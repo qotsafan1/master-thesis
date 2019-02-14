@@ -17,8 +17,8 @@
 		<div class='col-sm-1 graph' id='timeChart'></div>
 	</div>
 	<div class="row">
-		<div class='col-sm-5 graph' id='dayBarChart'></div>
-		<div class='col-sm-5 graph' id='hourBarChart'></div>
+		<div class='col-lg-5 graph' id='dayBarChart'></div>
+		<div class='col-lg-5 graph' id='hourBarChart'></div>
 	</div>
 	<div class="row">
 			<div class='col-sm-7 graph' id='monthBarChart'></div>
@@ -47,11 +47,14 @@
 			weekday[4] = "Thursday";
 			weekday[5] = "Friday";
 			weekday[6] = "Saturday";
+
+		var childGraphs;
+		var unFilteredData;
+		//2016-09-05T18:13:46.105Z
+		var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
 		
-		function createVisualization(dataset) {					
-			//2016-09-05T18:13:46.105Z
-			var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
-			
+		function createVisualization(dataset) {
+			childGraphs = [];
 			data = [];
 			data["byMonth"] = [];
 			data["byDay"] = [];
@@ -59,6 +62,7 @@
 			data['lastMonth'] = 1;		
 
 			d3.csv("data/" + dataset, function(rawData) {
+				unFilteredData = rawData;
 				console.log(rawData)
 
 				var countMonth = [];
@@ -116,7 +120,7 @@
 
 				console.log(data)
 
-				createBarChart(
+				var timeChart = createBarChart(
 					'timeChart', 
 					data['eachDay'],
 					900,
@@ -130,10 +134,11 @@
 					"Instances per day", 
 					"Day", 
 					"Instances",
-					false
-				);			
+					false,
+					true
+				);
 
-				createBarChart(
+				var monthChart = createBarChart(
 					'monthBarChart', 
 					data['byMonth'], 
 					500, 
@@ -147,10 +152,11 @@
 					"Instances per month", 
 					"Month", 
 					"Instances", 
-					true
+					true,
+					false
 				);
 
-				createBarChart(
+				var weekdayChart = createBarChart(
 					'dayBarChart', 
 					data['byDay'], 
 					500, 
@@ -164,10 +170,12 @@
 					"Instances per weekday", 
 					"Weekday", 
 					"Instances", 
-					true
+					true,
+					false
 				);
+				childGraphs.push(weekdayChart);
 
-				createBarChart(
+				var hourChart = createBarChart(
 					'hourBarChart', 
 					data['byHour'],
 					500,
@@ -181,8 +189,11 @@
 					"Instances per hour", 
 					"Hour", 
 					"Instances",
-					true
-				);			
+					true,
+					false
+				);
+				childGraphs.push(hourChart);
+
 			});
 		}
 
@@ -219,7 +230,8 @@
 			titleText, 
 			xAxisLabel, 
 			yAxisLabel, 
-			mouseInfo
+			mouseInfo,
+			brush
 		) {
 			//var newDiv = document.createElement('div');
 			//newDiv.setAttribute('id', elementId);
@@ -239,13 +251,49 @@
 				bWidth,
 				titleText,
 				xAxisLabel,
-				yAxisLabel,
-				
-				mouseInfo
+				yAxisLabel,				
+				mouseInfo,
+				brush
 			);
 
 			barChart.create();
+
+			return barChart;
 		}
+		
+		function updateChildGraphs(firstDate, lastDate) {
+			if (childGraphs.length > 0) {
+				var countWeekday = [];
+				var countHour = [];
+
+				for (var i=0; i<24;i++) {
+					countHour[i] = 0;
+				}
+
+				for (var instance in unFilteredData) {
+					var date = Object.keys(unFilteredData[instance])[0]
+					if (date !== "date") {
+						continue;
+					}
+	
+					var isoDate = strictIsoParse(unFilteredData[instance][date]);
+					if (firstDate > isoDate || lastDate < isoDate) {
+						continue;
+					}
+
+					var currentDay = weekday[isoDate.getDay()]
+					sumData(currentDay, countWeekday);
+
+					sumData(isoDate.getHours(), countHour);
+				}
+				var weekdayData = createBarData(countWeekday);
+				childGraphs[0].updateGraph(weekdayData);
+				var hourData = createBarData(countHour);
+				childGraphs[1].updateGraph(hourData);
+
+			}
+		}
+
 
 		function datasetChange() {
 			var dataset = document.getElementById("datasets").value;
