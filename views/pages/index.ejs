@@ -8,14 +8,37 @@
 	<header>
 		<% include ../partials/header %>
 	</header>
-	<h4>Dataset:</h4>
-	<select name="datasets" id="datasets" onchange="datasetChange()">
-		<option value="itch_tbc.csv">itch_tbc.csv</option>
-		<option value="ptsd.csv">ptsd.csv</option>
-	</select>	
+	<br>
+	<div class="row">
+		<div class='col-sm-1'>
+			<p class="font-weight-bolder">Dataset:</p>			
+		</div>
+		<div class='col-lg-2'>
+			<select name="datasets" id="datasets" onchange="datasetChange()">
+				<option value="itch_tbc.csv">itch_tbc.csv</option>
+				<option value="ptsd.csv">ptsd.csv</option>
+			</select>
+			</div>
+		</div>
+		<div class="row">
+			<div class='col-sm-1'></div>
+			<div class=''>
+				<p class="h6">Date from:</p>
+			</div>
+			<div class='col-sm-3'>
+				<p  class="h6"id="firstDate"></p>
+			</div>
+			<div class=''>
+					<p class="h6">Date to:</p>
+				</div>
+			<div class='col-sm-4'>
+				<p class="h6" id="lastDate"></p>
+			</div>
+		</div>
 	<div class="row">
 		<div class='col-sm-1 graph' id='timeChart'></div>
 	</div>
+
 	<div class="row">
 		<div class='col-lg-5 graph' id='dayBarChart'></div>
 		<div class='col-lg-5 graph' id='hourBarChart'></div>
@@ -260,8 +283,18 @@
 
 			return barChart;
 		}
+
+		function setClockTo(dateObject, time) {
+			dateObject.setHours(time[0]);
+			dateObject.setMinutes(time[1]);
+			dateObject.setSeconds(time[2]);
+		}
 		
 		function updateChildGraphs(firstDate, lastDate) {
+			setClockTo(firstDate, [0,0,0]);
+			setClockTo(lastDate, [23,59,59]);
+			document.getElementById("firstDate").innerHTML = weekday[firstDate.getDay()] + " " + month[firstDate.getMonth()] + " " + firstDate.getDate() + " " + firstDate.getFullYear();
+			document.getElementById("lastDate").innerHTML = weekday[lastDate.getDay()] + " " + month[lastDate.getMonth()] + " " + lastDate.getDate() + " " + lastDate.getFullYear();;
 			if (childGraphs.length > 0) {
 				var countWeekday = [];
 				var countHour = [];
