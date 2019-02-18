@@ -79,7 +79,7 @@ BarChart.prototype.xAxisBottom = function(ticks, tickFormat) {
     xAxis.ticks(ticks);
   }
   if (tickFormat === 'time') {
-    xAxis.tickFormat(d3.timeFormat("%m/%Y"));
+    xAxis.tickFormat(d3.timeFormat("%d %b %Y"));
   }
   return xAxis;
 }
@@ -219,7 +219,7 @@ BarChart.prototype.createBrush = function() {
     .on("start brush", brushed);
 
     this.g.call(brush);
-    this.g.call(brush.move, [0, this.width]);
+    //this.g.call(brush.move, [0, this.width]);
     
     function brushed() {
       var extent = d3.event.selection.map(x.invert, x);

@@ -90,6 +90,10 @@
 
 				var countMonth = [];
 				var countWeekday = [];
+				for (var i in weekday) {
+					countWeekday[weekday[i]] = 0;
+				}
+
 				var countHour = [];
 				var countEachDay = [];
 
@@ -131,6 +135,7 @@
 
 				data['byMonth'] = createBarData(countMonth);
 				data['byDay'] = createBarData(countWeekday);
+				console.log(countWeekday);
 				data['byHour'] = createBarData(countHour);
 				data['eachDay'] = [];
 
