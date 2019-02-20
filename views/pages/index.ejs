@@ -17,6 +17,7 @@
 			<select name="datasets" id="datasets" onchange="datasetChange()">
 				<option value="itch_tbc.csv">itch_tbc.csv</option>
 				<option value="ptsd.csv">ptsd.csv</option>
+				<option value="itching_in_nose_tbc_newer.csv">itching_in_nose_tbc_newer.csv</option>
 			</select>
 			</div>
 		</div>
@@ -82,7 +83,10 @@
 			data["byMonth"] = [];
 			data["byDay"] = [];
 			data['firstMonth'] = 12;
-			data['lastMonth'] = 1;		
+			data['lastMonth'] = 1;
+			data['firstYear'] = 2030;
+			data['lastYear'] = 1000;
+			numberOfMonths = [];
 
 			d3.csv("data/" + dataset, function(rawData) {
 				unFilteredData = rawData;
@@ -124,12 +128,23 @@
 						countEachDay[dayOfMonth] = 1;					
 					}
 
-					//Find first and last month
-					if (isoDate.getMonth() < data["firstMonth"]) {
-						data["firstMonth"] = isoDate.getMonth();
+					if (isoDate.getFullYear() < data['firstYear']) {
+						data['firstYear'] = isoDate.getFullYear();
 					}
-					if (isoDate.getMonth() > data["lastMonth"]) {
-						data["lastMonth"] = isoDate.getMonth();
+					if (isoDate.getFullYear() > data['lastYear']) {
+						data['lastYear'] = isoDate.getFullYear();
+					}
+
+					if (isoDate.getFullYear() === data['firstYear']) {
+						//Find first and last month
+						if (isoDate.getMonth() < data["firstMonth"]) {
+							data["firstMonth"] = isoDate.getMonth();
+						}						
+					}
+					if (isoDate.getFullYear() === data['lastYear']) {
+						if (isoDate.getMonth() > data["lastMonth"]) {
+							data["lastMonth"] = isoDate.getMonth();
+						}
 					}
 				}
 
@@ -148,15 +163,18 @@
 
 				console.log(data)
 
+				var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);
+				var lastDate = new Date(data['lastMonth'] === 11 ? data['lastYear']+1 : data['lastYear'], data['lastMonth'] === 11 ? 0 : 11, 1);
+
 				var timeChart = createBarChart(
 					'timeChart', 
 					data['eachDay'],
 					900,
 					250,
 					'time',
-					[new Date(2016, data['firstMonth'], 1), new Date(data['lastMonth'] === 11 ? 2017 : 2016, data['lastMonth'] === 11 ? 0 : 11, 1)],
+					[firstDate, lastDate],
 					'default',
-					5,
+					monthDiff(firstDate, lastDate),
 					'time',
 					3,
 					"Instances per day", 
@@ -293,6 +311,14 @@
 			dateObject.setHours(time[0]);
 			dateObject.setMinutes(time[1]);
 			dateObject.setSeconds(time[2]);
+		}
+
+		function monthDiff(d1, d2) {
+			var months;
+			months = (d2.getFullYear() - d1.getFullYear()) * 12;
+			months -= d1.getMonth() + 1;
+			months += d2.getMonth();
+			return months <= 0 ? 0 : months;
 		}
 		
 		function updateChildGraphs(firstDate, lastDate) {
