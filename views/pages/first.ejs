@@ -19,31 +19,23 @@
 				<option value="ptsd.csv">ptsd.csv</option>
 				<option value="itching_in_nose_tbc_newer.csv">itching_in_nose_tbc_newer.csv</option>
 			</select>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-lg-5">
-			<table id="calendar"></table>
-		</div>
-		<div class="col-lg-5">
-			<table id="timetable"></table>
-		</div>
-	</div>
-	<div class="row">
-		<div class='col-sm-1'></div>
-		<div class=''>
-			<p class="h6">Date from:</p>
-		</div>
-		<div class='col-sm-3'>
-			<p  class="h6"id="firstDate"></p>
-		</div>
-		<div class=''>
-				<p class="h6">Date to:</p>
 			</div>
-		<div class='col-sm-4'>
-			<p class="h6" id="lastDate"></p>
 		</div>
-	</div>
+		<div class="row">
+			<div class='col-sm-1'></div>
+			<div class=''>
+				<p class="h6">Date from:</p>
+			</div>
+			<div class='col-sm-3'>
+				<p  class="h6"id="firstDate"></p>
+			</div>
+			<div class=''>
+					<p class="h6">Date to:</p>
+				</div>
+			<div class='col-sm-4'>
+				<p class="h6" id="lastDate"></p>
+			</div>
+		</div>
 	<div class="row">
 		<div class='col-sm-1 graph' id='timeChart'></div>
 	</div>
@@ -71,9 +63,6 @@
 			data['lastMonth'] = 1;
 			data['firstYear'] = 2030;
 			data['lastYear'] = 1000;
-			data['maxHourOfDay'] = 0;
-			data['lastRecordedDay'] = new Date("1971-1-1");
-			
 			numberOfMonths = [];
 
 			d3.csv("data/" + dataset, function(rawData) {
@@ -88,7 +77,6 @@
 
 				var countHour = [];
 				var countEachDay = [];
-				var countEachHourOfEachDay = [];
 
 				for (var i=0; i<24;i++) {
 					countHour[i] = 0;
@@ -117,18 +105,6 @@
 						countEachDay[dayOfMonth] = 1;					
 					}
 
-					// sum of each hour of each day
-					var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
-					if (hourOfDay in countEachHourOfEachDay) {
-						countEachHourOfEachDay[hourOfDay]++;
-					} else {
-						countEachHourOfEachDay[hourOfDay] = 1;
-					}
-
-					if (isoDate > data['lastRecordedDay']) {
-						data['lastRecordedDay'] = isoDate;
-					}
-
 					if (isoDate.getFullYear() < data['firstYear']) {
 						data['firstYear'] = isoDate.getFullYear();
 					}
@@ -151,8 +127,8 @@
 
 				data['byMonth'] = createBarData(countMonth);
 				data['byDay'] = createBarData(countWeekday);
+				console.log(countWeekday);
 				data['byHour'] = createBarData(countHour);
-				data['hourByDay'] = countEachHourOfEachDay;
 				data['eachDay'] = [];
 
 				for(var i in countEachDay) {
@@ -162,26 +138,11 @@
 					});
 				}
 
-				for (var i in countEachHourOfEachDay) {
-					if (countEachHourOfEachDay[i] > data['maxHourOfDay']) {
-						data['maxHourOfDay'] = countEachHourOfEachDay[i];
-					}
-				}
-
 				console.log(data)
-				data['mostInADay'] = d3.max(data['eachDay'],function(d) { return d.sum});
-				data['averageDay'] = d3.mean(data['eachDay'],function(d) { return d.sum});
 
 				var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);
-				var lastDate = new Date(data['lastMonth'] === 11 ? data['lastYear']+1 : data['lastYear'], data['lastMonth'] === 11 ? 0 : 11, 1);				
-
-				var calendarObject = new Calendar(data['lastRecordedDay'], countEachDay, data['mostInADay']);
-				calendarObject.create();
-
-				var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], data['maxHourOfDay']);
-				timetableObject.create();
-
-				calendarObject.timeTable = timetableObject;
+				var lastDate = new Date(data['lastMonth'] === 11 ? data['lastYear']+1 : data['lastYear'], data['lastMonth'] === 11 ? 0 : 11, 1);
+				console.log(getMatrix(data['lastYear'], data['lastMonth']));
 
 				var timeChart = createBarChart(
 					'timeChart', 
@@ -322,7 +283,7 @@
 			barChart.create();
 
 			return barChart;
-		}		
+		}
 		
 		function updateChildGraphs(firstDate, lastDate) {
 			setClockTo(firstDate, [0,0,0]);
@@ -370,18 +331,8 @@
 				while (graphs[i].firstChild) {
 					graphs[i].removeChild(graphs[i].firstChild);
 				}
-			}
+			}  				
 
-			var calendar = document.getElementById("calendar");			
-			while (calendar.firstChild) {
-				calendar.removeChild(calendar.firstChild);
-			}
-
-			var timetable = document.getElementById("timetable");			
-			while (timetable.firstChild) {
-				timetable.removeChild(timetable.firstChild);
-			}
-			
 			createVisualization(dataset);
 		}
 

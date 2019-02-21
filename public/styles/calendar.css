@@ -1,0 +1,29 @@
+#calendar {
+    width: 400px;
+    height: 200px;
+    border-collapse: collapse;
+}
+
+#calendar tbody td {
+    border: 1px solid black;
+    text-align: right;
+    vertical-align: top;
+    width: 14%;
+}
+
+#calendar td.empty {
+    border: none;
+}
+
+#calendar td.change-month {
+    cursor: pointer;
+}
+
+#calendar td.chosen-day {
+    border: 3px solid blue;
+}
+
+#calendar td.month-outside {
+    border-color: grey;
+    color: grey;
+}

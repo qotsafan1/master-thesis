@@ -19,24 +19,12 @@ app.use(express.static('public'))
 
 // index page
 app.get('/', function(req, res) {
-	/*
-	d3.csv('/data/ptsd.csv')
-  .then(function(data) {
-			console.log(data)
-      // data is now whole data set
-      // draw chart in here!
-  })
-  .catch(function(error){
-		console.log(error)
-     // handle error
-  })
-*/
 	res.render('pages/index');
 });
 
 // about page
-app.get('/about', function(req, res) {
-	res.render('pages/about');
+app.get('/first', function(req, res) {
+	res.render('pages/first');
 });
 
 app.listen(3000);
