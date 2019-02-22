@@ -178,7 +178,7 @@
 				var calendarObject = new Calendar(data['lastRecordedDay'], countEachDay, data['mostInADay']);
 				calendarObject.create();
 
-				var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], data['maxHourOfDay']);
+				var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], calendarObject.month, calendarObject.year, data['maxHourOfDay']);
 				timetableObject.create();
 
 				calendarObject.timeTable = timetableObject;

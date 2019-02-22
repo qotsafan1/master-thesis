@@ -1,7 +1,7 @@
-function TimeTable(date, week, data, maxInstance) {
+function TimeTable(date, week, data, calendarMonth, calendarYear, maxInstance) {
     this.date = date;
-    this.month = date.getMonth();
-    this.year = date.getFullYear();
+    this.month = calendarMonth;
+    this.year = calendarYear;
     this.week = week;
     this.data = data;
     
@@ -19,16 +19,23 @@ TimeTable.prototype.create = function() {
         .append('td')
         .attr('colspan', 8)
         .style('text-align', 'center')
+        .style('border-width', '0px')
         .append('h5')
         .text(theObject.getTitle());
 
     const tr = header.append('tr');
-    tr.append('td').text("00:00").attr('class', 'hour');
+    tr.append('td').text("00:00").attr('class', 'hour').style('border-top-width', "0px");
     tr.selectAll('td.time-slot')
         .data(weekday)
         .enter()
         .append('td')
-        .attr('class', 'time-slot')
+        .attr('class', function(d,i) {
+            var classString = 'time-slot ';
+            if (theObject.date.getDate() === theObject.week[i] || (theObject.week[i] < 0 && theObject.date.getDate() === -1*theObject.week[i])) {
+                classString += "selected-head ";
+            }
+            return classString;
+        })
         .style('text-align', 'center')
         .text(function (d) {
           return d;
@@ -53,7 +60,7 @@ TimeTable.prototype.create = function() {
             } else if (j===0) {
               continue;  
             } else {
-                var hourByDay = theObject.date.getFullYear() + "-" +  (theObject.date.getMonth()+1) + "-" + (theObject.week[j-1] < 0 ? -1*theObject.week[j-1] : theObject.week[j-1]) + "-" + i;
+                var hourByDay = theObject.getHourByDayString(i, (j-1));
                 tempTd.text(function() {
                     if (hourByDay in theObject.data) {
                         return theObject.data[hourByDay];
@@ -61,12 +68,21 @@ TimeTable.prototype.create = function() {
                     return 0;
                 })
                 .style("background-color", function(d) {
-                    var dayString = theObject.getDayString(d);
                     if (hourByDay in theObject.data) {                
                         return theObject.colorScale(theObject.data[hourByDay]);
                     }
                     return "white";
-                });;
+                })
+                .attr('class', function() {
+                    var classString = "";
+                    if (theObject.date.getDate() === theObject.week[(j-1)] || (theObject.week[(j-1)] < 0 && theObject.date.getDate() === -1*theObject.week[(j-1)])) {
+                        classString += "selected-day ";
+                        if (i===23) {
+                            classString += "selected-day-last ";
+                        }
+                    }
+                    return classString;
+                });
             }
 
         }
@@ -80,8 +96,9 @@ TimeTable.prototype.getDayString = function(d) {
         if (currentMonth == 12) {
             currentMonth = 1;
             currentYear += 1;
+        } else {
+            currentMonth++;
         }
-        currentMonth++;
     }
     else if (d < 0 && -1*d > 20) {
         if (currentMonth == 1) {
@@ -92,7 +109,14 @@ TimeTable.prototype.getDayString = function(d) {
         }
     }
     var dateString = currentYear + "-" + currentMonth + "-" + (d > 0 ? d : -1*d);
-    return dateString
+    return dateString;
+}
+
+TimeTable.prototype.getHourByDayString = function(hour, dayOfWeek) {    
+    var day = this.week[dayOfWeek];
+    var dayString = this.getDayString(day);
+
+    return (dayString + "-" + hour);
 }
 
 TimeTable.prototype.getTitle = function() {
@@ -123,10 +147,10 @@ TimeTable.prototype.remove = function() {
     }
 }
 
-TimeTable.prototype.update = function(date,week) {
+TimeTable.prototype.update = function(date,week, calendarMonth, calendarYear) {
     this.date = date;
-    this.month = date.getMonth();
-    this.year = date.getFullYear();
+    this.month = calendarMonth;
+    this.year = calendarYear;
     this.week = week;
 
     this.remove();

@@ -142,7 +142,6 @@
 
 				var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);
 				var lastDate = new Date(data['lastMonth'] === 11 ? data['lastYear']+1 : data['lastYear'], data['lastMonth'] === 11 ? 0 : 11, 1);
-				console.log(getMatrix(data['lastYear'], data['lastMonth']));
 
 				var timeChart = createBarChart(
 					'timeChart', 

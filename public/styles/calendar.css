@@ -9,6 +9,15 @@
     text-align: right;
     vertical-align: top;
     width: 14%;
+    font-weight: bold;
+    font-size: 11px;
+    font-style: italic
+}
+
+#calendar tbody td div {    
+    font-weight: normal;
+    font-style: normal;
+    font-size: 15px;
 }
 
 #calendar td.empty {
@@ -24,6 +33,5 @@
 }
 
 #calendar td.month-outside {
-    border-color: grey;
     color: grey;
 }

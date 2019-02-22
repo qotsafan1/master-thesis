@@ -10,7 +10,12 @@
     border: 1px solid black;
     text-align: right;
     vertical-align: top;
-    max-width: 5px;
+    max-width: 5px;    
+}
+
+#timetable thead td div {
+    font-size: 15px;
+    font-weight: bold;
 }
 
 #timetable tbody td {
@@ -32,6 +37,30 @@
     vertical-align: bottom;
     border-left: none;
     max-width: 2px;
+}
+
+#timetable thead td.selected-head {
+    border-right-width: 3px;
+    border-left-width: 3px;
+    border-top-width: 3px;
+    border-right-color: blue;
+    border-left-color: blue;
+    border-top-color: blue;
+    
+}
+
+#timetable tbody td.selected-day {
+    border-right-width: 3px;
+    border-left-width: 3px;
+    border-right-color: blue;
+    border-left-color: blue;
+    
+}
+
+#timetable tbody td.selected-day-last {
+    border-bottom-width: 3px;
+    border-bottom-color: blue;
+    
 }
 
 #timetable td.empty {

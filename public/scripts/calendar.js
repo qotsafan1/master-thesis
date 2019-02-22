@@ -103,16 +103,17 @@ Calendar.prototype.create = function() {
             .data(week)
             .enter()
             .append('td')
-            .attr('class', function (d) {
-                return d > 0 ? '' : 'month-outside';
-            })
             .attr('data-date', function(d) { return theObject.getDayString(d)})
             .attr('data-day', function(d) { return d})
             .attr('class', function(d) {
+                var classString = "";
                 if (this.getAttribute('data-date') === theObject.getDateAsDateString()) {
-                    return 'chosen-day';
+                    classString += 'chosen-day ';
                 }
-                return "";
+                if (d < 0) {
+                    classString += 'month-outside ';
+                }
+                return classString;
             })
             .text(function (d) {              
                 return d > 0 ? d : -1*d;
@@ -146,8 +147,9 @@ Calendar.prototype.getDayString = function(d) {
         if (currentMonth == 12) {
             currentMonth = 1;
             currentYear += 1;
+        } else {
+            currentMonth++;
         }
-        currentMonth++;
     }
     else if (d < 0 && -1*d > 20) {
         if (currentMonth == 1) {
@@ -158,7 +160,7 @@ Calendar.prototype.getDayString = function(d) {
         }
     }
     var dateString = currentYear + "-" + currentMonth + "-" + (d > 0 ? d : -1*d);
-    return dateString
+    return dateString;
 }
 
 Calendar.prototype.getDateAsDateString = function() {
@@ -187,7 +189,7 @@ Calendar.prototype.changeDay = function(newTd) {
     this.date = new Date(newTd.getAttribute('data-date'));
     this.day = newTd.getAttribute('data-day');
     this.week = this.getWeek();
-    this.timeTable.update(this.date, this.week);    
+    this.timeTable.update(this.date, this.week, this.month, this.year);    
 }
 
 Calendar.prototype.remove = function() {
