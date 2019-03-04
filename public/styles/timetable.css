@@ -66,3 +66,37 @@
 #timetable td.empty {
     border: none;
 }
+
+#timetable tbody td.chosenDay {
+    border: 3px solid red;
+}
+
+#timetable td .note {
+    margin-left: 4px;
+    position: relative;
+}
+
+#timetable td .overlay {
+    position: absolute;
+    visibility: hidden;
+    background-color: #9FDAEE;
+    border: 1px solid #2BB0D7;
+    border-radius: 6px;
+    font-size: 16px;
+    z-index: 10;
+    text-align: left;
+    padding: 5px;
+    width: 500px;
+    white-space: pre-line;
+    top: -5px;
+    right: 105%; 
+}
+
+#timetable td .note:hover .overlay {
+    visibility: visible;
+}
+
+#annotation-comment {
+    width: 500px;
+    height: 400px;
+}

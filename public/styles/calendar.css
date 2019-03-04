@@ -35,3 +35,27 @@
 #calendar td.month-outside {
     color: grey;
 }
+
+#calendar td .note {
+    position: relative;
+    font-size: 8px;
+}
+
+#calendar td .overlay-right {
+    position: absolute;
+    visibility: hidden;
+    background-color: #9FDAEE;
+    border: 1px solid #2BB0D7;
+    border-radius: 6px;
+    font-size: 16px;
+    z-index: 10;
+    text-align: left;
+    padding: 5px;
+    width: 500px;
+    white-space: pre-line;
+    top: -5px;
+}
+
+#calendar .note:hover .overlay {
+    visibility: visible;
+}

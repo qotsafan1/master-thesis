@@ -23,7 +23,13 @@
 	</div>
 	<div class="row">
 		<div class="col-lg-5">
-			<table id="calendar"></table>
+			<div class="row">
+				<table id="calendar"></table>
+			</div>
+			<div class="row" id="informationPanel">
+				<p id="averageDay"></p>
+				<p id="averageHourPerWeekday"></p>
+			</div>
 		</div>
 		<div class="col-lg-5">
 			<table id="timetable"></table>
@@ -59,8 +65,37 @@
 	<script>
 		var childGraphs;
 		var unFilteredData;
+		var annotations = [];
 		//2016-09-05T18:13:46.105Z
 		var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
+
+		function getAnnotations(dataset) {
+			annotations = [];
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					var result = JSON.parse(this.responseText);
+
+					for (annotation in result.annotations)
+					{
+						if (!(result.annotations[annotation].systemName in annotations)) {
+							annotations[result.annotations[annotation].systemName] = [];
+						}
+
+						annotations[result.annotations[annotation].systemName].push({
+							"comment": result.annotations[annotation].comment,
+							"creationDate": result.annotations[annotation].creationDate,
+							"type": result.annotations[annotation].type,
+							"id": result.annotations[annotation].id
+						});
+					}
+					createVisualization(dataset);
+				}
+			};
+			xmlhttp.open("GET", ("/annotations?dataset="+dataset), true);
+			xmlhttp.send();
+		}
+
 		
 		function createVisualization(dataset) {
 			childGraphs = [];
@@ -73,6 +108,7 @@
 			data['lastYear'] = 1000;
 			data['maxHourOfDay'] = 0;
 			data['lastRecordedDay'] = new Date("1971-1-1");
+			data['firstRecordedDay'] = new Date("2050-1-1");
 			
 			numberOfMonths = [];
 
@@ -89,9 +125,17 @@
 				var countHour = [];
 				var countEachDay = [];
 				var countEachHourOfEachDay = [];
+				var countEachHourOfEachWeekday = [];
 
 				for (var i=0; i<24;i++) {
 					countHour[i] = 0;
+				}
+
+				for (var d in weekday) {
+					countEachHourOfEachWeekday[d] = [];
+					for (var i=0; i<24; i++) {
+						countEachHourOfEachWeekday[d][i] = 0;
+					}
 				}
 
 				for (var instance in rawData) {
@@ -125,8 +169,15 @@
 						countEachHourOfEachDay[hourOfDay] = 1;
 					}
 
+					// sum of each hour of each weekday
+					countEachHourOfEachWeekday[isoDate.getDay()][isoDate.getHours()]++; 
+
 					if (isoDate > data['lastRecordedDay']) {
 						data['lastRecordedDay'] = isoDate;
+					}
+
+					if (isoDate < data['firstRecordedDay']) {
+						data['firstRecordedDay'] = isoDate;
 					}
 
 					if (isoDate.getFullYear() < data['firstYear']) {
@@ -153,6 +204,7 @@
 				data['byDay'] = createBarData(countWeekday);
 				data['byHour'] = createBarData(countHour);
 				data['hourByDay'] = countEachHourOfEachDay;
+				data['amountOfEachWeekday'] = getCountOfEachWeekday(data['firstRecordedDay'], data['lastRecordedDay']);
 				data['eachDay'] = [];
 
 				for(var i in countEachDay) {
@@ -172,16 +224,36 @@
 				data['mostInADay'] = d3.max(data['eachDay'],function(d) { return d.sum});
 				data['averageDay'] = d3.mean(data['eachDay'],function(d) { return d.sum});
 
+				data['totalDays'] = getNumberOfDayBetweenTwoDates(data['firstRecordedDay'], data['lastRecordedDay']);
+				data['averagePerHour'] = [];
+				for (var hour in countHour) {
+					data['averagePerHour'][hour] = (countHour[hour]/data['totalDays']);
+				}
+
+				data["averagePerHourPerWeekday"] = [];
+				for (var d in weekday) {
+					data["averagePerHourPerWeekday"][d] = [];
+					for (var i=0; i<24; i++) {
+						data["averagePerHourPerWeekday"][d][i] = countEachHourOfEachWeekday[d][i]/data['amountOfEachWeekday'][d];
+					}
+				}
+
 				var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);
 				var lastDate = new Date(data['lastMonth'] === 11 ? data['lastYear']+1 : data['lastYear'], data['lastMonth'] === 11 ? 0 : 11, 1);				
 
-				var calendarObject = new Calendar(data['lastRecordedDay'], countEachDay, data['mostInADay']);
+				var calendarObject = new Calendar(data['lastRecordedDay'], countEachDay, data['mostInADay'], data);
 				calendarObject.create();
 
 				var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], calendarObject.month, calendarObject.year, data['maxHourOfDay']);
 				timetableObject.create();
 
 				calendarObject.timeTable = timetableObject;
+				timetableObject.calendar = calendarObject;
+
+				var informationPanel = new InformationPanel(data);
+
+				calendarObject.informationPanel = informationPanel;
+				timetableObject.informationPanel = informationPanel;
 
 				var timeChart = createBarChart(
 					'timeChart', 
@@ -296,11 +368,6 @@
 			mouseInfo,
 			brush
 		) {
-			//var newDiv = document.createElement('div');
-			//newDiv.setAttribute('id', elementId);
-			//newDiv.setAttribute('class', 'col-sm');
-			//document.getElementById("visulization").appendChild(newDiv);
-
 			var barChart = new BarChart(
 				data,
 				elementId,
@@ -382,10 +449,13 @@
 				timetable.removeChild(timetable.firstChild);
 			}
 			
-			createVisualization(dataset);
+			getAnnotations(dataset);
+			//createVisualization(dataset);
 		}
 
-		createVisualization('itch_tbc.csv');
+		getAnnotations('itch_tbc.csv');
+		
+		
 	</script>
 
 	<footer>
@@ -393,4 +463,101 @@
 	</footer>
 
 </body>
+<!-- Modal -->
+<dialog id="myDialog">
+	<p>Write annotation: </p>
+	<textarea name="annotaition-comment" id="annotation-comment" cols="30" rows="10"></textarea>
+	<input type="hidden" name="annotation-type" id="annotation-type">
+	<input type="hidden" name="annotation-system-name" id="annotation-system-name">
+	<br>
+	<button id="saveAnnotation" onclick="saveAnnotation()">Save</button>
+	<button id="closeAnnotation" onclick="closeDialog()">Cancel</button>
+</dialog>
+
+<script>
+	var dialogWindow = document.getElementById("myDialog");
+	function closeDialog() { 
+		dialogWindow.close(); 
+	}
+
+	function saveAnnotation() { 
+		var dataset = document.getElementById("datasets").value;
+		var systemName = document.getElementById("annotation-system-name").value;
+		var comment = document.getElementById("annotation-comment").value;
+		var type = document.getElementById("annotation-type").value;
+		var creationDate = new Date();
+
+		if (systemName in annotations) {
+			deleteAnnotation(annotations[systemName][0].id);
+			deleteAnnotationMark(systemName, type);
+
+			if (comment === "") {
+				closeDialog();
+				delete annotations[systemName];
+				return;
+			}
+		}
+
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 201) {
+				closeDialog();
+				var result = JSON.parse(this.responseText);
+				if (systemName in annotations) {
+					annotations[systemName][0].comment = comment;
+					annotations[systemName][0].creationDate = creationDate;
+					annotations[systemName][0].id = result.annotation.id;
+				} else {
+					annotations[systemName] = [];
+					annotations[systemName].push({
+						"comment": result.annotation.comment,
+							"creationDate": result.annotation.creationDate,
+							"type": result.annotation.type,
+							"id": result.annotation.id
+					});
+				}
+				
+				var parentItem = null;
+				if (type === "day") {
+					parentItem = document.querySelector("[data-timetable-date='"+systemName+"']");
+				} else {
+					parentItem = document.querySelector("[data-hour-key='"+systemName+"']");
+				}
+
+				var symbol = document.createElement("i");
+				symbol.className += "far fa-comment note";
+				var tooltip = document.createElement("div");
+				tooltip.innerHTML = comment;
+				tooltip.className = "overlay";
+
+				symbol.appendChild(tooltip);				
+				parentItem.appendChild(symbol);
+			}
+		};
+		xmlhttp.open("POST", "/annotations", true);
+		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+		xmlhttp.send(JSON.stringify({systemName, dataset, type, creationDate, comment}));
+
+	} 
+
+	function deleteAnnotation(id) {
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 204) {}
+		};
+		xmlhttp.open("DELETE", ("/annotations/"+id), true);
+		xmlhttp.send();
+	}
+
+	function deleteAnnotationMark(systemName, dateType) {
+		if (dateType === 'day') {
+			var day = document.querySelector("[data-timetable-date='"+systemName+"']");
+			day.removeChild(day.lastChild);
+		} else {
+			var hour = document.querySelector("[data-hour-key='"+systemName+"']");
+			hour.removeChild(hour.lastChild);
+		}
+	}
+
+</script>
 </html>

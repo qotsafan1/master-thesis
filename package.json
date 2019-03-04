@@ -18,11 +18,13 @@
   },
   "homepage": "https://github.com/qotsafan1/master-thesis#readme",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "d3": "^5.8.2",
     "d3-fetch": "^1.1.2",
     "ejs": "^1.0.0",
     "express": "^4.16.4",
     "express-ejs-layouts": "^1.1.0",
+    "mysql": "^2.16.0",
     "node-fetch-polyfill": "^2.0.6"
   },
   "devDependencies": {

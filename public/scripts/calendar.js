@@ -1,6 +1,7 @@
-function Calendar(date, data, maxInstance) {
+function Calendar(date, data, maxInstance, overallData) {
     this.date = date;
     this.data = data;
+    this.overallData = overallData;
     this.day = date.getDate();
 
     this.monthArray = this.getMatrix(date.getFullYear(), date.getMonth());
@@ -11,6 +12,7 @@ function Calendar(date, data, maxInstance) {
     this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxInstance]);
 
     this.timeTable = null;
+    this.informationPanel = null;
     this.week = this.getWeek();
 }
 
@@ -136,7 +138,26 @@ Calendar.prototype.create = function() {
                         return theObject.colorScale(theObject.data[dayString]);
                     }
                     return "white";
-                });
+                })
+                /*
+                .append("i")
+                    .attr('class', 'far fa-comment note')
+                    .style('display', function(d,i) {
+                        var dayString = theObject.getDayString(d);
+                        if (dayString in annotations) {
+                            return "block";
+                        }
+                        return "none";
+                    })
+                    .append("div")
+                        .text(function(d,i) {
+                            var dayString = theObject.getDayString(d);
+                            if (dayString in annotations) {
+                                return annotations[dayString][0].comment;
+                            }
+                        })
+                        .attr("class", "overlay-right");
+                        */
     });
 }
 
@@ -189,7 +210,11 @@ Calendar.prototype.changeDay = function(newTd) {
     this.date = new Date(newTd.getAttribute('data-date'));
     this.day = newTd.getAttribute('data-day');
     this.week = this.getWeek();
-    this.timeTable.update(this.date, this.week, this.month, this.year);    
+    this.timeTable.update(this.date, this.week, this.month, this.year);
+
+    if (this.informationPanel !== null) {
+        this.informationPanel.updateAverageDay(parseInt(newTd.lastChild.innerText));
+    }
 }
 
 Calendar.prototype.remove = function() {

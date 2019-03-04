@@ -34,3 +34,33 @@ function monthDiff(d1, d2) {
     months += d2.getMonth();
     return months <= 0 ? 0 : months;
 }
+
+function getCountOfEachWeekday(d1, d2) {
+    var date1 = new Date(d1.getTime());
+    var date2 = new Date(d2.getTime());
+    var weekdayCount = [];
+    for (var i=0;i<7;i++) {
+        weekdayCount[i] = 0;
+    }
+    var currentDate = date1;
+    while ( currentDate.getTime() <= date2.getTime() )
+    {
+       weekdayCount[currentDate.getDay()]++;
+       currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return weekdayCount;
+}
+
+function getNumberOfDayBetweenTwoDates(d1, d2) {
+    var date1 = new Date(d1.getTime());
+    var date2 = new Date(d2.getTime());
+    var totalDays = 0;
+    var currentDate = date1;
+    while (currentDate.getTime() <= date2.getTime())
+    {
+        totalDays++;
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return totalDays;
+}

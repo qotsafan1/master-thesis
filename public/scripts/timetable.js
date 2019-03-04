@@ -5,7 +5,10 @@ function TimeTable(date, week, data, calendarMonth, calendarYear, maxInstance) {
     this.week = week;
     this.data = data;
     
-    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxInstance]);    
+    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxInstance]);
+
+    this.calendar = null;
+    this.informationPanel = null;
 }
 
 TimeTable.prototype.create = function() {
@@ -36,6 +39,13 @@ TimeTable.prototype.create = function() {
             }
             return classString;
         })
+        .attr('data-timetable-date', function(d,i) { return theObject.getDayString(theObject.week[i])})
+        .on('click', function() {
+            theObject.changeSelectedDay(this.getAttribute('data-timetable-date'), this);
+        })
+        .on('dblclick', function() {
+            theObject.addAnnotation(this, "day");
+        })
         .style('text-align', 'center')
         .text(function (d) {
           return d;
@@ -44,7 +54,25 @@ TimeTable.prototype.create = function() {
             .text(function(d, i) {                
                 return theObject.week[i] < 0 ? -1*theObject.week[i] : theObject.week[i];
             })
-            .attr('style', 'text-align: center');
+            .attr('style', 'text-align: center')
+        .select(function(d,i) { return this.parentNode; })
+            .append("i")
+            .attr('class', 'far fa-comment note')
+            .style('display', function(d,i) {
+                var dayString = theObject.getDayString(theObject.week[i]);
+                if (dayString in annotations) {
+                    return "block";
+                }
+                return "none";
+            })
+            .append("div")
+                .text(function(d,i) {
+                    var dayString = theObject.getDayString(theObject.week[i]);
+                    if (dayString in annotations) {
+                        return annotations[dayString][0].comment;
+                    }
+                })
+                .attr("class", "overlay");
     
     for (var i=0; i<=23; i++) {
         var bodyTr = body.append('tr');
@@ -61,11 +89,23 @@ TimeTable.prototype.create = function() {
               continue;  
             } else {
                 var hourByDay = theObject.getHourByDayString(i, (j-1));
+                var dayString = theObject.getDayString(theObject.week[(j-1)]);
+
                 tempTd.text(function() {
                     if (hourByDay in theObject.data) {
                         return theObject.data[hourByDay];
                     }
                     return 0;
+                })
+                .attr('data-hour-key', hourByDay)
+                .attr('data-parent-day', dayString)
+                .attr('data-timetable-weekday', (j-1))
+                .attr('data-timetable-hour', i)
+                .on('click', function(d) {
+                    theObject.markChosenDay(this);
+                })
+                .on('dblclick', function() {
+                    theObject.addAnnotation(this, "hour");
                 })
                 .style("background-color", function(d) {
                     if (hourByDay in theObject.data) {                
@@ -83,6 +123,17 @@ TimeTable.prototype.create = function() {
                     }
                     return classString;
                 });
+                
+                if (hourByDay in annotations) {
+                    tempTd
+                        .append("i")
+                        .attr('class', 'far fa-comment note')
+                        .append("div")
+                            .text(annotations[hourByDay][0].comment)
+                            .attr("class", "overlay");
+                        
+
+                }
             }
 
         }
@@ -155,4 +206,59 @@ TimeTable.prototype.update = function(date,week, calendarMonth, calendarYear) {
 
     this.remove();
     this.create();
+}
+
+TimeTable.prototype.addAnnotation = function(element, dateType) {
+    var systemName = "";
+    var type = "";
+
+    if (dateType === "day") {
+        systemName = element.getAttribute('data-timetable-date');
+        type = 'day';
+    } else {
+        systemName = element.getAttribute('data-hour-key');
+        type = 'hour';
+    }
+    var dataset = document.getElementById("datasets").value;
+    
+    document.getElementById("datasets").value = dataset;
+	document.getElementById("annotation-system-name").value = systemName;
+    document.getElementById("annotation-type").value = type;
+
+    if (systemName in annotations) {
+        document.getElementById("annotation-comment").value = annotations[systemName][0].comment;
+    } else {
+        document.getElementById("annotation-comment").value = "";
+    }
+    
+    document.getElementById("myDialog").showModal(); 
+}
+
+TimeTable.prototype.markChosenDay = function(element, dayString) {
+    var dayString = element.getAttribute('data-parent-day');
+    var hourByDay = element.getAttribute('data-hour-key');
+    
+    this.changeSelectedDay(dayString, element);
+
+    var hourSelected = document.querySelector("[data-hour-key='"+hourByDay+"']");
+    hourSelected.classList += " chosenDay";
+
+    if (this.informationPanel !== null) {
+        var weekday = element.getAttribute('data-timetable-weekday');
+        var hour = element.getAttribute('data-timetable-hour');
+        this.informationPanel.updateAverageHour(parseInt(hourSelected.innerText), weekday, hour);
+    }
+}
+
+TimeTable.prototype.changeSelectedDay = function(dayString, element) {
+    var calendarDate = document.querySelector("[data-date='"+dayString+"']");
+    if (calendarDate !== null) { 
+        this.calendar.changeDay(calendarDate);    
+    } else {
+        var hourByDay = element.getAttribute('data-hour-key');
+        this.remove();
+        this.create();
+        var hourSelected = document.querySelector("[data-hour-key='"+hourByDay+"']");
+        hourSelected.classList += " chosenDay";
+    }
 }
