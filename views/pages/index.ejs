@@ -29,6 +29,7 @@
 			<div class="row" id="informationPanel">
 				<p id="averageDay"></p>
 				<p id="averageHourPerWeekday"></p>
+				<div id="minuteBreakdown"></div>
 			</div>
 		</div>
 		<div class="col-lg-5">
@@ -255,9 +256,9 @@
 				calendarObject.informationPanel = informationPanel;
 				timetableObject.informationPanel = informationPanel;
 
-				var timeChart = createBarChart(
-					'timeChart', 
+				var timeChart = new BarChart(
 					data['eachDay'],
+					'timeChart', 
 					900,
 					250,
 					'time',
@@ -272,10 +273,11 @@
 					false,
 					true
 				);
+				timeChart.create();
 
-				var monthChart = createBarChart(
-					'monthBarChart', 
+				var monthChart = new BarChart(
 					data['byMonth'], 
+					'monthBarChart', 
 					500, 
 					250,
 					'band',
@@ -290,10 +292,11 @@
 					true,
 					false
 				);
+				monthChart.create();
 
-				var weekdayChart = createBarChart(
-					'dayBarChart', 
+				var weekdayChart = new BarChart(
 					data['byDay'], 
+					'dayBarChart', 
 					500, 
 					250,
 					'band',
@@ -308,11 +311,12 @@
 					true,
 					false
 				);
+				weekdayChart.create();
 				childGraphs.push(weekdayChart);
 
-				var hourChart = createBarChart(
-					'hourBarChart', 
+				var hourChart = new BarChart(
 					data['byHour'],
+					'hourBarChart', 
 					500,
 					250,
 					'linear',
@@ -327,8 +331,8 @@
 					true,
 					false
 				);
+				hourChart.create();
 				childGraphs.push(hourChart);
-
 			});
 		}
 
@@ -349,47 +353,7 @@
 				});
 			}
 			return barData;
-		}
-
-		function createBarChart(
-			elementId, 
-			data, 
-			width, 
-			height,
-			xScaleType,
-			xScaleData,
-			yScaleType,
-			ticksAmount,
-			ticksFormat,
-			bWidth,
-			titleText, 
-			xAxisLabel, 
-			yAxisLabel, 
-			mouseInfo,
-			brush
-		) {
-			var barChart = new BarChart(
-				data,
-				elementId,
-				width,
-				height,
-				xScaleType,
-				xScaleData,
-				yScaleType,
-				ticksAmount,
-				ticksFormat,
-				bWidth,
-				titleText,
-				xAxisLabel,
-				yAxisLabel,				
-				mouseInfo,
-				brush
-			);
-
-			barChart.create();
-
-			return barChart;
-		}		
+		}	
 		
 		function updateChildGraphs(firstDate, lastDate) {
 			setClockTo(firstDate, [0,0,0]);
