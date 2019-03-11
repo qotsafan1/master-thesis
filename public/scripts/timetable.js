@@ -263,4 +263,6 @@ TimeTable.prototype.changeSelectedDay = function(dayString, element) {
         var hourSelected = document.querySelector("[data-hour-key='"+hourByDay+"']");
         hourSelected.classList += " chosenDay";
     }
+
+    
 }

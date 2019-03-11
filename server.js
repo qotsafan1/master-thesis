@@ -47,6 +47,9 @@ app.get('/', function(req, res) {
 app.get('/first', function(req, res) {
 	res.render('pages/first');
 });
+app.get('/second', function(req, res) {
+	res.render('pages/second');
+});
 
 app.get('/annotations', function(req, res) {	
 	var query = "SELECT * FROM annotations ";
