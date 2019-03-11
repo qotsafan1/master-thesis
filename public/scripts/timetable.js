@@ -255,9 +255,11 @@ TimeTable.prototype.changeSelectedDay = function(dayString, element) {
     if (calendarDate !== null) { 
         this.calendar.changeDay(calendarDate);    
     } else {
-        var hourByDay = element.getAttribute('data-hour-key');
+        var newDate = new Date(element.getAttribute('data-parent-day'));
+        this.date = newDate;
         this.remove();
         this.create();
+        var hourByDay = element.getAttribute('data-hour-key');
         var hourSelected = document.querySelector("[data-hour-key='"+hourByDay+"']");
         hourSelected.classList += " chosenDay";
     }
