@@ -107,6 +107,7 @@ Calendar.prototype.create = function() {
             .append('td')
             .attr('data-date', function(d) { return theObject.getDayString(d)})
             .attr('data-day', function(d) { return d})
+            .attr('data-weekday', function(d,i) { return i})
             .attr('class', function(d) {
                 var classString = "";
                 if (this.getAttribute('data-date') === theObject.getDateAsDateString()) {
@@ -209,12 +210,9 @@ Calendar.prototype.changeDay = function(newTd) {
     newTd.classList.add("chosen-day");
     this.date = new Date(newTd.getAttribute('data-date'));
     this.day = newTd.getAttribute('data-day');
+    var wday = newTd.getAttribute('data-weekday');
     this.week = this.getWeek();
-    this.timeTable.update(this.date, this.week, this.month, this.year);
-
-    if (this.informationPanel !== null) {
-        this.informationPanel.updateAverageDay(parseInt(newTd.lastChild.innerText));
-    }
+    this.timeTable.update(this.date, this.week, this.month, this.year, parseInt(newTd.lastChild.innerText), wday);
 }
 
 Calendar.prototype.remove = function() {

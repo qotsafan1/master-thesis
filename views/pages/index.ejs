@@ -15,10 +15,8 @@
 		</div>
 		<div class='col-lg-2'>
 			<select name="datasets" id="datasets" onchange="datasetChange()">
-				<option value="itch_tbc.csv">itch_tbc.csv</option>
-				<option value="ptsd.csv">ptsd.csv</option>
-				<option value="ptsd_filtered.csv">ptsd_filtered.csv</option>
-				<option value="ptsd_filtered_no_single.csv">ptsd_filtered_no_single.csv</option>
+				<option value="ptsd_filtered_no_single.csv">ptsd_filtered.csv</option>
+				<option value="itch_tbc.csv">itch_tbc.csv</option>				
 				<option value="itching_in_nose_tbc_newer.csv">itching_in_nose_tbc_newer.csv</option>
 				<option value="symptom-simple.csv">symptom-simple.csv</option>
 			</select>
@@ -29,8 +27,10 @@
 			<div class="row">
 				<table id="calendar"></table>
 			</div>
-			<div class="row" id="informationPanel">
+			<div id="informationPanel">
 				<p id="averageDay"></p>
+				<p id="averageWorkday"></p>
+				<p id="averagePerWeekday"></p>
 				<p id="averageHourPerWeekday"></p>
 				<div id="minuteBreakdown"></div>
 			</div>
@@ -247,12 +247,21 @@
 
 				console.log(data)
 				data['mostInADay'] = d3.max(data['eachDay'],function(d) { return d.sum});
-				data['averageDay'] = d3.mean(data['eachDay'],function(d) { return d.sum});
-
+				
 				data['totalDays'] = getNumberOfDayBetweenTwoDates(data['firstRecordedDay'], data['lastRecordedDay']);
 				data['averagePerHour'] = [];
 				for (var hour in countHour) {
 					data['averagePerHour'][hour] = (countHour[hour]/data['totalDays']);
+				}
+				
+				data['averageDay'] = (d3.sum(data['eachDay'],function(d) { return d.sum})/data['totalDays']);
+
+				data['averageWorkday'] = (data['byDay'][1].sum + data['byDay'][2].sum + data['byDay'][3].sum +data['byDay'][4].sum + data['byDay'][5].sum) / (data['totalDays']-data['amountOfEachWeekday'][0]-data['amountOfEachWeekday'][6]);
+				data['averageWeekend'] = (data['byDay'][0].sum + data['byDay'][6].sum) / (data['amountOfEachWeekday'][0]+data['amountOfEachWeekday'][6]);
+
+				data['averagePerWeekday'] = [];
+				for (var i=0;i<7;i++) {
+					data['averagePerWeekday'][i] = data['byDay'][i].sum/data['amountOfEachWeekday'][i];
 				}
 
 				data["averagePerHourPerWeekday"] = [];
@@ -263,19 +272,22 @@
 					}
 				}
 
-				var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);
-				var lastDate = new Date(data['lastMonth'] === 11 ? data['lastYear']+1 : data['lastYear'], data['lastMonth'] === 11 ? 0 : 11, 1);				
+				var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
+				var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
 
 				var calendarObject = new Calendar(data['lastRecordedDay'], countEachDay, data['mostInADay'], data);
 				calendarObject.create();
 
 				var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], calendarObject.month, calendarObject.year, data['maxHourOfDay']);
-				timetableObject.create();
+				timetableObject.create();				
 
 				calendarObject.timeTable = timetableObject;
 				timetableObject.calendar = calendarObject;
 
 				var informationPanel = new InformationPanel(data);
+				informationPanel.setAverageWorkday();
+				informationPanel.setChosenWeekdayAverage(data['lastRecordedDay'].getDay());
+
 
 				calendarObject.informationPanel = informationPanel;
 				timetableObject.informationPanel = informationPanel;
@@ -436,12 +448,19 @@
 			while (timetable.firstChild) {
 				timetable.removeChild(timetable.firstChild);
 			}
+
+			var barChartBreakdown = document.getElementById("minuteBreakdown");			
+			while (barChartBreakdown.firstChild) {
+				barChartBreakdown.removeChild(barChartBreakdown.firstChild);
+			}
 			
+			document.getElementById("averageHourPerWeekday").innerText = "";
+
 			getAnnotations(dataset);
 			//createVisualization(dataset);
 		}
 
-		getAnnotations('itch_tbc.csv');
+		getAnnotations('ptsd_filtered_no_single.csv');
 		
 		
 	</script>

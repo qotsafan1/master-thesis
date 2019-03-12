@@ -4,17 +4,17 @@ function InformationPanel(data) {
     averageDay.innerText = "Average instance per day is " + (data["averageDay"].toFixed(2)) + ".";
 }
 
-InformationPanel.prototype.updateAverageDay = function(chosenDayNumber) {
+InformationPanel.prototype.updateAverageDay = function(instances) {
     this.resetAverageHour();
     var averageDay = document.getElementById("averageDay");
     
-    if (isNaN(chosenDayNumber) || chosenDayNumber === this.data["averageDay"].toFixed(2)) {
+    if (isNaN(instances) || instances === this.data["averageDay"].toFixed(2)) {
         averageDay.innerText = "Average instance per day is " + (data["averageDay"].toFixed(2)) + ".";
     } else {
         averageDay.innerText = "Average instance per day is " 
         + (this.data["averageDay"].toFixed(2) + ". Chosen day is " 
-            + this.calculatePercentage(this.data["averageDay"].toFixed(2), chosenDayNumber)
-            + "% " + (this.data["averageDay"].toFixed(2) < chosenDayNumber ? "more." : "less."));
+            + this.calculatePercentage(this.data["averageDay"].toFixed(2), instances)
+            + "% " + (this.data["averageDay"].toFixed(2) < instances ? "more." : "less."));
     }
 }
     
@@ -24,6 +24,19 @@ InformationPanel.prototype.updateAverageHour = function(chosenHourNumber, wday, 
     averageHourPerWeekday.innerText = "Average instance on " 
         + weekday[wday] + "s between " + chosenHour + ":00 - " + (parseInt(chosenHour)+1) + ":00 is " 
         + this.data["averagePerHourPerWeekday"][wday][chosenHour].toFixed(3)  + ".";
+}
+
+InformationPanel.prototype.setAverageWorkday = function() {
+    var averageWorkday = document.getElementById("averageWorkday");
+    averageWorkday.innerText = "Average instance per workday is " 
+        + this.data["averageWorkday"].toFixed(3) + " vs. " 
+        + this.data["averageWeekend"].toFixed(3) + " on weekends.";
+}
+
+InformationPanel.prototype.setChosenWeekdayAverage = function(day) {
+    var averageChosenWeekday = document.getElementById("averagePerWeekday");
+    averageChosenWeekday.innerText = "Average instance on " + weekday[day] + "s is " 
+        + this.data["averagePerWeekday"][day].toFixed(3);
 }
 
 InformationPanel.prototype.calculatePercentage = function(orginal, numToCompare) {

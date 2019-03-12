@@ -196,9 +196,11 @@ TimeTable.prototype.remove = function() {
     while (timetable.firstChild) {
         timetable.removeChild(timetable.firstChild);
     }
+
+    this.removeBreakdownBarChart();
 }
 
-TimeTable.prototype.update = function(date,week, calendarMonth, calendarYear) {
+TimeTable.prototype.update = function(date,week, calendarMonth, calendarYear, dayInstances, wday) {
     this.date = date;
     this.month = calendarMonth;
     this.year = calendarYear;
@@ -206,6 +208,11 @@ TimeTable.prototype.update = function(date,week, calendarMonth, calendarYear) {
 
     this.remove();
     this.create();
+
+    if (this.informationPanel !== null) {
+        this.informationPanel.updateAverageDay(dayInstances);
+        this.informationPanel.setChosenWeekdayAverage(wday);
+    }
 }
 
 TimeTable.prototype.addAnnotation = function(element, dateType) {
@@ -234,7 +241,7 @@ TimeTable.prototype.addAnnotation = function(element, dateType) {
     document.getElementById("myDialog").showModal(); 
 }
 
-TimeTable.prototype.markChosenDay = function(element, dayString) {
+TimeTable.prototype.markChosenDay = function(element, dayString) {    
     var dayString = element.getAttribute('data-parent-day');
     var hourByDay = element.getAttribute('data-hour-key');
     
@@ -251,6 +258,7 @@ TimeTable.prototype.markChosenDay = function(element, dayString) {
 }
 
 TimeTable.prototype.changeSelectedDay = function(dayString, element) {
+    this.removeBreakdownBarChart();
     var calendarDate = document.querySelector("[data-date='"+dayString+"']");
     if (calendarDate !== null) { 
         this.calendar.changeDay(calendarDate);    
@@ -264,5 +272,60 @@ TimeTable.prototype.changeSelectedDay = function(dayString, element) {
         hourSelected.classList += " chosenDay";
     }
 
-    
+    var theHour = element.getAttribute('data-timetable-hour');
+    if (dayString in data['recordsEachDayAndHour'] 
+        && theHour in data['recordsEachDayAndHour'][dayString]
+        && data['recordsEachDayAndHour'][dayString][theHour].length > 0
+    ) {
+        this.addBreakdownBarChart(dayString, theHour);
+    }
+}
+
+TimeTable.prototype.addBreakdownBarChart = function(dayString, theHour) {
+    this.removeBreakdownBarChart();    
+    var hourData = data['recordsEachDayAndHour'][dayString][theHour];
+    var collectedData = [];
+    for (var i=0; i<60; i++) {
+        collectedData.push({
+            type: i,
+            sum: 0
+        });
+    }
+
+    for (var instance in hourData) {
+        var hour = hourData[instance].getMinutes();
+        collectedData[hour].sum++;
+    }
+
+    var hourChart = new CustomBarChart(
+        collectedData,
+        'minuteBreakdown', 
+        450,
+        150,
+        'linear',
+        [0,60],
+        'default',
+        60,
+        null,
+        null,
+        "Instances per hour", 
+        "Minute", 
+        "Instances",
+        true,
+        false,
+        {
+            "xBarFontSize": "5px",
+            "titleFontSize": "15px"
+        }
+    );
+    hourChart.createXAxis();
+    hourChart.createYAxis();
+    hourChart.createBars();
+    hourChart.createTitle("Instances on chosen hour");
+}
+TimeTable.prototype.removeBreakdownBarChart = function() {
+    var barChart = document.getElementById("minuteBreakdown");			
+    while (barChart.firstChild) {
+        barChart.removeChild(barChart.firstChild);
+    }
 }
