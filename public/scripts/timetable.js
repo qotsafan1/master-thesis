@@ -297,31 +297,22 @@ TimeTable.prototype.addBreakdownBarChart = function(dayString, theHour) {
         collectedData[hour].sum++;
     }
 
-    var hourChart = new CustomBarChart(
+
+    var hourChart = new TimeBarChart(
         collectedData,
-        'minuteBreakdown', 
+        'minuteBreakdown',
         450,
         150,
-        'linear',
+        {top: 40, right: 60, bottom: 40, left: 20},
+        "Instances per hour",
         [0,60],
-        'default',
-        60,
-        null,
-        null,
-        "Instances per hour", 
-        "Minute", 
-        "Instances",
-        true,
-        false,
         {
             "xBarFontSize": "5px",
             "titleFontSize": "15px"
-        }
+        }  
     );
-    hourChart.createXAxis();
-    hourChart.createYAxis();
-    hourChart.createBars();
-    hourChart.createTitle("Instances on chosen hour");
+
+    hourChart.create("Minutes", "Observations", 1);
 }
 TimeTable.prototype.removeBreakdownBarChart = function() {
     var barChart = document.getElementById("minuteBreakdown");			

@@ -1,84 +1,52 @@
-function CustomBarChart(
-  data, 
-  elementId, 
-  chartWidth, 
-  chartHeight,
-  xScaleType,
-  xScaleData,
-  yScaleType,
-  ticksAmount,
-  ticksFormat,
-  bWidth,
-  titleText, 
-  xAxisLabel, 
-  yAxisLabel, 
-  mouseInfo,
-  brush,
-  styles
-) {
+function CustomBarChart() {}
+CustomBarChart.prototype.create = function() {}
+
+CustomBarChart.prototype.createFrame = function(elementId, chartWidth, chartHeight) {
   this.svg = d3.select("#" + elementId)
               .append("svg")
               .attr("width", chartWidth)
-              .attr("height", chartHeight); 
-  this.margin = {top: 40, right: 60, bottom: 40, left: 20},
+              .attr("height", chartHeight);   
   this.width = this.svg.attr("width") - this.margin.left - this.margin.right,
   this.height = this.svg.attr("height") - this.margin.top - this.margin.bottom,
   this.g = this.svg.append("g").attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
-  
-  this.data       = data;
-  this.titleText  = titleText;
-  this.xAxisLabel = xAxisLabel;
-  this.yAxisLabel = yAxisLabel;
-  this.mouseInfo  = mouseInfo;
-  this.xScaleType = xScaleType;
-  this.xScaleData = xScaleData;
-  this.yScaleType = yScaleType;
-  this.brush      = brush;
-
-  this.x = this.xScale(xScaleType, this.width, xScaleData);
-  this.y = this.yScale();
-  
-  this.xAxis = this.xAxisBottom(ticksAmount, ticksFormat);
-  this.yAxis = this.yAxisLeft();
-
-  this.barWidth  = this.calculateBarWidth(bWidth, ticksAmount);
-
-  this.styles = styles;
 }
 
-CustomBarChart.prototype.xScale = function() { 
+CustomBarChart.prototype.xScale = function(width, xScaleData) { 
   var x;
   switch (this.xScaleType) {
     case 'time':
-      x = d3.scaleTime().range([0, this.width]);
-      x.domain(this.xScaleData);//[lowest,highest]
+      x = d3.scaleTime().range([0, width]);
+      x.domain(xScaleData);//[lowest,highest]
       break;
     case 'linear':
-      x = d3.scaleLinear().range([0, this.width]);
-      x.domain(this.xScaleData);
+      x = d3.scaleLinear().range([0, width]);
+      x.domain(xScaleData);
       break;
     default:
-      x = d3.scaleBand().rangeRound([0, this.width]).padding(0.1);
-      x.domain(this.xScaleData.map(function(d) { return d.type; }));
+      x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+      x.domain(xScaleData.map(function(d) { return d.type; }));
       break;
   }
   return x;
 }
 
-CustomBarChart.prototype.yScale = function(height, data) {
+CustomBarChart.prototype.yScale = function() {
   var y;
   y = d3.scaleLinear().rangeRound([this.height, 0]);
   y.domain([0, d3.max(this.data, function(d) { return d.sum; })]);
   return y;
 }
 
-CustomBarChart.prototype.yAxisLeft = function() {
-  var yAxis = d3.axisLeft(this.y).ticks(1).tickFormat(d3.format("d"));
+CustomBarChart.prototype.yAxisLeft = function(y, ticks) {
+  var yAxis = d3.axisLeft(y).tickFormat(d3.format("d"));
+  if (ticks > -1 && ticks < 10) {
+    yAxis.ticks(ticks);
+  }
   return yAxis;
 }
 
-CustomBarChart.prototype.xAxisBottom = function(ticks, tickFormat) {
-  var xAxis = d3.axisBottom(this.x);
+CustomBarChart.prototype.xAxisBottom = function(x, ticks, tickFormat) {
+  var xAxis = d3.axisBottom(x);
   if (ticks > -1) {
     xAxis.ticks(ticks);
   }
@@ -86,16 +54,6 @@ CustomBarChart.prototype.xAxisBottom = function(ticks, tickFormat) {
     xAxis.tickFormat(d3.timeFormat("%d %b %Y"));
   }
   return xAxis;
-}
-
-CustomBarChart.prototype.calculateBarWidth = function(width, ticksAmount) {
-  if (width > 0) {
-    return width;
-  } else if (this.xScaleType === 'linear') {
-    return (this.width-this.margin.right)/ticksAmount;
-  } else {
-    return this.x;
-  }
 }
 
 CustomBarChart.prototype.getBarWidth = function() {
@@ -122,7 +80,7 @@ CustomBarChart.prototype.getBarData = function(data) {
   } else {
     result = this.x(data.type);
   }
-  if (this.xScaleType === 'linear') {
+  if (this.this.xScaleType === 'linear') {
     result+=2;
   }
   return result;
@@ -142,7 +100,7 @@ CustomBarChart.prototype.xBarPosition = function(x, data, type) {
   return result;
 }
 
-CustomBarChart.prototype.createYAxis = function() {
+CustomBarChart.prototype.createYAxis = function(label) {
   this.g.append("g")
     .call(this.yAxis)
     .attr('class', 'y-axis')
@@ -152,10 +110,10 @@ CustomBarChart.prototype.createYAxis = function() {
       .attr("x", -(this.height/2))
       .attr("dy", "0.9em")
       .attr("fill", "#000")
-      .text(this.yAxisLabel);
+      .text(label);
 }
 
-CustomBarChart.prototype.createXAxis = function() {
+CustomBarChart.prototype.createXAxis = function(label) {
   this.g.append("g")
   .attr("transform", "translate(0," + this.height + ")")
   .style("font-size", this.styles.xBarFontSize)
@@ -164,27 +122,24 @@ CustomBarChart.prototype.createXAxis = function() {
     .attr("y", 30)
     .attr("x", this.width/2)
     .attr("fill", "#000")
-    .text(this.xAxisLabel);
+    .text(label);
 }
 
-CustomBarChart.prototype.createTitle = function(title) {
-  this.title = this.svg.append("g")
+CustomBarChart.prototype.createTitle = function() {
+  this.svg
+    .append("g")
     .attr("class", "title")
-    .style("font-size", this.styles.titleFontSize);
-  this.title.append("text")
-  	.attr("x", (this.width/1.80))
-  	.attr("y", 30)
-  	.attr("text-anchor", "middle")
-  	.style("font", "sans-serif")
-    .text(title);
+    .style("font-size", this.styles.titleFontSize)
+    .append("text")
+      .attr("x", (this.width/1.80))
+      .attr("y", 30)
+      .attr("text-anchor", "middle")
+      .style("font", "sans-serif")
+      .text(this.title);
 }
 
 CustomBarChart.prototype.createBars = function() {
-  var x = this.x;
-  var y = this.y;
-  var height = this.height;
-  var xScaleType = this.xScaleType;
-  var xBarPosition = this.xBarPosition;
+  var thisObj = this;
   
   // Define the div for the tooltip
   var div = d3.select("body").append("div")
@@ -195,12 +150,12 @@ CustomBarChart.prototype.createBars = function() {
     .data(this.data)
     .enter().append("rect")
     .attr("class", "bar")
-    .attr("x", function(d) { return xBarPosition(x,d,xScaleType); })
-    .attr("y", function(d) { return y(d.sum); })
-    .attr("width", this.getBarWidth())
-    .attr("height", function(d) { return (height - y(d.sum)); });
+    .attr("x", function(d) { return thisObj.xBarPosition(thisObj.x,d,thisObj.xScaleType); })
+    .attr("y", function(d) { return thisObj.y(d.sum); })
+    .attr("width", this.getBarWidth(this.xScaleType))
+    .attr("height", function(d) { return (thisObj.height - thisObj.y(d.sum)); });
 
-  if (this.mouseInfo) {
+  if (true) {
     this.bars.on("mouseover", function(d) {
       div.transition()
           .duration(200)
@@ -233,25 +188,9 @@ CustomBarChart.prototype.createBrush = function() {
     }
 }
 
-
-CustomBarChart.prototype.create = function() {
-  var x = this.x;
-  this.createXAxis();
-  
-  this.createYAxis();
-    
-  this.createBars();
-
-  this.createTitle();
-
-  if (this.brush) {
-    this.createBrush();
-  }
-}
-
 CustomBarChart.prototype.updateYAxis = function() {
-  this.y = this.yScale(this.yScaleType, this.height, this.data);
-  this.yAxis = this.yAxisLeft(this.y);
+  this.y = this.yScale();
+  this.yAxis = this.yAxisLeft(this.y, this.yTicks);
   this.g.selectAll(".y-axis").remove();
   
   this.createYAxis();    

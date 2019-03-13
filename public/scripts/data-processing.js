@@ -223,82 +223,71 @@ function createVisualization(dataset) {
         calendarObject.informationPanel = informationPanel;
         timetableObject.informationPanel = informationPanel;
 
-        var timeChart = new BarChart(
+        var timeChart = new DateBarChart(
             data['eachDay'],
             'timeChart', 
             900,
             250,
-            'time',
+            {top: 40, right: 60, bottom: 40, left: 40},
+            "Observations per day", 
             [firstDate, lastDate],
             'default',
-            monthDiff(firstDate, lastDate),
-            'time',
-            3,
-            "Instances per day", 
-            "Day", 
-            "Instances",
-            false,
-            true
+            {
+                "xBarFontSize": "12px",
+                "titleFontSize": "15px"
+            }
         );
-        timeChart.create();
+        timeChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
+        timeChart.createBrush();
 
-        var monthChart = new BarChart(
+        var monthChart = new NormalBarChart(
             data['byMonth'], 
             'monthBarChart', 
             500, 
             250,
-            'band',
+            {top: 40, right: 60, bottom: 40, left: 40},
+            "Observations per month", 
             data['byMonth'], 
             'default',
-            -1,
-            null,
-            null,
-            "Instances per month", 
-            "Month", 
-            "Instances", 
-            true,
-            false
+            {
+                "xBarFontSize": "12px",
+                "titleFontSize": "15px"
+            }
         );
-        monthChart.create();
+        monthChart.create("Month", "Observations", -1);
 
-        var weekdayChart = new BarChart(
+        var weekdayChart = new NormalBarChart(
             data['byDay'], 
             'dayBarChart', 
             500, 
             250,
-            'band',
+            {top: 40, right: 60, bottom: 40, left: 40},
+            "Observations per weekday",
             data['byDay'], 
             'default',
-            -1,
-            null,
-            null,
-            "Instances per weekday", 
-            "Weekday", 
-            "Instances", 
-            true,
-            false
+            {
+                "xBarFontSize": "12px",
+                "titleFontSize": "15px"
+            }
         );
-        weekdayChart.create();
+        weekdayChart.create("Weekday", "Observations", -1);
         childGraphs.push(weekdayChart);
-
-        var hourChart = new BarChart(
+        
+        var hourChart = new TimeBarChart(
             data['byHour'],
-            'hourBarChart', 
+            'hourBarChart',
             500,
             250,
-            'linear',
+            {top: 40, right: 60, bottom: 40, left: 40},
+            "Observations per hour",
             [0,24],
-            'default',
-            24,
-            null,
-            null,
-            "Instances per hour", 
-            "Hour", 
-            "Instances",
-            true,
-            false
+            {
+                "xBarFontSize": "12px",
+                "titleFontSize": "15px"
+            }
         );
-        hourChart.create();
+            
+        hourChart.create("Hour", "Observations", -1);
         childGraphs.push(hourChart);
     });
 }
@@ -351,9 +340,20 @@ function updateChildGraphs(firstDate, lastDate) {
 
             sumData(isoDate.getHours(), countHour);
         }
+        
         var weekdayData = createBarData(countWeekday);
+        
+        var maxVal = 0;
+        for (var i in countWeekday) {
+            if (countWeekday[i] > maxVal) {
+                maxVal = countWeekday[i];
+            }
+        }
+
+        childGraphs[0].yTicks = maxVal;
         childGraphs[0].updateGraph(weekdayData);
         var hourData = createBarData(countHour);
+        childGraphs[1].yTicks = d3.max(countHour);
         childGraphs[1].updateGraph(hourData);
 
     }
