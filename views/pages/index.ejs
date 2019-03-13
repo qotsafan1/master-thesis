@@ -460,9 +460,7 @@
 			//createVisualization(dataset);
 		}
 
-		getAnnotations('ptsd_filtered_no_single.csv');
-		
-		
+		getAnnotations('ptsd_filtered_no_single.csv');	
 	</script>
 
 	<footer>
@@ -470,101 +468,5 @@
 	</footer>
 
 </body>
-<!-- Modal -->
-<dialog id="myDialog">
-	<p>Write annotation: </p>
-	<textarea name="annotaition-comment" id="annotation-comment" cols="30" rows="10"></textarea>
-	<input type="hidden" name="annotation-type" id="annotation-type">
-	<input type="hidden" name="annotation-system-name" id="annotation-system-name">
-	<br>
-	<button id="saveAnnotation" onclick="saveAnnotation()">Save</button>
-	<button id="closeAnnotation" onclick="closeDialog()">Cancel</button>
-</dialog>
-
-<script>
-	var dialogWindow = document.getElementById("myDialog");
-	function closeDialog() { 
-		dialogWindow.close(); 
-	}
-
-	function saveAnnotation() { 
-		var dataset = document.getElementById("datasets").value;
-		var systemName = document.getElementById("annotation-system-name").value;
-		var comment = document.getElementById("annotation-comment").value;
-		var type = document.getElementById("annotation-type").value;
-		var creationDate = new Date();
-
-		if (systemName in annotations) {
-			deleteAnnotation(annotations[systemName][0].id);
-			deleteAnnotationMark(systemName, type);
-
-			if (comment === "") {
-				closeDialog();
-				delete annotations[systemName];
-				return;
-			}
-		}
-
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 201) {
-				closeDialog();
-				var result = JSON.parse(this.responseText);
-				if (systemName in annotations) {
-					annotations[systemName][0].comment = comment;
-					annotations[systemName][0].creationDate = creationDate;
-					annotations[systemName][0].id = result.annotation.id;
-				} else {
-					annotations[systemName] = [];
-					annotations[systemName].push({
-						"comment": result.annotation.comment,
-							"creationDate": result.annotation.creationDate,
-							"type": result.annotation.type,
-							"id": result.annotation.id
-					});
-				}
-				
-				var parentItem = null;
-				if (type === "day") {
-					parentItem = document.querySelector("[data-timetable-date='"+systemName+"']");
-				} else {
-					parentItem = document.querySelector("[data-hour-key='"+systemName+"']");
-				}
-
-				var symbol = document.createElement("i");
-				symbol.className += "far fa-comment note";
-				var tooltip = document.createElement("div");
-				tooltip.innerHTML = comment;
-				tooltip.className = "overlay";
-
-				symbol.appendChild(tooltip);				
-				parentItem.appendChild(symbol);
-			}
-		};
-		xmlhttp.open("POST", "/annotations", true);
-		xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		xmlhttp.send(JSON.stringify({systemName, dataset, type, creationDate, comment}));
-
-	} 
-
-	function deleteAnnotation(id) {
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 204) {}
-		};
-		xmlhttp.open("DELETE", ("/annotations/"+id), true);
-		xmlhttp.send();
-	}
-
-	function deleteAnnotationMark(systemName, dateType) {
-		if (dateType === 'day') {
-			var day = document.querySelector("[data-timetable-date='"+systemName+"']");
-			day.removeChild(day.lastChild);
-		} else {
-			var hour = document.querySelector("[data-hour-key='"+systemName+"']");
-			hour.removeChild(hour.lastChild);
-		}
-	}
-
-</script>
+<% include ../partials/annotations %>
 </html>
