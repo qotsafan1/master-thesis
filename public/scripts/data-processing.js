@@ -52,7 +52,7 @@ function createVisualization(dataset) {
     
     numberOfMonths = [];
 
-    d3.csv("data/" + dataset, function(rawData) {
+    d3.csv("data/" + dataset).then(function(rawData) {
         unFilteredData = rawData;
         console.log(rawData)
 
@@ -210,7 +210,7 @@ function createVisualization(dataset) {
         calendarObject.create();
 
         var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], calendarObject.month, calendarObject.year, data['maxHourOfDay']);
-        timetableObject.create();				
+        timetableObject.create();        
 
         calendarObject.timeTable = timetableObject;
         timetableObject.calendar = calendarObject;
@@ -223,9 +223,9 @@ function createVisualization(dataset) {
         calendarObject.informationPanel = informationPanel;
         timetableObject.informationPanel = informationPanel;
 
-        var timeChart = new DateBarChart(
+        var dateChart = new DateBarChart(
             data['eachDay'],
-            'timeChart', 
+            'dateChart', 
             900,
             250,
             {top: 40, right: 60, bottom: 40, left: 40},
@@ -237,8 +237,8 @@ function createVisualization(dataset) {
                 "titleFontSize": "15px"
             }
         );
-        timeChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
-        timeChart.createBrush();
+        dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
+        dateChart.createBrush();
 
         var monthChart = new NormalBarChart(
             data['byMonth'], 
@@ -255,6 +255,7 @@ function createVisualization(dataset) {
             }
         );
         monthChart.create("Month", "Observations", -1);
+        monthChart.addClickEventToUpdateDateChart(dateChart, 'month');
 
         var weekdayChart = new NormalBarChart(
             data['byDay'], 
@@ -272,6 +273,7 @@ function createVisualization(dataset) {
         );
         weekdayChart.create("Weekday", "Observations", -1);
         childGraphs.push(weekdayChart);
+        weekdayChart.addClickEventToUpdateDateChart(dateChart, 'weekday');
         
         var hourChart = new TimeBarChart(
             data['byHour'],
@@ -359,6 +361,79 @@ function updateChildGraphs(firstDate, lastDate) {
     }
 }
 
+
+
+function getSpecificWeekdayData(day) {
+    var days = [];
+    for (var instance in unFilteredData) {
+        var date = Object.keys(unFilteredData[instance])[0]
+        if (date !== "date") {
+            continue;
+        }
+        
+        var isoDate = strictIsoParse(unFilteredData[instance][date]);
+        if (isoDate.getDay() === day) {
+            days.push(isoDate);
+        }
+        /*
+        if (firstDate > isoDate || lastDate < isoDate) {
+            continue;
+        }
+        var currentDay = weekday[isoDate.getDay()]
+        sumData(currentDay, countWeekday);
+
+        sumData(isoDate.getHours(), countHour);
+        */
+    }
+    return days;
+}
+
+function updateChildGraphsWithWeekdayData(weekdayIndex) {    
+    document.getElementById("firstDate").innerHTML = "All " + weekday[weekdayIndex] + "s";
+    document.getElementById("lastDate").innerHTML = "All " + weekday[weekdayIndex] + "s";
+    if (childGraphs.length > 0) {
+        var countWeekday = [];
+        var countHour = [];
+
+        for (var i=0; i<24;i++) {
+            countHour[i] = 0;
+        }
+
+        for (var instance in unFilteredData) {
+            var date = Object.keys(unFilteredData[instance])[0]
+            if (date !== "date") {
+                continue;
+            }
+
+            var isoDate = strictIsoParse(unFilteredData[instance][date]);
+
+            if (weekdayIndex !== isoDate.getDay()) {
+                continue;
+            }
+
+            var currentDay = weekday[isoDate.getDay()]
+            sumData(currentDay, countWeekday);
+
+            sumData(isoDate.getHours(), countHour);
+        }
+        
+        var weekdayData = createBarData(countWeekday);
+        
+        var maxVal = 0;
+        for (var i in countWeekday) {
+            if (countWeekday[i] > maxVal) {
+                maxVal = countWeekday[i];
+            }
+        }
+
+        childGraphs[0].yTicks = maxVal;
+        childGraphs[0].updateGraph(weekdayData);
+        var hourData = createBarData(countHour);
+        childGraphs[1].yTicks = d3.max(countHour);
+        childGraphs[1].updateGraph(hourData);
+
+    }
+}
 
 function datasetChange() {
     var dataset = document.getElementById("datasets").value;

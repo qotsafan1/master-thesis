@@ -106,8 +106,8 @@ CustomBarChart.prototype.createYAxis = function(label) {
     .attr('class', 'y-axis')
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", -50)
-      .attr("x", -(this.height/2))
+      .attr("y", -40)
+      .attr("x", -(this.height/2.5))
       .attr("dy", "0.9em")
       .attr("fill", "#000")
       .text(label);
@@ -116,6 +116,7 @@ CustomBarChart.prototype.createYAxis = function(label) {
 CustomBarChart.prototype.createXAxis = function(label) {
   this.g.append("g")
   .attr("transform", "translate(0," + this.height + ")")
+  .attr("class", "x-axis")
   .style("font-size", this.styles.xBarFontSize)
   .call(this.xAxis)
   .append("text")
@@ -177,9 +178,9 @@ CustomBarChart.prototype.createBrush = function() {
   var brush = d3.brushX()
     .extent([[0, 0], [this.width, this.height]])
     .on("start brush", brushed);
-
-    this.g.call(brush);
-    //this.g.call(brush.move, [0, this.width]);
+  this.brush = brush;
+  this.g.call(brush);
+  //this.g.call(brush.move, [0, this.width]);
     
     function brushed() {
       var extent = d3.event.selection.map(x.invert, x);

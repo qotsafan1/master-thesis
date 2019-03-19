@@ -28,7 +28,3 @@ TimeBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.createBars();
     this.createTitle();
 }
-
-TimeBarChart.prototype.update = function() {
-
-}

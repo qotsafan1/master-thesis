@@ -29,6 +29,17 @@ NormalBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.createTitle();
 }
 
+NormalBarChart.prototype.addClickEventToUpdateDateChart = function(dateChart, type) {
+    var xAxis = this.svg.select('.x-axis');
+    xAxis
+        .selectAll('.tick')        
+        .on('click', function(d,i) {
+            dateChart.updateToSpecificTime(type, d);
+        })
+        .style("cursor", "pointer");
+
+}
+
 NormalBarChart.prototype.update = function() {
 
 }

@@ -25,6 +25,16 @@
     max-width: 5px;
 }
 
+#timetable tbody td.distribution {
+    width: 90px;
+    border-width: 0px;
+}
+
+#timetable tbody td .distribution-bar {    
+    background-color: steelblue;    
+    height:20px;
+}
+
 #timetable tbody td.hour {
     font-size: 9px;
     vertical-align: bottom;
@@ -100,3 +110,5 @@
     width: 500px;
     height: 400px;
 }
+
+

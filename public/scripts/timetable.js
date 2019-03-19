@@ -9,6 +9,7 @@ function TimeTable(date, week, data, calendarMonth, calendarYear, maxInstance) {
 
     this.calendar = null;
     this.informationPanel = null;
+    this.distributions = [];
 }
 
 TimeTable.prototype.create = function() {
@@ -26,7 +27,7 @@ TimeTable.prototype.create = function() {
         .append('h5')
         .text(theObject.getTitle());
 
-    const tr = header.append('tr');
+    const tr = header.append('tr').attr("id", "headerTr");
     tr.append('td').text("00:00").attr('class', 'hour').style('border-top-width', "0px");
     tr.selectAll('td.time-slot')
         .data(weekday)
@@ -38,7 +39,7 @@ TimeTable.prototype.create = function() {
                 classString += "selected-head ";
             }
             return classString;
-        })
+        })        
         .attr('data-timetable-date', function(d,i) { return theObject.getDayString(theObject.week[i])})
         .on('click', function() {
             theObject.changeSelectedDay(this.getAttribute('data-timetable-date'), this);
@@ -76,7 +77,7 @@ TimeTable.prototype.create = function() {
     
     for (var i=0; i<=23; i++) {
         var bodyTr = body.append('tr');
-        for (var j=0; j<=7; j++) {
+        for (var j=0; j<=8; j++) {
             var tempTd = bodyTr.append('td');                
             if (j === 0) {                
                 if ((i+1) < 10) {
@@ -86,7 +87,11 @@ TimeTable.prototype.create = function() {
                 }
                 tempTd.attr('class', 'hour');
             } else if (j===0) {
-              continue;  
+              continue;
+            } else if (j===8) {
+                tempTd.attr("class", "distribution")
+                this.distributions.push(tempTd);
+                continue;              
             } else {
                 var hourByDay = theObject.getHourByDayString(i, (j-1));
                 var dayString = theObject.getDayString(theObject.week[(j-1)]);
@@ -138,6 +143,8 @@ TimeTable.prototype.create = function() {
 
         }
     }
+
+    this.addDistributionChart();
 }
 
 TimeTable.prototype.getDayString = function(d) {
@@ -196,7 +203,7 @@ TimeTable.prototype.remove = function() {
     while (timetable.firstChild) {
         timetable.removeChild(timetable.firstChild);
     }
-
+    this.distributions = [];
     this.removeBreakdownBarChart();
 }
 
@@ -304,7 +311,7 @@ TimeTable.prototype.addBreakdownBarChart = function(dayString, theHour) {
         450,
         150,
         {top: 40, right: 60, bottom: 40, left: 20},
-        "Instances per hour",
+        "Observations on chosen hour",
         [0,60],
         {
             "xBarFontSize": "5px",
@@ -318,5 +325,32 @@ TimeTable.prototype.removeBreakdownBarChart = function() {
     var barChart = document.getElementById("minuteBreakdown");			
     while (barChart.firstChild) {
         barChart.removeChild(barChart.firstChild);
+    }
+}
+
+TimeTable.prototype.addDistributionChart = function() {
+    var collectedHourData = [];
+    for (var i=0; i<24; i++) {
+        collectedHourData[i] = 0;
+    }
+
+    d3.selectAll('.time-slot').each(function() {
+        var dateString = this.getAttribute('data-timetable-date');
+        for (var i=0; i<24; i++) {
+            if (dateString in data['recordsEachDayAndHour']) {
+                collectedHourData[i] += data['recordsEachDayAndHour'][dateString][i].length;
+            }
+        }
+    })
+
+    var barLength = d3.scaleLinear().rangeRound([0, 40]);
+    barLength.domain([0, d3.max(collectedHourData)]);
+    for (var i in this.distributions) {
+        if (i < 24) {
+            this.distributions[i]
+                .append("div")
+                .attr("class", "distribution-bar")
+                .style("width", barLength(collectedHourData[i]) + "px");
+        }
     }
 }

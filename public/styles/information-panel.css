@@ -1,4 +1,14 @@
 #informationPanel {
     margin-top: 20px;
-    font-size: 14px;
+    font-size: 15px;
+}
+
+#informationPanel .detail {
+    padding-left: 25px;
+    margin: 5px;
+}
+
+#informationPanel .header {
+    margin: 5px;
+    font-weight: bold;
 }
