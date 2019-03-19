@@ -330,8 +330,10 @@ TimeTable.prototype.removeBreakdownBarChart = function() {
 
 TimeTable.prototype.addDistributionChart = function() {
     var collectedHourData = [];
+    var dailyCollectedHours = [];
     for (var i=0; i<24; i++) {
         collectedHourData[i] = 0;
+        dailyCollectedHours[i] = 0;
     }
 
     d3.selectAll('.time-slot').each(function() {
@@ -343,14 +345,20 @@ TimeTable.prototype.addDistributionChart = function() {
         }
     })
 
+    var chosenDayString = d3.select('.selected-head').node().getAttribute('data-timetable-date');
+
     var barLength = d3.scaleLinear().rangeRound([0, 40]);
     barLength.domain([0, d3.max(collectedHourData)]);
     for (var i in this.distributions) {
         if (i < 24) {
-            this.distributions[i]
+            var distBar = this.distributions[i]
                 .append("div")
                 .attr("class", "distribution-bar")
                 .style("width", barLength(collectedHourData[i]) + "px");
+            
+            if (chosenDayString in data['recordsEachDayAndHour']) {
+                //distBar.style("border-left", barLength(data['recordsEachDayAndHour'][chosenDayString][i].length) + "px solid steelblue");
+            }
         }
     }
 }
