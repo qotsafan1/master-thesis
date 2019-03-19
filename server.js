@@ -110,7 +110,7 @@ app.post('/annotations', function(req, res) {
 				req.body.dataset,
 				req.body.type, 
 				req.body.comment, 
-				req.body.creationDate, 
+				new Date(),
 				req.body.systemName
 			],
 			function(error, result) { 
