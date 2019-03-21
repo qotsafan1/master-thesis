@@ -13,13 +13,13 @@ var month = new Array(12);
     month[11] = "December";
 
 var weekday = new Array(7);
-    weekday[0] = "Sunday";
-    weekday[1] = "Monday";
-    weekday[2] = "Tuesday";
-    weekday[3] = "Wednesday";
-    weekday[4] = "Thursday";
-    weekday[5] = "Friday";
-    weekday[6] = "Saturday";
+weekday[0] = "Monday";
+weekday[1] = "Tuesday";
+weekday[2] = "Wednesday";
+weekday[3] = "Thursday";
+weekday[4] = "Friday";
+weekday[5] = "Saturday";
+weekday[6] = "Sunday";
 
 function setClockTo(dateObject, time) {
     dateObject.setHours(time[0]);
@@ -64,3 +64,11 @@ function getNumberOfDayBetweenTwoDates(d1, d2) {
     }
     return totalDays;
 }
+
+Date.prototype.getWeekNumber = function(){
+    var d = new Date(Date.UTC(this.getFullYear(), this.getMonth(), this.getDate()));
+    var dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1)/7)
+};

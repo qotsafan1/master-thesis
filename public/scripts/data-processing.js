@@ -92,12 +92,19 @@ function createVisualization(dataset) {
                 lastRecordDate = isoDate;	
             }
 
+            console.log(isoDate.getWeekNumber());
+
             var currentMonth = month[isoDate.getMonth()]
             sumData(currentMonth, countMonth);
 
-            var currentDay = weekday[isoDate.getDay()]
-            sumData(currentDay, countWeekday);
+            var currentDay;
+            if (isoDate.getDay() === 0) {
+                currentDay = weekday[6];
+            } else {
+                currentDay = weekday[(isoDate.getDay()-1)];
+            }
 
+            sumData(currentDay, countWeekday);
             sumData(isoDate.getHours(), countHour);
 
             var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
@@ -337,7 +344,12 @@ function updateChildGraphs(firstDate, lastDate) {
                 continue;
             }
 
-            var currentDay = weekday[isoDate.getDay()]
+            var currentDay;
+            if (isoDate.getDay() === 0) {
+                currentDay = weekday[6];
+            } else {
+                currentDay = weekday[(isoDate.getDay()-1)];
+            }
             sumData(currentDay, countWeekday);
 
             sumData(isoDate.getHours(), countHour);
@@ -375,15 +387,6 @@ function getSpecificWeekdayData(day) {
         if (isoDate.getDay() === day) {
             days.push(isoDate);
         }
-        /*
-        if (firstDate > isoDate || lastDate < isoDate) {
-            continue;
-        }
-        var currentDay = weekday[isoDate.getDay()]
-        sumData(currentDay, countWeekday);
-
-        sumData(isoDate.getHours(), countHour);
-        */
     }
     return days;
 }
@@ -411,7 +414,12 @@ function updateChildGraphsWithWeekdayData(weekdayIndex) {
                 continue;
             }
 
-            var currentDay = weekday[isoDate.getDay()]
+            var currentDay;
+            if (isoDate.getDay() === 0) {
+                currentDay = weekday[6];
+            } else {
+                currentDay = weekday[(isoDate.getDay()-1)];
+            }
             sumData(currentDay, countWeekday);
 
             sumData(isoDate.getHours(), countHour);

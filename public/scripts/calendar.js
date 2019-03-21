@@ -4,7 +4,7 @@ function Calendar(date, data, maxInstance, overallData) {
     this.overallData = overallData;
     this.day = date.getDate();
 
-    this.monthArray = this.getMatrix(date.getFullYear(), date.getMonth());
+    this.monthArray = this.getMonthMatrix(date.getFullYear(), date.getMonth());
 
     this.month = date.getMonth();
     this.year = date.getFullYear();
@@ -16,39 +16,41 @@ function Calendar(date, data, maxInstance, overallData) {
     this.week = this.getWeek();
 }
 
-//https://github.com/bclinkinbeard/calendar-matrix/blob/master/index.js
-Calendar.prototype.getMatrix = function(y, m) {
-    var rows = [0,1,2,3,4,5];
-    var cols = [0,1,2,3,4,5,6];
-    var matrix = [];
-    var date = new Date(y, m);
-    var numDays = new Date(y, m + 1, 0).getDate();
-    var dayNum;
+Calendar.prototype.getMonthMatrix = function(y, m) {
+    var calendarMatrix = []
 
-    _.each(rows, function (row) {
-        var week = [];
+    var startDay = new Date(y, m, 1)
+    var lastDay = new Date(y, m+1, 0)
 
-        _.each(cols, function (col) {
-        if (row == 0) {
-            dayNum = col - date.getDay() + 1;
-            week.push(col < date.getDay() ? -(new Date(y, m, -(date.getDay() - 1 - col)).getDate()) : dayNum);
-        } else {
-            dayNum = _.last(matrix)[6] + col + 1;
-            week.push(dayNum <= numDays ? dayNum : -(dayNum - numDays));
+    // Modify the result of getDay so that we treat Monday = 0 instead of Sunday = 0
+    var startDow = (startDay.getDay() + 6) % 7;
+    var endDow = (lastDay.getDay() + 6) % 7;
+
+    // If the month didn't start on a Monday, start from the last Monday of the previous month
+    startDay.setDate(startDay.getDate() - startDow);
+
+    // If the month didn't end on a Sunday, end on the following Sunday in the next month
+    lastDay.setDate(lastDay.getDate() + (6-endDow));
+
+    var week = []
+    while(startDay <= lastDay){
+        week.push(new Date(startDay));
+        if (week.length === 7){
+          calendarMatrix.push(week);
+          week = []
         }
-        });
+        startDay.setDate(startDay.getDate() + 1)
+    }
 
-        if (!row || week[0] > 1) matrix.push(week);
-
-    });
-
-    return matrix;
+    return calendarMatrix;
 }
 
 Calendar.prototype.getWeek = function() {
     for (var row in this.monthArray) {
         for (var col in this.monthArray[row]) {
-            if (this.day == this.monthArray[row][col]) {
+            if (this.date.getDate() == this.monthArray[row][col].getDate() 
+                && this.date.getMonth() == this.monthArray[row][col].getMonth()
+            ) {
                 return this.monthArray[row];
             }
         }
@@ -105,12 +107,12 @@ Calendar.prototype.create = function() {
             .data(week)
             .enter()
             .append('td')
-            .attr('data-date', function(d) { return theObject.getDayString(d)})
-            .attr('data-day', function(d) { return d})
+            .attr('data-date', function(d) { return theObject.getDateAsDateString(d)})
+            .attr('data-day', function(d) { return d.getDate()})
             .attr('data-weekday', function(d,i) { return i})
             .attr('class', function(d) {
                 var classString = "";
-                if (this.getAttribute('data-date') === theObject.getDateAsDateString()) {
+                if (this.getAttribute('data-date') === theObject.getDateAsDateString(theObject.date)) {
                     classString += 'chosen-day ';
                 }
                 if (d < 0) {
@@ -119,14 +121,14 @@ Calendar.prototype.create = function() {
                 return classString;
             })
             .text(function (d) {              
-                return d > 0 ? d : -1*d;
+                return d.getDate();
             })
             .on('click', function() {
                 theObject.changeDay(this);
             })
             .append('div')
                 .text(function(d) {
-                    var dayString = theObject.getDayString(d);
+                    var dayString = theObject.getDateAsDateString(d);
                     if (dayString in theObject.data) {                  
                         return theObject.data[dayString];
                     }
@@ -134,59 +136,17 @@ Calendar.prototype.create = function() {
                 })
                 .attr('style', 'text-align: center')
                 .style("background-color", function(d) {
-                    var dayString = theObject.getDayString(d);
+                    var dayString = theObject.getDateAsDateString(d);
                     if (dayString in theObject.data) {                  
                         return theObject.colorScale(theObject.data[dayString]);
                     }
                     return "white";
                 })
-                /*
-                .append("i")
-                    .attr('class', 'far fa-comment note')
-                    .style('display', function(d,i) {
-                        var dayString = theObject.getDayString(d);
-                        if (dayString in annotations) {
-                            return "block";
-                        }
-                        return "none";
-                    })
-                    .append("div")
-                        .text(function(d,i) {
-                            var dayString = theObject.getDayString(d);
-                            if (dayString in annotations) {
-                                return annotations[dayString][0].comment;
-                            }
-                        })
-                        .attr("class", "overlay-right");
-                        */
     });
 }
 
-Calendar.prototype.getDayString = function(d) {
-    var currentMonth = (this.month+1);
-    var currentYear = this.year;
-    if (d < 0 && -1*d < 10) {
-        if (currentMonth == 12) {
-            currentMonth = 1;
-            currentYear += 1;
-        } else {
-            currentMonth++;
-        }
-    }
-    else if (d < 0 && -1*d > 20) {
-        if (currentMonth == 1) {
-            currentMonth = 12;
-            currentYear -= 1;
-        } else {
-            currentMonth--;
-        }
-    }
-    var dateString = currentYear + "-" + currentMonth + "-" + (d > 0 ? d : -1*d);
-    return dateString;
-}
-
-Calendar.prototype.getDateAsDateString = function() {
-    return (this.date.getFullYear() +"-"+ (this.date.getMonth()+1) +"-"+ this.date.getDate());
+Calendar.prototype.getDateAsDateString = function(date) {
+    return (date.getFullYear() +"-"+ (date.getMonth()+1) +"-"+ date.getDate());
 }
 
 Calendar.prototype.changeMonth = function(direction) {
@@ -197,7 +157,8 @@ Calendar.prototype.changeMonth = function(direction) {
         this.year = this.month === 0 ? this.year-1 : this.year;
         this.month = this.month === 0 ? 11 : this.month-1;
     }
-    this.monthArray = this.getMatrix(this.year, this.month);    
+    this.monthArray = this.getMonthMatrix(this.year, this.month);
+ 
     this.remove();
     this.create();
 }

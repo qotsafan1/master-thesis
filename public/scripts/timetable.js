@@ -35,12 +35,12 @@ TimeTable.prototype.create = function() {
         .append('td')
         .attr('class', function(d,i) {
             var classString = 'time-slot ';
-            if (theObject.date.getDate() === theObject.week[i] || (theObject.week[i] < 0 && theObject.date.getDate() === -1*theObject.week[i])) {
+            if (theObject.date.getDate() === theObject.week[i].getDate()) {
                 classString += "selected-head ";
             }
             return classString;
         })        
-        .attr('data-timetable-date', function(d,i) { return theObject.getDayString(theObject.week[i])})
+        .attr('data-timetable-date', function(d,i) { return theObject.getDateAsDateString(theObject.week[i])})
         .on('click', function() {
             theObject.changeSelectedDay(this.getAttribute('data-timetable-date'), this);
         })
@@ -53,14 +53,14 @@ TimeTable.prototype.create = function() {
         })
         .append('div')
             .text(function(d, i) {                
-                return theObject.week[i] < 0 ? -1*theObject.week[i] : theObject.week[i];
+                return theObject.week[i].getDate();
             })
             .attr('style', 'text-align: center')
         .select(function(d,i) { return this.parentNode; })
             .append("i")
             .attr('class', 'far fa-comment note')
             .style('display', function(d,i) {
-                var dayString = theObject.getDayString(theObject.week[i]);
+                var dayString = theObject.getDateAsDateString(theObject.week[i]);
                 if (dayString in annotations) {
                     return "block";
                 }
@@ -68,7 +68,7 @@ TimeTable.prototype.create = function() {
             })
             .append("div")
                 .text(function(d,i) {
-                    var dayString = theObject.getDayString(theObject.week[i]);
+                    var dayString = theObject.getDateAsDateString(theObject.week[i]);
                     if (dayString in annotations) {
                         return annotations[dayString][0].comment;
                     }
@@ -93,8 +93,8 @@ TimeTable.prototype.create = function() {
                 this.distributions.push(tempTd);
                 continue;              
             } else {
-                var hourByDay = theObject.getHourByDayString(i, (j-1));
-                var dayString = theObject.getDayString(theObject.week[(j-1)]);
+                var hourByDay = theObject.getHourByDayString(i, theObject.week[(j-1)]);
+                var dayString = theObject.getDateAsDateString(theObject.week[(j-1)]);
 
                 tempTd.text(function() {
                     if (hourByDay in theObject.data) {
@@ -120,7 +120,7 @@ TimeTable.prototype.create = function() {
                 })
                 .attr('class', function() {
                     var classString = "";
-                    if (theObject.date.getDate() === theObject.week[(j-1)] || (theObject.week[(j-1)] < 0 && theObject.date.getDate() === -1*theObject.week[(j-1)])) {
+                    if (theObject.date.getDate() === theObject.week[(j-1)].getDate()) {
                         classString += "selected-day ";
                         if (i===23) {
                             classString += "selected-day-last ";
@@ -147,54 +147,30 @@ TimeTable.prototype.create = function() {
     this.addDistributionChart();
 }
 
-TimeTable.prototype.getDayString = function(d) {
-    var currentMonth = (this.month+1);
-    var currentYear = this.year;
-    if (d < 0 && -1*d < 10) {
-        if (currentMonth == 12) {
-            currentMonth = 1;
-            currentYear += 1;
-        } else {
-            currentMonth++;
-        }
-    }
-    else if (d < 0 && -1*d > 20) {
-        if (currentMonth == 1) {
-            currentMonth = 12;
-            currentYear -= 1;
-        } else {
-            currentMonth--;
-        }
-    }
-    var dateString = currentYear + "-" + currentMonth + "-" + (d > 0 ? d : -1*d);
-    return dateString;
+TimeTable.prototype.getDateAsDateString = function(date) {
+    return (date.getFullYear() +"-"+ (date.getMonth()+1) +"-"+ date.getDate());
 }
 
-TimeTable.prototype.getHourByDayString = function(hour, dayOfWeek) {    
-    var day = this.week[dayOfWeek];
-    var dayString = this.getDayString(day);
+TimeTable.prototype.getHourByDayString = function(hour, day) {
+    var dayString = this.getDateAsDateString(day);
 
     return (dayString + "-" + hour);
 }
 
 TimeTable.prototype.getTitle = function() {
-    var title = month[this.date.getMonth()] + " " + this.date.getFullYear();
-    if (this.week[0] < 0 || this.week[6] < 0) {        
-        if (this.date.getDate() > 10) {
-            if (this.date.getMonth() === 11) {
-                title = month[11] + " " + this.date.getFullYear() + "-" + month[0] + " " + (this.date.getFullYear()+1);
+    var title = month[this.week[0].getMonth()] + " " + this.week[0].getFullYear();
+    for (var i=1; i < this.week.length; i++) {
+        if (this.week[i].getMonth() !== this.week[0].getMonth()) {
+            if (this.week[i].getFullYear() !== this.week[0].getFullYear()) {
+                title = month[this.week[0].getMonth()] + " " + this.week[0].getFullYear() 
+                    + " - " + month[this.week[i].getMonth()] + " " + this.week[i].getFullYear();
             } else {
-                title = month[this.date.getMonth()] + "-" + month[this.date.getMonth()+1] + " " + this.date.getFullYear(); 
+                title = month[this.week[0].getMonth()] 
+                    + " - " + month[this.week[i].getMonth()] + " " + this.week[i].getFullYear();
             }
-        } else {
-            if (this.date.getMonth() === 0) {
-                title = month[11] + " " + (this.date.getFullYear()-1) + "-" + month[0] + " " + (this.date.getFullYear());
-            } else {
-                title = month[this.date.getMonth()-1] + "-" + month[this.date.getMonth()] + " " + this.date.getFullYear(); 
-            }
-        } 
+            return title;
+        }
     }
-
     return title;
 }
 
