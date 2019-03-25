@@ -1,4 +1,4 @@
-function TimeBarChart(data, elementId, chartWidth, chartHeight, margin, title, xScaleData, styles) {
+function TimeBarChart(data, elementId, chartWidth, chartHeight, margin, title, xScaleData, meanLine, styles) {
     this.data = data;
     this.elementId = elementId;
     this.chartWidth = chartWidth;
@@ -8,6 +8,7 @@ function TimeBarChart(data, elementId, chartWidth, chartHeight, margin, title, x
     this.xScaleData = xScaleData;
     this.styles = styles;
     this.xScaleType = 'linear';
+    this.meanLine = meanLine;
 }
 
 TimeBarChart.prototype = Object.create(new CustomBarChart());
@@ -27,4 +28,5 @@ TimeBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.createYAxis(yLabel);
     this.createBars();
     this.createTitle();
+    this.createMeanLine();
 }

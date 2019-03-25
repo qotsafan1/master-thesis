@@ -1,4 +1,4 @@
-function DateBarChart(data, elementId, chartWidth, chartHeight, margin, title, xScaleData, styles) {
+function DateBarChart(data, elementId, chartWidth, chartHeight, margin, title, xScaleData, meanLine, styles) {
     this.data = data;
     this.elementId = elementId;
     this.chartWidth = chartWidth;
@@ -9,6 +9,7 @@ function DateBarChart(data, elementId, chartWidth, chartHeight, margin, title, x
     this.styles = styles;
     this.xScaleType = 'time';
     this.brushes = [];
+    this.meanLine = meanLine;
 }
 
 DateBarChart.prototype = Object.create(new CustomBarChart());
@@ -28,6 +29,7 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.createYAxis(yLabel);
     this.createBars();
     this.createTitle();
+    this.createMeanLine();
 }
 
 DateBarChart.prototype.updateToSpecificTime = function(type, time) {

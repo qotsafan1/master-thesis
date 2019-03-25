@@ -115,7 +115,7 @@ CustomBarChart.prototype.createYAxis = function(label) {
 
 CustomBarChart.prototype.createXAxis = function(label) {
   this.g.append("g")
-  .attr("transform", "translate(0," + this.height + ")")
+  .attr("transform", "translate(0 ," + this.height + ")")
   .attr("class", "x-axis")
   .style("font-size", this.styles.xBarFontSize)
   .call(this.xAxis)
@@ -137,6 +137,13 @@ CustomBarChart.prototype.createTitle = function() {
       .attr("text-anchor", "middle")
       .style("font", "sans-serif")
       .text(this.title);
+}
+
+CustomBarChart.prototype.rotateTickLabels = function() {
+  this.svg.select('.x-axis').selectAll('text')
+    .attr("dx", "-1.8em")
+    .attr("dy", ".5em")
+    .attr("transform", "rotate(-65)");
 }
 
 CustomBarChart.prototype.createBars = function() {
@@ -207,6 +214,33 @@ CustomBarChart.prototype.updateGraph = function(data) {
   this.data = data;
   this.updateYAxis();
   this.updateBars();
+  this.updateMeanLine();
 }
 
+CustomBarChart.prototype.addLine = function(x1, x2, y1, y2, name) {
+  this.g.append("line")
+    .style("stroke", "red")
+    .attr("x1", x1)
+    .attr("y1", y1)
+    .attr("x2", x2)
+    .attr("y2", y2)
+    .attr("class", name);
+}
+
+CustomBarChart.prototype.createMeanLine = function() {
+  if (this.meanLine) {
+    var mean = d3.mean(this.data, function(d,i) {
+        return d.sum;
+    });
+            
+    this.addLine(0, this.width, this.y(mean), this.y(mean), 'mean-line');
+  }
+}
+
+CustomBarChart.prototype.updateMeanLine = function() {
+  if (this.meanLine) {
+    this.g.select(".mean-line").remove();
+    this.createMeanLine();
+  }
+}
 

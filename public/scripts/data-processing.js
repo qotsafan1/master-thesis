@@ -37,6 +37,7 @@ function createVisualization(dataset) {
     data = [];
     data["byMonth"] = [];
     data["byDay"] = [];
+    data["byWeek"] = [];
     data['firstMonth'] = 12;
     data['lastMonth'] = 1;
     data['firstYear'] = 2030;
@@ -64,6 +65,7 @@ function createVisualization(dataset) {
 
         var countHour = [];
         var countEachDay = [];
+        var countWeeks = [];
         var countEachHourOfEachDay = [];
         var countEachHourOfEachWeekday = [];
 
@@ -92,17 +94,14 @@ function createVisualization(dataset) {
                 lastRecordDate = isoDate;	
             }
 
-            console.log(isoDate.getWeekNumber());
+            //console.log(isoDate.getWeekNumber());
+            var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getFullYear();
+            sumData(currentWeek, countWeeks);
 
             var currentMonth = month[isoDate.getMonth()]
             sumData(currentMonth, countMonth);
 
-            var currentDay;
-            if (isoDate.getDay() === 0) {
-                currentDay = weekday[6];
-            } else {
-                currentDay = weekday[(isoDate.getDay()-1)];
-            }
+            var currentDay = isoDate.getDay() === 0 ? weekday[6] : weekday[(isoDate.getDay()-1)];
 
             sumData(currentDay, countWeekday);
             sumData(isoDate.getHours(), countHour);
@@ -166,6 +165,7 @@ function createVisualization(dataset) {
         data['byMonth'] = createBarData(countMonth);
         data['byDay'] = createBarData(countWeekday);
         data['byHour'] = createBarData(countHour);
+        data['byWeek'] = createBarData(countWeeks);
         data['hourByDay'] = countEachHourOfEachDay;
         data['amountOfEachWeekday'] = getCountOfEachWeekday(data['firstRecordedDay'], data['lastRecordedDay']);
         data['eachDay'] = [];
@@ -239,6 +239,7 @@ function createVisualization(dataset) {
             "Observations per day", 
             [firstDate, lastDate],
             'default',
+            true,
             {
                 "xBarFontSize": "12px",
                 "titleFontSize": "15px"
@@ -256,6 +257,7 @@ function createVisualization(dataset) {
             "Observations per month", 
             data['byMonth'], 
             'default',
+            true,
             {
                 "xBarFontSize": "12px",
                 "titleFontSize": "15px"
@@ -263,6 +265,24 @@ function createVisualization(dataset) {
         );
         monthChart.create("Month", "Observations", -1);
         monthChart.addClickEventToUpdateDateChart(dateChart, 'month');
+        
+        var weekChart = new NormalBarChart(
+            data['byWeek'], 
+            'weekBarChart', 
+            500, 
+            250,
+            {top: 40, right: 60, bottom: 40, left: 40},
+            "Observations per week", 
+            data['byWeek'], 
+            'default',
+            true,
+            {
+                "xBarFontSize": "12px",
+                "titleFontSize": "15px"
+            }
+        );
+        weekChart.create("", "Observations", -1);
+        weekChart.rotateTickLabels();
 
         var weekdayChart = new NormalBarChart(
             data['byDay'], 
@@ -273,6 +293,7 @@ function createVisualization(dataset) {
             "Observations per weekday",
             data['byDay'], 
             'default',
+            true,
             {
                 "xBarFontSize": "12px",
                 "titleFontSize": "15px"
@@ -290,6 +311,7 @@ function createVisualization(dataset) {
             {top: 40, right: 60, bottom: 40, left: 40},
             "Observations per hour",
             [0,24],
+            true,
             {
                 "xBarFontSize": "12px",
                 "titleFontSize": "15px"
@@ -323,8 +345,8 @@ function createBarData(countArray) {
 function updateChildGraphs(firstDate, lastDate) {
     setClockTo(firstDate, [0,0,0]);
     setClockTo(lastDate, [23,59,59]);
-    document.getElementById("firstDate").innerHTML = weekday[firstDate.getDay()] + " " + month[firstDate.getMonth()] + " " + firstDate.getDate() + " " + firstDate.getFullYear();
-    document.getElementById("lastDate").innerHTML = weekday[lastDate.getDay()] + " " + month[lastDate.getMonth()] + " " + lastDate.getDate() + " " + lastDate.getFullYear();;
+    document.getElementById("firstDate").innerHTML = weekday[firstDate.getDay() === 0 ? 6 : (firstDate.getDay()-1)] + " " + month[firstDate.getMonth()] + " " + firstDate.getDate() + " " + firstDate.getFullYear();
+    document.getElementById("lastDate").innerHTML = weekday[lastDate.getDay() === 0 ? 6 : (lastDate.getDay()-1)] + " " + month[lastDate.getMonth()] + " " + lastDate.getDate() + " " + lastDate.getFullYear();;
     if (childGraphs.length > 0) {
         var countWeekday = [];
         var countHour = [];
@@ -384,14 +406,15 @@ function getSpecificWeekdayData(day) {
         }
         
         var isoDate = strictIsoParse(unFilteredData[instance][date]);
-        if (isoDate.getDay() === day) {
+        var isoDay = isoDate.getDay() === 0 ? 6 : isoDay = isoDate.getDay()-1;
+        if (isoDay === day) {
             days.push(isoDate);
         }
     }
     return days;
 }
 
-function updateChildGraphsWithWeekdayData(weekdayIndex) {    
+function updateChildGraphsWithWeekdayData(weekdayIndex) {
     document.getElementById("firstDate").innerHTML = "All " + weekday[weekdayIndex] + "s";
     document.getElementById("lastDate").innerHTML = "All " + weekday[weekdayIndex] + "s";
     if (childGraphs.length > 0) {
@@ -409,22 +432,19 @@ function updateChildGraphsWithWeekdayData(weekdayIndex) {
             }
 
             var isoDate = strictIsoParse(unFilteredData[instance][date]);
+            var isoDay = isoDate.getDay() === 0 ? 6 : isoDay = isoDate.getDay()-1;
 
-            if (weekdayIndex !== isoDate.getDay()) {
+            if (weekdayIndex !== isoDay) {
                 continue;
             }
 
-            var currentDay;
-            if (isoDate.getDay() === 0) {
-                currentDay = weekday[6];
-            } else {
-                currentDay = weekday[(isoDate.getDay()-1)];
-            }
+            var currentDay = weekday[isoDay];
+            
             sumData(currentDay, countWeekday);
 
             sumData(isoDate.getHours(), countHour);
         }
-        
+
         var weekdayData = createBarData(countWeekday);
         
         var maxVal = 0;

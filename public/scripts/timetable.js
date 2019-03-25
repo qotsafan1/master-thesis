@@ -289,13 +289,14 @@ TimeTable.prototype.addBreakdownBarChart = function(dayString, theHour) {
         {top: 40, right: 60, bottom: 40, left: 20},
         "Observations on chosen hour",
         [0,60],
+        false,
         {
             "xBarFontSize": "5px",
             "titleFontSize": "15px"
         }  
     );
 
-    hourChart.create("Minutes", "Observations", 1);
+    hourChart.create("Minute", "Observations", 1);
 }
 TimeTable.prototype.removeBreakdownBarChart = function() {
     var barChart = document.getElementById("minuteBreakdown");			
