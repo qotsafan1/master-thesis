@@ -1,5 +1,5 @@
 #calendar {
-    width: 400px;
+    width: 450px;
     height: 200px;
     border-collapse: collapse;
 }
@@ -8,7 +8,7 @@
     border: 1px solid black;
     text-align: right;
     vertical-align: top;
-    width: 14%;
+    min-width: 35px;
     font-weight: bold;
     font-size: 11px;
     font-style: italic
@@ -58,4 +58,8 @@
 
 #calendar .note:hover .overlay {
     visibility: visible;
+}
+
+#calendar .calendar-hidden-distribution {
+    visibility: hidden;
 }

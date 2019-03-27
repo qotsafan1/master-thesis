@@ -177,6 +177,7 @@ function createVisualization(dataset) {
         data['byDay'] = createBarData(countWeekday);
         data['byHour'] = createBarData(countHour);
         data['byWeek'] = createBarData(countWeeks);
+        data['sumOfEachWeek'] = countWeeks;
         data['hourByDay'] = countEachHourOfEachDay;
         data['hourByWeek'] =  countEachHourOfEachWeek;
         data['amountOfEachWeekday'] = getCountOfEachWeekday(data['firstRecordedDay'], data['lastRecordedDay']);
@@ -239,12 +240,25 @@ function createVisualization(dataset) {
 
             data["averageHourOverAllWeeks"][i] = hourSum/numWeeks;
         }
+        
+        data["maxWeek"] = 0;
+        var weekSum = 0;
+        var amountOfWeeks = 0;
+        for (var i in countWeeks) {
+            if (countWeeks[i] > data["maxWeek"]) {
+                data["maxWeek"] = countWeeks[i];
+            }
+            weekSum += countWeeks[i];
+            amountOfWeeks++;
+        }
+        data["averageWeek"] = (weekSum/amountOfWeeks);
 
         var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
         var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
 
         var calendarObject = new Calendar(data['lastRecordedDay'], countEachDay, data['mostInADay'], data);
         calendarObject.create();
+        calendarObject.addDistribution();
 
         var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], calendarObject.month, calendarObject.year, data['maxHourOfDay']);
         timetableObject.create();        

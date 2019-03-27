@@ -75,22 +75,33 @@ Calendar.prototype.create = function() {
         .append('h5')
         .text("<")
     tr.append('td')
-        .attr('colspan', 5)
-        .style('text-align', 'center')
-        .append('h5')
-        .text(month[this.month] + " " + this.year)
-    tr.append('td')
         .attr('colspan', 1)
         .attr('class', 'change-month')
-        .style('text-align', 'right')
+        .style('text-align', 'left')
         .on('click', function() {
             theObject.changeMonth("next");
         })
         .append('h5')
         .text(">");
+    tr.append('td')
+        .attr('colspan', 4)
+        .style('text-align', 'center')
+        .append('h5')
+        .text(month[this.month] + " " + this.year)
+    
+    tr.append('td')
+
+    tr.append('td')
+        .text("Show distribution")
+        .on("click", function() {
+            theObject.toggleDistribution()
+        })
+        .style("font-size", "10px")
+        .style("cursor", "pointer")
       
     header
         .append('tr')
+        .attr("class", "calendar-header-week")
         .selectAll('td')
         .data(weekday)
         .enter()
@@ -103,6 +114,7 @@ Calendar.prototype.create = function() {
     this.monthArray.forEach(function (week) {
         body
             .append('tr')
+            .attr("class", "calendar-week")
             .selectAll('td')
             .data(week)
             .enter()
@@ -161,6 +173,7 @@ Calendar.prototype.changeMonth = function(direction) {
  
     this.remove();
     this.create();
+    this.addDistribution();
 }
 
 Calendar.prototype.changeDay = function(newTd) {
@@ -181,4 +194,43 @@ Calendar.prototype.remove = function() {
     while (calendar.firstChild) {
         calendar.removeChild(calendar.firstChild);
     }
+}
+
+Calendar.prototype.addDistribution = function() {
+    var thisObj = this;
+
+    var barLength = d3.scaleLinear().rangeRound([0, 90]);
+    barLength.domain([0, data["maxWeek"]]);
+
+    d3.select(".calendar-header-week")
+        .append("td")
+        .append("div")  
+            .attr("class", "calendar-distribution")          
+            .style("width", (barLength(data["averageWeek"]) + "px"))
+            .style("height", "100%")
+            .style("background-color", "lightsteelblue")
+            .text("Avg")
+            .style("font-size", "12px")
+            .style("text-align", "center")
+
+    d3.selectAll(".calendar-week")
+        .append("td")
+        .style("width", "90px")
+        .attr("class", "calendar-distribution")
+        .style("border-width", "0px")
+        .append("div")            
+            .style("width", function(d,i) {
+                var firstDayInWeek = thisObj.monthArray[i][0];
+                var weekString = (firstDayInWeek.getWeekNumber() === 1 && firstDayInWeek.getMonth() === 11) ? (firstDayInWeek.getWeekNumber()+"-"+(firstDayInWeek.getFullYear()+1)) : (firstDayInWeek.getWeekNumber()+"-"+firstDayInWeek.getFullYear());
+                return barLength(weekString in data["sumOfEachWeek"] ? data["sumOfEachWeek"][weekString] : 0) + "px";
+            })
+            .style("height", "100%")
+            .style("background-color", "steelblue")
+}
+
+Calendar.prototype.toggleDistribution = function() {
+    var dist  = d3.selectAll(".calendar-distribution");
+    dist.classed("calendar-hidden-distribution", function() {
+        return (this.classList.contains('calendar-hidden-distribution')) ? false : true;
+    })
 }
