@@ -74,6 +74,14 @@ TimeTable.prototype.create = function() {
                     }
                 })
                 .attr("class", "overlay");
+    var distributionTd = tr.append("td").style("border-width", "0px");
+    distributionTd.append("div")
+        .attr("class", "distribution-header")
+        .text("Average week");
+    distributionTd.append("div")
+        .attr("class", "distribution-header")
+        .style("background-color", "steelblue")
+        .text("Chosen week");
     
     for (var i=0; i<=23; i++) {
         var bodyTr = body.append('tr');
@@ -305,33 +313,30 @@ TimeTable.prototype.removeBreakdownBarChart = function() {
     }
 }
 
-TimeTable.prototype.addDistributionChart = function() {
-    var collectedHourData = [];
-    var dailyCollectedHours = [];
-    for (var i=0; i<24; i++) {
-        collectedHourData[i] = 0;
-        dailyCollectedHours[i] = 0;
-    }
-
-    d3.selectAll('.time-slot').each(function() {
-        var dateString = this.getAttribute('data-timetable-date');
-        for (var i=0; i<24; i++) {
-            if (dateString in data['recordsEachDayAndHour']) {
-                collectedHourData[i] += data['recordsEachDayAndHour'][dateString][i].length;
-            }
-        }
-    })
-
+TimeTable.prototype.addDistributionChart = function() {    
     var chosenDayString = d3.select('.selected-head').node().getAttribute('data-timetable-date');
+    var chosenDay = new Date(chosenDayString);
+    var chosenWeek = (chosenDay.getWeekNumber()+"-"+chosenDay.getFullYear());
+    
 
-    var barLength = d3.scaleLinear().rangeRound([0, 40]);
-    barLength.domain([0, d3.max(collectedHourData)]);
+    var barLength = d3.scaleLinear().rangeRound([0, 90]);
+    barLength.domain([0, data["maxHourOverAllWeeks"]]);
     for (var i in this.distributions) {
         if (i < 24) {
             var distBar = this.distributions[i]
                 .append("div")
                 .attr("class", "distribution-bar")
-                .style("width", barLength(collectedHourData[i]) + "px");
+                .style("width", barLength(data["averageHourOverAllWeeks"][i]) + "px")
+                .style("height", "50%");
+            
+            if (chosenWeek in data["hourByWeek"]) {
+                this.distributions[i]
+                    .append("div")
+                    .attr("class", "distribution-bar")
+                    .style("width", barLength(data["hourByWeek"][chosenWeek][i]) + "px")
+                    .style("height", "50%")
+                    .style("background-color", "steelblue");
+            }
             
             if (chosenDayString in data['recordsEachDayAndHour']) {
                 //distBar.style("border-left", barLength(data['recordsEachDayAndHour'][chosenDayString][i].length) + "px solid steelblue");

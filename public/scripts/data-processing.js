@@ -66,6 +66,7 @@ function createVisualization(dataset) {
         var countHour = [];
         var countEachDay = [];
         var countWeeks = [];
+        var countEachHourOfEachWeek = [];
         var countEachHourOfEachDay = [];
         var countEachHourOfEachWeekday = [];
 
@@ -94,7 +95,6 @@ function createVisualization(dataset) {
                 lastRecordDate = isoDate;	
             }
 
-            //console.log(isoDate.getWeekNumber());
             var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getFullYear();
             sumData(currentWeek, countWeeks);
 
@@ -134,6 +134,17 @@ function createVisualization(dataset) {
                 data['recordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
             }
 
+            // sum of each hour of each week
+            if (currentWeek in countEachHourOfEachWeek) {
+                countEachHourOfEachWeek[currentWeek][isoDate.getHours()]++;
+            } else {
+                countEachHourOfEachWeek[currentWeek] = [];
+                for (var i=0; i<24; i++) {
+                    countEachHourOfEachWeek[currentWeek][i] = 0;
+                }
+                countEachHourOfEachWeek[currentWeek][isoDate.getHours()]++;
+            }
+
             if (isoDate > data['lastRecordedDay']) {
                 data['lastRecordedDay'] = isoDate;
             }
@@ -167,6 +178,7 @@ function createVisualization(dataset) {
         data['byHour'] = createBarData(countHour);
         data['byWeek'] = createBarData(countWeeks);
         data['hourByDay'] = countEachHourOfEachDay;
+        data['hourByWeek'] =  countEachHourOfEachWeek;
         data['amountOfEachWeekday'] = getCountOfEachWeekday(data['firstRecordedDay'], data['lastRecordedDay']);
         data['eachDay'] = [];
 
@@ -194,8 +206,8 @@ function createVisualization(dataset) {
         
         data['averageDay'] = (d3.sum(data['eachDay'],function(d) { return d.sum})/data['totalDays']);
 
-        data['averageWorkday'] = (data['byDay'][1].sum + data['byDay'][2].sum + data['byDay'][3].sum +data['byDay'][4].sum + data['byDay'][5].sum) / (data['totalDays']-data['amountOfEachWeekday'][0]-data['amountOfEachWeekday'][6]);
-        data['averageWeekend'] = (data['byDay'][0].sum + data['byDay'][6].sum) / (data['amountOfEachWeekday'][0]+data['amountOfEachWeekday'][6]);
+        data['averageWorkday'] = (data['byDay'][0].sum + data['byDay'][1].sum + data['byDay'][2].sum +data['byDay'][3].sum + data['byDay'][4].sum) / (data['totalDays']-data['amountOfEachWeekday'][5]-data['amountOfEachWeekday'][6]);
+        data['averageWeekend'] = (data['byDay'][5].sum + data['byDay'][6].sum) / (data['amountOfEachWeekday'][5]+data['amountOfEachWeekday'][6]);
 
         data['averagePerWeekday'] = [];
         for (var i=0;i<7;i++) {
@@ -208,6 +220,24 @@ function createVisualization(dataset) {
             for (var i=0; i<24; i++) {
                 data["averagePerHourPerWeekday"][d][i] = countEachHourOfEachWeekday[d][i]/data['amountOfEachWeekday'][d];
             }
+        }
+
+        data["averageHourOverAllWeeks"] = [];   
+        data["maxHourOverAllWeeks"] = 0;    
+        for (var i=0; i<24; i++) {
+            var hourSum = 0;
+            var numWeeks = 0;
+            var currentWeek;
+            for (var w in countEachHourOfEachWeek) {                
+                hourSum += countEachHourOfEachWeek[w][i];
+                numWeeks++;
+
+                if (countEachHourOfEachWeek[w][i] > data["maxHourOverAllWeeks"]) {
+                    data["maxHourOverAllWeeks"] = countEachHourOfEachWeek[w][i];
+                }
+            }            
+
+            data["averageHourOverAllWeeks"][i] = hourSum/numWeeks;
         }
 
         var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				

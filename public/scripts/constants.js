@@ -37,7 +37,9 @@ function monthDiff(d1, d2) {
 
 function getCountOfEachWeekday(d1, d2) {
     var date1 = new Date(d1.getTime());
+    setClockTo(date1, [0,0,0]);
     var date2 = new Date(d2.getTime());
+    setClockTo(date2, [0,0,0]);
     var weekdayCount = [];
     for (var i=0;i<7;i++) {
         weekdayCount[i] = 0;
@@ -45,8 +47,9 @@ function getCountOfEachWeekday(d1, d2) {
     var currentDate = date1;
     while ( currentDate.getTime() <= date2.getTime() )
     {
-       weekdayCount[currentDate.getDay()]++;
-       currentDate.setDate(currentDate.getDate() + 1);
+        var currentDay = currentDate.getDay() === 0 ? 6 : currentDate.getDay()-1;
+        weekdayCount[currentDay]++;
+        currentDate.setDate(currentDate.getDate() + 1);
     }
 
     return weekdayCount;
@@ -54,7 +57,9 @@ function getCountOfEachWeekday(d1, d2) {
 
 function getNumberOfDayBetweenTwoDates(d1, d2) {
     var date1 = new Date(d1.getTime());
+    setClockTo(date1, [0,0,0]);
     var date2 = new Date(d2.getTime());
+    setClockTo(date2, [0,0,0]);
     var totalDays = 0;
     var currentDate = date1;
     while (currentDate.getTime() <= date2.getTime())
