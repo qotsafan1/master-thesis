@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+</head>
+<body class="container">
+	<header>
+		<% include ../partials/header %>
+	</header>
+	<br>		
+	<div class="row">
+		<div class='col-sm-1'></div>
+		<div class=''>
+			<p class="h6">Date from:</p>
+		</div>
+		<div class='col-sm-3'>
+			<p  class="h6"id="firstDate"></p>
+		</div>
+		<div class=''>
+				<p class="h6">Date to:</p>
+			</div>
+		<div class='col-sm-4'>
+			<p class="h6" id="lastDate"></p>
+		</div>
+	</div>
+	<div class="row">
+		<div class='col-sm-1 graph' id='dateChart'></div>
+	</div>
+
+	<div class="row">
+		<div class='col-lg-5 graph' id='dayBarChart'></div>
+		<div class='col-lg-5 graph' id='hourBarChart'></div>
+	</div>
+	<div class="row">
+		<div class='col-sm-5 graph' id='monthBarChart'></div>
+		<div class='col-sm-5 graph' id='weekBarChart'></div>
+	</div>
+	
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+
+</body>
+<% include ../partials/annotations %>
+</html>
+
+<script src="scripts/data-processing.js"></script>
+
+<script type='text/javascript'>	
+	var childGraphs;
+	var dataset = document.getElementById("datasets");
+	var event = new Event('change');
+	dataset.dispatchEvent(event);
+
+	function datasetChange() {
+		var dataset = document.getElementById("datasets").value;
+		
+		var graphs = document.getElementsByClassName("graph");
+		for (var i in graphs) {				
+			while (graphs[i].firstChild) {
+				graphs[i].removeChild(graphs[i].firstChild);
+			}
+		}
+		
+		getDataset(dataset);
+	}
+
+	function getDataset(dataset) {
+		annotations = [];
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				var result = JSON.parse(this.responseText);
+				rawData = result.data;
+				for (annotation in result.annotations)
+				{
+					if (!(result.annotations[annotation].systemName in annotations)) {
+						annotations[result.annotations[annotation].systemName] = [];
+					}
+
+					annotations[result.annotations[annotation].systemName].push({
+						"comment": result.annotations[annotation].comment,
+						"creationDate": result.annotations[annotation].creationDate,
+						"type": result.annotations[annotation].type,
+						"id": result.annotations[annotation].id
+					});
+				}
+				
+				processData();
+				createVisualizations();
+			}
+		};
+		xmlhttp.open("GET", ("/datasets/"+dataset), true);
+		xmlhttp.send();
+	}
+
+	function createVisualizations() {
+		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
+		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
+
+		var dateChart = new DateBarChart(
+			data['eachDay'],
+			'dateChart', 
+			900,
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per day", 
+			[firstDate, lastDate],
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
+		dateChart.createBrush();
+
+		var monthChart = new NormalBarChart(
+			data['byMonth'], 
+			'monthBarChart', 
+			500, 
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per month", 
+			data['byMonth'], 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		monthChart.create("Month", "Observations", -1);
+		monthChart.addClickEventToUpdateDateChart(dateChart, 'month');
+		
+		var weekChart = new NormalBarChart(
+			data['byWeek'], 
+			'weekBarChart', 
+			500, 
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per week", 
+			data['byWeek'], 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		weekChart.create("", "Observations", -1);
+		weekChart.rotateTickLabels();
+
+		var weekdayChart = new NormalBarChart(
+			data['byDay'], 
+			'dayBarChart', 
+			500, 
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per weekday",
+			data['byDay'], 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		weekdayChart.create("Weekday", "Observations", -1);
+		childGraphs.push(weekdayChart);
+		weekdayChart.addClickEventToUpdateDateChart(dateChart, 'weekday');
+		
+		var hourChart = new TimeBarChart(
+			data['byHour'],
+			'hourBarChart',
+			500,
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per hour",
+			[0,24],
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+			
+		hourChart.create("Hour", "Observations", -1);
+		childGraphs.push(hourChart);
+	}
+</script>

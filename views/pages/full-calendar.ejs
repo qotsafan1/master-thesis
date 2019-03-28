@@ -44,32 +44,13 @@
 	dataset.dispatchEvent(event);
 
 	function datasetChange() {
-		var dataset = document.getElementById("datasets").value;
-		
-		var graphs = document.getElementsByClassName("graph");
-		for (var i in graphs) {				
-			while (graphs[i].firstChild) {
-				graphs[i].removeChild(graphs[i].firstChild);
-			}
-		}
-
-		var calendar = document.getElementById("calendar");			
-		while (calendar.firstChild) {
-			calendar.removeChild(calendar.firstChild);
-		}
+		var dataset = document.getElementById("datasets").value;		
 
 		var timetable = document.getElementById("timetable");			
 		while (timetable.firstChild) {
 			timetable.removeChild(timetable.firstChild);
 		}
 
-		var barChartBreakdown = document.getElementById("minuteBreakdown");			
-		while (barChartBreakdown.firstChild) {
-			barChartBreakdown.removeChild(barChartBreakdown.firstChild);
-		}
-		
-		document.getElementById("averageHourPerWeekday").innerText = "";
-		
 		getDataset(dataset);
 	}
 
@@ -106,22 +87,9 @@
 		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
 		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
 
-		var calendarObject = new Calendar(data['lastRecordedDay'], data['sumOfEachDay'], data['mostInADay'], data);
-		calendarObject.create();
-		calendarObject.addDistribution();
-
 		var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], calendarObject.month, calendarObject.year, data['maxHourOfDay']);
 		timetableObject.create();        
 
-		calendarObject.timeTable = timetableObject;
-		timetableObject.calendar = calendarObject;
-
-		var informationPanel = new InformationPanel(data);
-		informationPanel.setAverageWorkday();
-		informationPanel.setChosenWeekdayAverage(data['lastRecordedDay'].getDay());
-
-
-		calendarObject.informationPanel = informationPanel;
 		timetableObject.informationPanel = informationPanel;
 	}
 </script>
