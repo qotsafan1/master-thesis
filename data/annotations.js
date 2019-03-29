@@ -75,7 +75,6 @@ exports.addAnnotation = async function(body) {
                     console.log(error)
 					resolve("");
 				} else {
-                    console.log()
 					resolve(result.insertId);
 				}
 			}

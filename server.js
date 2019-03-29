@@ -35,16 +35,11 @@ app.get('/datasets/:name', function(req, res) {
 	var annotations = database.getAnnotations(req.params.name);
 	
 	annotations.then(function(result) {
-		console.log(result)
 		res.send(JSON.stringify({
 			annotations: result,
 			data: rawData
 		}));
 	});	
-});
-
-app.get('/first', function(req, res) {
-	res.render('pages/first');
 });
 
 app.get('/full-calendar', function(req, res) {

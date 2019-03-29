@@ -148,7 +148,7 @@ function processData(dataset) {
         }
 
         if (isoDate < data['firstRecordedDay']) {
-            data['firstRecordedDay'] = isoDate;
+            data['firstRecordedDay'] = isoDate;            
         }
 
         if (isoDate.getFullYear() < data['firstYear']) {

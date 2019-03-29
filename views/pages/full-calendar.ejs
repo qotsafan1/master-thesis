@@ -8,24 +8,23 @@
 	<header>
 		<% include ../partials/header %>
 	</header>
-	<br>	
-	<div class="row">
-		<div class="col-lg-5">
-			<div class="row">
-				<table id="calendar"></table>
-			</div>
-			<div id="informationPanel">
-				<p class="header">Average observations</p>
-				<p class="detail" id="averageDay"></p>
-				<p class="detail" id="averageWorkday"></p>
-				<p class="detail" id="averagePerWeekday"></p>
-				<p class="detail" id="averageHourPerWeekday"></p>
-				<div id="minuteBreakdown"></div>
-			</div>
-		</div>
-		<div class="col-lg-7">
-			<table id="timetable"></table>
-		</div>
+	<br>
+	<input type="date" name="first-date" id="firstDate" onchange="dateChanged()">
+	<span>-</span>
+	<input type="date" name="last-date" id="lastDate" onchange="dateChanged()">
+	<select style="float:right" name="specific-day" id="specificDay" onchange="specificDayChange(this.value)">
+		<option value=""></option>
+		<option value="0">Monday</option>
+		<option value="1">Tuesday</option>
+		<option value="2">Wednesday</option>
+		<option value="3">Thursday</option>
+		<option value="4">Friday</option>
+		<option value="5">Saturday</option>
+		<option value="6">Sunday</option>
+	</select>
+	<span style="float:right">Choose specific weekday:</span>
+	<div style="overflow-x: scroll">
+		<table id="fullCalendar"></table>
 	</div>
 	<footer>
 		<% include ../partials/footer %>
@@ -37,8 +36,8 @@
 
 <script src="scripts/data-processing.js"></script>
 
-<script type='text/javascript'>	
-	var childGraphs;
+<script type='text/javascript'>		
+	var fullCalendar;
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
 	dataset.dispatchEvent(event);
@@ -46,9 +45,9 @@
 	function datasetChange() {
 		var dataset = document.getElementById("datasets").value;		
 
-		var timetable = document.getElementById("timetable");			
-		while (timetable.firstChild) {
-			timetable.removeChild(timetable.firstChild);
+		var fullCalendar = document.getElementById("fullCalendar");			
+		while (fullCalendar.firstChild) {
+			fullCalendar.removeChild(fullCalendar.firstChild);
 		}
 
 		getDataset(dataset);
@@ -84,12 +83,25 @@
 	}
 
 	function createVisualizations() {
-		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
-		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
+		fullCalendar = new FullCalendar(data['hourByDay'], data['sumOfEachDay'], data['firstRecordedDay'], data['lastRecordedDay'], data['maxHourOfDay'], data["mostInADay"], "");
+		fullCalendar.create();
+		fullCalendar.setDatePickers(data['firstRecordedDay'], data['lastRecordedDay']);
+		document.getElementById("specificDay").value = "";
+	}
 
-		var timetableObject = new TimeTable(data['lastRecordedDay'], calendarObject.week, data['hourByDay'], calendarObject.month, calendarObject.year, data['maxHourOfDay']);
-		timetableObject.create();        
+	function dateChanged() {
+		var firstDate = document.getElementById("firstDate");	
+		var lastDate = document.getElementById("lastDate");	
+		
+		fullCalendar.update(firstDate.value, lastDate.value, "");
+		document.getElementById("specificDay").value = "";
+	}
 
-		timetableObject.informationPanel = informationPanel;
+	function specificDayChange(day) {
+		var firstDate = data['firstRecordedDay'].getFullYear() +"-"+ (data['firstRecordedDay'].getMonth()+1) +"-"+ data['firstRecordedDay'].getDate();
+		var lastDate = data['lastRecordedDay'].getFullYear() +"-"+ (data['lastRecordedDay'].getMonth()+1) +"-"+ data['lastRecordedDay'].getDate();
+		
+		fullCalendar.setDatePickers(data['firstRecordedDay'], data['lastRecordedDay']);		
+		fullCalendar.update(firstDate, lastDate, day);
 	}
 </script>

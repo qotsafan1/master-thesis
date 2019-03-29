@@ -1,0 +1,79 @@
+#fullCalendar {
+    width: 100%;
+    border-collapse: collapse;
+    overflow: scroll;
+}
+
+#fullCalendar thead th {
+    border: 1px solid black;
+    text-align: center;
+    vertical-align: top;
+    max-width: 30px;
+    min-width: 30px;
+    font-weight: bold;
+    font-size: 11px;
+    
+}
+
+#fullCalendar thead th.month-label {
+    border: 0px;
+    font-size: 20px;
+}
+
+#fullCalendar tbody td.hour, #fullCalendar thead th.hour {
+    font-size: 7px;
+    font-weight: normal;
+    vertical-align: bottom;
+    border-left: none;
+    max-width: 2px;
+    border-top: none;
+}
+
+#fullCalendar tbody td {
+    border: 1px solid black;
+    text-align: center;
+    vertical-align: top;
+    max-width: 30px;
+    min-width: 30px;
+    font-weight: bold;
+    font-size: 11px;
+    
+}
+
+#fullCalendar tbody td div {    
+    font-weight: normal;
+    font-style: normal;
+    font-size: 15px;
+}
+
+#fullCalendar td.empty, #fullCalendar th.empty {
+    border: none;
+}
+
+#fullCalendar td .note {
+    position: relative;
+    font-size: 8px;
+}
+
+#fullCalendar tbody td.day-sum {
+    border-top: 3px double black;
+}
+
+#fullCalendar .overlay {
+    position: absolute;
+    visibility: hidden;
+    background-color: #9FDAEE;
+    border: 1px solid #2BB0D7;
+    border-radius: 6px;
+    font-size: 16px;
+    z-index: 10;
+    text-align: left;
+    padding: 5px;
+    width: 500px;
+    white-space: pre-line;
+    
+}
+
+#fullCalendar .note:hover .overlay {
+    visibility: visible;
+}
