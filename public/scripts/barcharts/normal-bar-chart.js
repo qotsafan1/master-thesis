@@ -41,7 +41,3 @@ NormalBarChart.prototype.addClickEventToUpdateDateChart = function(dateChart, ty
         .style("cursor", "pointer");
 
 }
-
-NormalBarChart.prototype.update = function() {
-
-}

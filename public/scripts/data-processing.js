@@ -274,6 +274,34 @@ function processData(dataset) {
         amountOfWeeks++;
     }
     data["averageWeek"] = (weekSum/amountOfWeeks);
+
+    data["daysInEachWeek"] = getDaysInEachWeek(data['firstRecordedDay'], data['lastRecordedDay']);
+}
+
+function getDaysInEachWeek(firstDay, lastDay) {
+    var currentDay = new Date(firstDay.getTime());
+    currentDay.setHours(0,0,0,0);
+    weekArray = [];
+    while (currentDay.getTime() < lastDay.getTime()) {
+        var weekString = currentDay.getWeekNumber() +"-"+ currentDay.getFullYear();
+        if (weekString in weekArray) {
+            if (weekArray[weekString]["firstDay"].getTime() > currentDay.getTime()) {
+                weekArray[weekString]["firstDay"] = new Date(currentDay.getTime());
+            }
+
+            if (weekArray[weekString]["lastDay"].getTime() < currentDay.getTime()) {
+                weekArray[weekString]["lastDay"] = new Date(currentDay.getTime());
+            }
+        } else {
+            weekArray[weekString] = [];
+            weekArray[weekString]["firstDay"] = new Date(currentDay.getTime());
+            weekArray[weekString]["lastDay"] = new Date(currentDay.getTime());
+        }
+
+        currentDay.setDate(currentDay.getDate() + 1);
+    }
+
+    return weekArray;
 }
 
 function sumData(instance, sumArray) {

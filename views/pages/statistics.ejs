@@ -150,6 +150,7 @@
 			}
 		);
 		weekChart.create("", "Observations", -1);
+		weekChart.addClickEventToUpdateDateChart(dateChart, 'week');
 		weekChart.rotateTickLabels();
 
 		var weekdayChart = new NormalBarChart(
