@@ -30,6 +30,10 @@ app.get('/full-calendar', function(req, res) {
 	res.render('pages/full-calendar');
 });
 
+app.get('/monthly-breakdown', function(req, res) {
+	res.render('pages/monthly-breakdown');
+});
+
 app.get('/datasets/:name', function(req, res) {	
 	var rawData = data.getRawData(req.params.name);
 	var annotations = database.getAnnotations(req.params.name);
@@ -103,20 +107,14 @@ app.post('/annotations', function(req, res) {
 });
 
 app.delete('/annotations/:id', function(req, res) {
-	db.query(
-		"DELETE FROM annotations WHERE id = ?",
-		[
-			req.params.id
-		],
-		function(error, result) { 
-			if (error) {
-				console.log(error)
-				res.send(JSON.stringify({"status": 500, "error": error, "response": null}));
-			} else {				
-					res.status(204).send();
-			}
+	var data = database.deleteAnnotation(req.params.id);
+	data.then(function(result) {
+		if (result.length > 0) {
+			res.send(JSON.stringify({"status": 500, "error": "Unable to delete annotation", "response": null}));
+		} else {
+			res.status(204).send();
 		}
-	);
+	});
 });
 
 app.listen(3000);

@@ -47,6 +47,7 @@ function processData(dataset) {
 
     data['filteredData'] = [];
 
+    var lastLoopedDay;
     var lastRecordDate = new Date("1971-1-1");
     
     numberOfMonths = [];
@@ -91,6 +92,25 @@ function processData(dataset) {
         if (diff > 4000) {
             data['filteredData'].push(isoDate);
             lastRecordDate = isoDate;	
+        }        
+
+        if (lastLoopedDay) {
+            var tempDate = new Date(isoDate.getTime());
+            tempDate.setHours(0,0,0,0);
+            if ((tempDate.getTime() - lastLoopedDay.getTime()) > 86400000) {
+                while(lastLoopedDay.getTime() < tempDate.getTime()) {
+                    var tempDay = lastLoopedDay.getFullYear() + "-" + (lastLoopedDay.getMonth()+1) + "-" + lastLoopedDay.getDate();
+                    var tempWeek = lastLoopedDay.getWeekNumber() + "-" + lastLoopedDay.getFullYear();
+                    if (!(tempDay in countEachDay)) {
+                        countEachDay[tempDay] = 0;
+                    }
+
+                    if (!(tempWeek in countWeeks)) {
+                        countWeeks[tempWeek] = 0;
+                    }
+                    lastLoopedDay.setDate(lastLoopedDay.getDate() + 1);
+                }
+            }
         }
 
         var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getFullYear();
@@ -103,7 +123,7 @@ function processData(dataset) {
 
         sumData(currentDay, countWeekday);
         sumData(isoDate.getHours(), countHour);
-
+        
         var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
         if (dayOfMonth in countEachDay) {
             countEachDay[dayOfMonth]++;
@@ -120,7 +140,7 @@ function processData(dataset) {
         }
 
         // sum of each hour of each weekday
-        countEachHourOfEachWeekday[isoDate.getDay()][isoDate.getHours()]++; 
+        countEachHourOfEachWeekday[isoDate.getDay() === 0 ? 6 : (isoDate.getDay()-1)][isoDate.getHours()]++; 
 
         if (dayOfMonth in data['recordsEachDayAndHour']) {
             data['recordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
@@ -169,7 +189,10 @@ function processData(dataset) {
                 data["lastMonth"] = isoDate.getMonth();
             }
         }
-    }
+
+        lastLoopedDay = new Date(isoDate.getTime());
+        lastLoopedDay.setHours(0,0,0,0);
+    }    
 
     data['byMonth'] = createBarData(countMonth);
     data['byDay'] = createBarData(countWeekday);
@@ -296,12 +319,7 @@ function updateChildGraphs(firstDate, lastDate) {
                 continue;
             }
 
-            var currentDay;
-            if (isoDate.getDay() === 0) {
-                currentDay = weekday[6];
-            } else {
-                currentDay = weekday[(isoDate.getDay()-1)];
-            }
+            var currentDay = isoDate.getDay() === 0 ? weekday[6] : weekday[(isoDate.getDay()-1)];            
             sumData(currentDay, countWeekday);
 
             sumData(isoDate.getHours(), countHour);
@@ -334,7 +352,7 @@ function getSpecificWeekdayData(day) {
         }
         
         var isoDate = strictIsoParse(unFilteredData[instance][date]);
-        var isoDay = isoDate.getDay() === 0 ? 6 : isoDay = isoDate.getDay()-1;
+        var isoDay = isoDate.getDay() === 0 ? 6 : isoDate.getDay()-1;
         if (isoDay === day) {
             days.push(isoDate);
         }

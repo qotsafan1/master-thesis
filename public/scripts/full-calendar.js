@@ -75,7 +75,7 @@ FullCalendar.prototype.create = function() {
             } else if (i===24) {
                 var dayString = theObject.getDateAsDateString(days[(j-1)]);
                 var currentTd = bodyTr.append("td");
-                if (dayString in this.dayData) {
+                if (dayString in this.dayData && this.dayData[dayString] !== 0) {
                     currentTd
                         .text(this.dayData[dayString])
                         .style("background-color", theObject.dayColorScale(theObject.dayData[dayString]));

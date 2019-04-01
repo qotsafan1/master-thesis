@@ -1,0 +1,65 @@
+.calendar {
+    width: 350px;
+    height: 200px;
+    border-collapse: collapse;
+}
+
+.calendar tbody td {
+    border: 1px solid black;
+    text-align: right;
+    vertical-align: top;
+    min-width: 35px;
+    font-weight: bold;
+    font-size: 11px;
+    font-style: italic
+}
+
+.calendar tbody td div {    
+    font-weight: normal;
+    font-style: normal;
+    font-size: 15px;
+}
+
+.calendar td.empty {
+    border: none;
+}
+
+.calendar td.change-month {
+    cursor: pointer;
+}
+
+.calendar td.chosen-day {
+    border: 3px solid blue;
+}
+
+.calendar td.month-outside {
+    color: grey;
+}
+
+.calendar td .note {
+    position: relative;
+    font-size: 8px;
+}
+
+.calendar td .overlay-right {
+    position: absolute;
+    visibility: hidden;
+    background-color: #9FDAEE;
+    border: 1px solid #2BB0D7;
+    border-radius: 6px;
+    font-size: 16px;
+    z-index: 10;
+    text-align: left;
+    padding: 5px;
+    width: 500px;
+    white-space: pre-line;
+    top: -5px;
+}
+
+.calendar .note:hover .overlay {
+    visibility: visible;
+}
+
+.calendar .calendar-hidden-distribution {
+    visibility: hidden;
+}

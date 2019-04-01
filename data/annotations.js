@@ -84,3 +84,22 @@ exports.addAnnotation = async function(body) {
     return await promise;
 }
 
+exports.deleteAnnotation = async function(id) {
+    let promise = new Promise((resolve, reject) => {
+        db.query(
+            "DELETE FROM annotations WHERE id = ?",
+            [id],
+            function(error, result) { 
+                if (error) {
+                    console.log(error)
+                    return error;
+                } else {				
+                    return "";
+                }
+            }
+        );
+    });
+
+    return await promise;
+}
+

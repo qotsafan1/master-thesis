@@ -108,7 +108,7 @@ TimeTable.prototype.create = function() {
                     if (hourByDay in theObject.data) {
                         return theObject.data[hourByDay];
                     }
-                    return 0;
+                    return "\u00A0";
                 })
                 .attr('data-hour-key', hourByDay)
                 .attr('data-parent-day', dayString)
@@ -242,9 +242,10 @@ TimeTable.prototype.markChosenDay = function(element, dayString) {
     hourSelected.classList += " chosenDay";
 
     if (this.informationPanel !== null) {
-        var weekday = element.getAttribute('data-timetable-weekday');
+        var wDay = element.getAttribute('data-timetable-weekday');
         var hour = element.getAttribute('data-timetable-hour');
-        this.informationPanel.updateAverageHour(parseInt(hourSelected.innerText), weekday, hour);
+        console.log(wDay)
+        this.informationPanel.updateAverageHour(parseInt(hourSelected.innerText), wDay, hour);
     }
 }
 

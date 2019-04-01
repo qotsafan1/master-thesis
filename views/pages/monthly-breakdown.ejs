@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+</head>
+<body class="container">
+
+	<header>
+		<% include ../partials/header %>
+	</header>
+	<br>	
+	<div class="row" id="calendarDiv">
+
+		<table id="calendar"></table>
+	</div>
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+
+</body>
+<% include ../partials/annotations %>
+</html>
+
+<script src="scripts/data-processing.js"></script>
+
+<script type='text/javascript'>	
+	var dataset = document.getElementById("datasets");
+	var event = new Event('change');
+	dataset.dispatchEvent(event);
+
+	function datasetChange() {
+		var dataset = document.getElementById("datasets").value;		
+
+		var calendar = document.getElementById("calendarDiv");			
+		while (calendar.firstChild) {
+			calendar.removeChild(calendar.firstChild);
+		}
+		
+		getDataset(dataset);
+	}
+
+	function getDataset(dataset) {
+		annotations = [];
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				var result = JSON.parse(this.responseText);
+				rawData = result.data;
+				for (annotation in result.annotations)
+				{
+					if (!(result.annotations[annotation].systemName in annotations)) {
+						annotations[result.annotations[annotation].systemName] = [];
+					}
+
+					annotations[result.annotations[annotation].systemName].push({
+						"comment": result.annotations[annotation].comment,
+						"creationDate": result.annotations[annotation].creationDate,
+						"type": result.annotations[annotation].type,
+						"id": result.annotations[annotation].id
+					});
+				}
+				
+				processData();
+				createVisualizations();
+			}
+		};
+		xmlhttp.open("GET", ("/datasets/"+dataset), true);
+		xmlhttp.send();
+	}
+
+	function createVisualizations() {
+		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);
+		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
+
+		var currentDate = new Date(firstDate.getFullYear(), firstDate.getMonth(), 15);
+		while(currentDate.getTime() < lastDate.getTime()) {
+			var calendarObject = new MonthCalendar("#calendarDiv", currentDate, data['sumOfEachDay'], data['mostInADay'], data);
+			calendarObject.create();	
+			currentDate = new Date(
+				currentDate.getMonth() === 11 ? currentDate.getFullYear()+1 : currentDate.getFullYear(),
+				currentDate.getMonth() === 11 ? 0 : currentDate.getMonth()+1,
+				15
+			);
+		}
+
+		
+	}
+</script>

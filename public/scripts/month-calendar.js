@@ -1,4 +1,5 @@
-function Calendar(date, data, maxInstance, overallData) {
+function MonthCalendar(htmlElement, date, data, maxInstance, overallData) {
+    this.htmlElement = htmlElement;
     this.date = date;
     this.data = data;
     this.overallData = overallData;
@@ -16,7 +17,7 @@ function Calendar(date, data, maxInstance, overallData) {
     this.week = this.getWeek();
 }
 
-Calendar.prototype.getMonthMatrix = function(y, m) {
+MonthCalendar.prototype.getMonthMatrix = function(y, m) {
     var calendarMatrix = []
 
     var startDay = new Date(y, m, 1)
@@ -45,7 +46,7 @@ Calendar.prototype.getMonthMatrix = function(y, m) {
     return calendarMatrix;
 }
 
-Calendar.prototype.getWeek = function() {
+MonthCalendar.prototype.getWeek = function() {
     for (var row in this.monthArray) {
         for (var col in this.monthArray[row]) {
             if (this.date.getDate() == this.monthArray[row][col].getDate() 
@@ -58,13 +59,16 @@ Calendar.prototype.getWeek = function() {
     return [];
 }
 
-Calendar.prototype.create = function() {
-    const table = d3.select('#calendar');
+MonthCalendar.prototype.create = function() {
+    const element = d3.select(this.htmlElement);
+    const floatableDiv = element.append("div").attr("class", "col");
+    const table = floatableDiv.append("table").attr("class", "calendar");
     const header = table.append('thead');
     const body = table.append('tbody');
     var theObject = this;
       
     const tr = header.append('tr');
+    /*
     tr.append('td')
         .attr('colspan', 1)
         .attr('class', 'change-month')
@@ -83,14 +87,16 @@ Calendar.prototype.create = function() {
         })
         .append('h5')
         .text(">");
+        */
     tr.append('td')
-        .attr('colspan', 4)
+        .attr('colspan', 7)
         .style('text-align', 'center')
         .append('h5')
         .text(month[this.month] + " " + this.year)
     
     tr.append('td')
 
+/*
     tr.append('td')
         .text("Show distribution")
         .on("click", function() {
@@ -98,7 +104,7 @@ Calendar.prototype.create = function() {
         })
         .style("font-size", "10px")
         .style("cursor", "pointer")
-      
+  */    
     header
         .append('tr')
         .attr("class", "calendar-header-week")
@@ -125,7 +131,7 @@ Calendar.prototype.create = function() {
             .attr('class', function(d) {
                 var classString = "";
                 if (this.getAttribute('data-date') === theObject.getDateAsDateString(theObject.date)) {
-                    classString += 'chosen-day ';
+                    //classString += 'chosen-day ';
                 }
                 if (d < 0) {
                     classString += 'month-outside ';
@@ -136,12 +142,12 @@ Calendar.prototype.create = function() {
                 return d.getDate();
             })
             .on('click', function() {
-                theObject.changeDay(this);
+                //theObject.changeDay(this);
             })
             .append('div')
                 .text(function(d) {
                     var dayString = theObject.getDateAsDateString(d);
-                    if (dayString in theObject.data && theObject.data[dayString] !== 0) {
+                    if (dayString in theObject.data && theObject.data[dayString] !== 0) {                  
                         return theObject.data[dayString];
                     }
                     return "\u00A0";
@@ -149,7 +155,7 @@ Calendar.prototype.create = function() {
                 .attr('style', 'text-align: center')
                 .style("background-color", function(d) {
                     var dayString = theObject.getDateAsDateString(d);
-                    if (dayString in theObject.data && theObject.data[dayString] !== 0) {
+                    if (dayString in theObject.data && theObject.data[dayString] !== 0) {                  
                         return theObject.colorScale(theObject.data[dayString]);
                     }
                     return "white";
@@ -157,11 +163,11 @@ Calendar.prototype.create = function() {
     });
 }
 
-Calendar.prototype.getDateAsDateString = function(date) {
+MonthCalendar.prototype.getDateAsDateString = function(date) {
     return (date.getFullYear() +"-"+ (date.getMonth()+1) +"-"+ date.getDate());
 }
 
-Calendar.prototype.changeMonth = function(direction) {
+MonthCalendar.prototype.changeMonth = function(direction) {
     if (direction === 'next') {
         this.year = this.month === 11 ? this.year+1 : this.year;
         this.month = this.month === 11 ? 0 : this.month+1;
@@ -176,7 +182,7 @@ Calendar.prototype.changeMonth = function(direction) {
     this.addDistribution();
 }
 
-Calendar.prototype.changeDay = function(newTd) {
+MonthCalendar.prototype.changeDay = function(newTd) {
     var chosenDay = document.getElementsByClassName('chosen-day');
     if (chosenDay.length > 0) {
         chosenDay[0].classList.remove("chosen-day")
@@ -189,14 +195,14 @@ Calendar.prototype.changeDay = function(newTd) {
     this.timeTable.update(this.date, this.week, this.month, this.year, parseInt(newTd.lastChild.innerText), wday);
 }
 
-Calendar.prototype.remove = function() {
+MonthCalendar.prototype.remove = function() {
     var calendar = document.getElementById("calendar");			
     while (calendar.firstChild) {
         calendar.removeChild(calendar.firstChild);
     }
 }
 
-Calendar.prototype.addDistribution = function() {
+MonthCalendar.prototype.addDistribution = function() {
     var thisObj = this;
 
     var barLength = d3.scaleLinear().rangeRound([0, 90]);
@@ -228,7 +234,7 @@ Calendar.prototype.addDistribution = function() {
             .style("background-color", "steelblue")
 }
 
-Calendar.prototype.toggleDistribution = function() {
+MonthCalendar.prototype.toggleDistribution = function() {
     var dist  = d3.selectAll(".calendar-distribution");
     dist.classed("calendar-hidden-distribution", function() {
         return (this.classList.contains('calendar-hidden-distribution')) ? false : true;
