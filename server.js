@@ -36,6 +36,7 @@ app.get('/monthly-breakdown', function(req, res) {
 
 app.get('/datasets/:name', function(req, res) {	
 	var rawData = data.getRawData(req.params.name);
+	//console.log(rawData)
 	var annotations = database.getAnnotations(req.params.name);
 	
 	annotations.then(function(result) {

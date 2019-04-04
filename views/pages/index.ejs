@@ -41,11 +41,9 @@
 	var childGraphs;
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
-	dataset.dispatchEvent(event);
+	dataset.dispatchEvent(event);	
 
-	function datasetChange() {
-		var dataset = document.getElementById("datasets").value;
-		
+	function removeAllVisualizations() {
 		var graphs = document.getElementsByClassName("graph");
 		for (var i in graphs) {				
 			while (graphs[i].firstChild) {
@@ -69,38 +67,7 @@
 		}
 		
 		document.getElementById("averageHourPerWeekday").innerText = "";
-		
-		getDataset(dataset);
-	}
-
-	function getDataset(dataset) {
-		annotations = [];
-		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-				var result = JSON.parse(this.responseText);
-				rawData = result.data;
-				for (annotation in result.annotations)
-				{
-					if (!(result.annotations[annotation].systemName in annotations)) {
-						annotations[result.annotations[annotation].systemName] = [];
-					}
-
-					annotations[result.annotations[annotation].systemName].push({
-						"comment": result.annotations[annotation].comment,
-						"creationDate": result.annotations[annotation].creationDate,
-						"type": result.annotations[annotation].type,
-						"id": result.annotations[annotation].id
-					});
-				}
-				
-				processData();
-				createVisualizations();
-			}
-		};
-		xmlhttp.open("GET", ("/datasets/"+dataset), true);
-		xmlhttp.send();
-	}
+	}	
 
 	function createVisualizations() {
 		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				

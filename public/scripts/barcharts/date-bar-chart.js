@@ -61,28 +61,10 @@ DateBarChart.prototype.updateToSpecificTime = function(type, time) {
         }
         updateChildGraphsWithWeekdayData(weekdayIndex);
     } else if ('week') {
-        console.log(time)
         if (time in data["daysInEachWeek"]) {
             data["daysInEachWeek"][time]["lastDay"].setHours(23,59,59);
             this.g.call(this.brush.move, [this.x(data["daysInEachWeek"][time]["firstDay"]), this.x(data["daysInEachWeek"][time]["lastDay"])]);
         }
-
-
-        return;
-        var weekIndex = month.indexOf(time); 
-        var year = this.xScaleData[0].getFullYear();
-        var firstInMonth = new Date(year, monthIndex, 1)
-        var lastInMonth = new Date(year, monthIndex+1, 0)
-        
-        if (this.xScaleData[0].getTime() > firstInMonth.getTime()
-            || this.xScaleData[1].getTime() < firstInMonth.getTime())
-        {
-            firstInMonth = new Date(year+1, monthIndex, 1)
-            lastInMonth = new Date(year+1, monthIndex+1, 0)
-        }
-        lastInMonth.setHours(23,59,59);
-
-        this.g.call(this.brush.move, [this.x(firstInMonth), this.x(lastInMonth)]);
     }
 }
 

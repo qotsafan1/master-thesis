@@ -8,11 +8,14 @@
       <li class="nav-item">
         <select name="datasets" id="datasets" onchange="datasetChange()" class="nav-link">
             <option value="ptsd_filtered.csv">ptsd_filtered.csv</option>
-            <option value="ptsd.csv">ptsd_unfiltered.csv</option>
-            <option value="itch_tbc.csv">itch_tbc.csv</option>				
+            <option value="itch_tbc.csv">itch_tbc.csv</option>
             <option value="itching_in_nose_tbc_newer.csv">itching_in_nose_tbc_newer.csv</option>
             <option value="symptom-simple.csv">symptom-simple.csv</option>
+            <option value="custom">Custom Dataset</option>
         </select>
+      </li>
+      <li class="nav-item" id="customDataUpload" style="display:none">
+        <input type="file" name="custom-dataset" id="customDataset" onchange="openFile(event)">
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/">Main</a>
@@ -25,7 +28,81 @@
       </li>
       <li class="nav-item">
           <a class="nav-link" href="/monthly-breakdown">Monthly breakdown</a>
-        </li>
+      </li>
     </ul>
   
-  </nav>
+</nav>
+
+<script type="text/javascript">
+  var openFile = function(event) {
+    if (window.File && window.FileReader && window.FileList && window.Blob) {
+      var input = event.target;
+
+      var reader = new FileReader();
+      reader.onloadend = function(evt) {
+        if (evt.target.readyState == FileReader.DONE) {        
+          var allData = [];
+          d3.csvParseRows(reader.result).map(function(row) {      
+            allData.push({
+              date: row[0],
+              timezone: row[1]
+            });
+          });
+          console.log(allData)
+          rawData = allData;
+          
+          removeAllVisualizations();
+          processData();
+          createVisualizations();
+        }
+      };
+      reader.readAsBinaryString(input.files[0]);
+    } else {
+      alert('The File APIs are not fully supported in this browser.');
+    }
+  };
+
+  function datasetChange() {
+		var dataset = document.getElementById("datasets").value;
+    
+    if (dataset === "custom") {
+      d3.select("#customDataUpload").style("display", "inline");
+    } else {
+      d3.select("#customDataUpload").style("display", "none");
+      document.getElementById("customDataset").value = "";
+      removeAllVisualizations();		
+      
+      getDataset(dataset);
+    }
+  }
+  
+  function getDataset(dataset) {
+		annotations = [];
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				var result = JSON.parse(this.responseText);
+				rawData = result.data;
+				for (annotation in result.annotations)
+				{
+					if (!(result.annotations[annotation].systemName in annotations)) {
+						annotations[result.annotations[annotation].systemName] = [];
+					}
+
+					annotations[result.annotations[annotation].systemName].push({
+						"comment": result.annotations[annotation].comment,
+						"creationDate": result.annotations[annotation].creationDate,
+						"type": result.annotations[annotation].type,
+						"id": result.annotations[annotation].id
+					});
+				}
+				
+				processData();
+				createVisualizations();
+			}
+		};
+		xmlhttp.open("GET", ("/datasets/"+dataset), true);
+		xmlhttp.send();
+	}
+
+</script>

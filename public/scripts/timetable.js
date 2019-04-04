@@ -244,7 +244,6 @@ TimeTable.prototype.markChosenDay = function(element, dayString) {
     if (this.informationPanel !== null) {
         var wDay = element.getAttribute('data-timetable-weekday');
         var hour = element.getAttribute('data-timetable-hour');
-        console.log(wDay)
         this.informationPanel.updateAverageHour(parseInt(hourSelected.innerText), wDay, hour);
     }
 }
