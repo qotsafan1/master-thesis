@@ -1,7 +1,7 @@
 var unFilteredData;
 
 //2016-09-05T18:13:46.105Z
-var strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
+var strictIsoParse;
 
 function getAnnotations(dataset) {
     annotations = [];
@@ -84,6 +84,12 @@ function processData(dataset) {
         var date = Object.keys(rawData[instance])[0]
         if (date !== "date") {
             continue;
+        }
+
+        if (!rawData[instance][date].includes("-")) {
+            strictIsoParse = d3.utcParse("%Y%m%dT%H%M%SZ");
+        } else {
+            strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
         }
 
         var isoDate = strictIsoParse(rawData[instance][date]);
