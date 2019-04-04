@@ -202,7 +202,7 @@ function processData(dataset) {
         lastLoopedDay = new Date(isoDate.getTime());
         lastLoopedDay.setHours(0,0,0,0);
     }    
-
+ 
     data['byMonth'] = createBarData(countMonth);
     data['byDay'] = createBarData(countWeekday);
     data['byHour'] = createBarData(countHour);
@@ -283,6 +283,32 @@ function processData(dataset) {
         amountOfWeeks++;
     }
     data["averageWeek"] = (weekSum/amountOfWeeks);
+    
+    data["averageDayPerMonth"] = [];
+    data["maxAverageDayPerMonth"] = 0;
+    var amountOfDaysInFirstMonth = daysInMonth(data['firstRecordedDay'].getMonth(), data['firstRecordedDay'].getFullYear()) - data['firstRecordedDay'].getDate()+1;
+    var amountOfDaysInLastMonth = data['lastRecordedDay'].getDate();
+    var cnt = 0;
+    for (var i in countMonth) {
+        var sum = 0;
+        if (cnt === 0) {
+            sum = +(countMonth[i] / amountOfDaysInFirstMonth).toFixed(2);
+        } else if (cnt === (Object.keys(countMonth).length-1)) {
+            sum = +(countMonth[i] / amountOfDaysInLastMonth).toFixed(2);            
+        } else {
+            sum= +(countMonth[i] / daysInMonth((month.indexOf(i)+1), data["firstYear"])).toFixed(2);
+        }
+        
+        if (data["maxAverageDayPerMonth"] < sum) {
+            data["maxAverageDayPerMonth"] = Math.floor(sum);
+        }
+
+        data["averageDayPerMonth"].push({
+            sum: sum,
+            type: i
+        });
+        cnt++;
+    }
 
     data["daysInEachWeek"] = getDaysInEachWeek(data['firstRecordedDay'], data['lastRecordedDay']);
 }

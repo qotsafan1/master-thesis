@@ -84,13 +84,13 @@
 		dateChart.createBrush();
 
 		var monthChart = new NormalBarChart(
-			data['byMonth'], 
+			data['averageDayPerMonth'], 
 			'monthBarChart', 
 			500, 
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
-			"Observations per month", 
-			data['byMonth'], 
+			"Average observations per day each month", 
+			data['averageDayPerMonth'], 
 			'default',
 			true,
 			{
@@ -98,7 +98,7 @@
 				"titleFontSize": "15px"
 			}
 		);
-		monthChart.create("Month", "Observations", -1);
+		monthChart.create("Month", "Observations", data["maxAverageDayPerMonth"]);
 		monthChart.addClickEventToUpdateDateChart(dateChart, 'month');
 		
 		var weekChart = new NormalBarChart(

@@ -27,6 +27,10 @@ function setClockTo(dateObject, time) {
     dateObject.setSeconds(time[2]);
 }
 
+function daysInMonth (month, year) { // Use 1 for January, 2 for February, etc.
+    return new Date(year, month, 0).getDate();
+  }
+
 function monthDiff(d1, d2) {
     var months;
     months = (d2.getFullYear() - d1.getFullYear()) * 12;
