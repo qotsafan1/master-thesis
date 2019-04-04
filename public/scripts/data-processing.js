@@ -85,8 +85,11 @@ function processData(dataset) {
         if (date !== "date") {
             continue;
         }
-                
+
         var isoDate = strictIsoParse(rawData[instance][date]);
+        if (!isoDate || isoDate === null || isoDate === "") {
+            continue;
+        }        
 
         var diff = isoDate.getTime() - lastRecordDate.getTime();
         if (diff > 4000) {
