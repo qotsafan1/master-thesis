@@ -44,18 +44,23 @@
     text-align: center;
 }
 
-#timetable tbody td.hour {
+#timetable tbody td.hour, #timetable thead td.hour {
     font-size: 9px;
     vertical-align: bottom;
-    border-left: none;
+    border: none;
     max-width: 2px;
 }
 
-#timetable thead td.hour {
-    font-size: 9px;
-    vertical-align: bottom;
+#timetable tbody td.hour span, #timetable thead td.hour span {
+    position: relative;
+    top: 6.5px;
+}
+
+#timetable td.hour-pointer {
+    border-right: none;
     border-left: none;
-    max-width: 2px;
+    border-top: none;
+    width: 5px;
 }
 
 #timetable thead td.selected-head {

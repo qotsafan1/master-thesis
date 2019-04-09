@@ -113,6 +113,7 @@ MonthCalendar.prototype.create = function() {
         .enter()
         .append('td')
         .style('text-align', 'center')
+        .style('border', "none")
         .text(function (d) {
           return d.charAt(0);
         });
@@ -133,8 +134,9 @@ MonthCalendar.prototype.create = function() {
                 if (this.getAttribute('data-date') === theObject.getDateAsDateString(theObject.date)) {
                     //classString += 'chosen-day ';
                 }
-                if (d < 0) {
-                    classString += 'month-outside ';
+                
+                if (d.getMonth() !== theObject.month) {
+                    classString += 'hide-day ';
                 }
                 return classString;
             })

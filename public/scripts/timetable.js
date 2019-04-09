@@ -28,7 +28,8 @@ TimeTable.prototype.create = function() {
         .text(theObject.getTitle());
 
     const tr = header.append('tr').attr("id", "headerTr");
-    tr.append('td').text("00:00").attr('class', 'hour').style('border-top-width', "0px");
+    tr.append('td').attr('class', 'hour').style('border-top-width', "0px").append("span").text("00:00");
+    tr.append('td').attr('class', 'hour-pointer');
     tr.selectAll('td.time-slot')
         .data(weekday)
         .enter()
@@ -85,24 +86,24 @@ TimeTable.prototype.create = function() {
     
     for (var i=0; i<=23; i++) {
         var bodyTr = body.append('tr');
-        for (var j=0; j<=8; j++) {
+        for (var j=0; j<=9; j++) {
             var tempTd = bodyTr.append('td');                
             if (j === 0) {                
                 if ((i+1) < 10) {
-                    tempTd.text("0"+(i+1)+":00");
+                    tempTd.append("span").text("0"+(i+1)+":00");
                 } else {
-                    tempTd.text((i+1)+":00");
+                    tempTd.append("span").text((i+1)+":00");
                 }
                 tempTd.attr('class', 'hour');
-            } else if (j===0) {
-              continue;
-            } else if (j===8) {
+            } else if (j===1) {
+                tempTd.attr("class", "hour-pointer");
+            } else if (j===9) {
                 tempTd.attr("class", "distribution")
                 this.distributions.push(tempTd);
                 continue;              
             } else {
-                var hourByDay = theObject.getHourByDayString(i, theObject.week[(j-1)]);
-                var dayString = theObject.getDateAsDateString(theObject.week[(j-1)]);
+                var hourByDay = theObject.getHourByDayString(i, theObject.week[(j-2)]);
+                var dayString = theObject.getDateAsDateString(theObject.week[(j-2)]);
 
                 tempTd.text(function() {
                     if (hourByDay in theObject.data) {
@@ -112,7 +113,7 @@ TimeTable.prototype.create = function() {
                 })
                 .attr('data-hour-key', hourByDay)
                 .attr('data-parent-day', dayString)
-                .attr('data-timetable-weekday', (j-1))
+                .attr('data-timetable-weekday', (j-2))
                 .attr('data-timetable-hour', i)
                 .on('click', function(d) {
                     theObject.markChosenDay(this);
@@ -128,7 +129,7 @@ TimeTable.prototype.create = function() {
                 })
                 .attr('class', function() {
                     var classString = "";
-                    if (theObject.date.getDate() === theObject.week[(j-1)].getDate()) {
+                    if (theObject.date.getDate() === theObject.week[(j-2)].getDate()) {
                         classString += "selected-day ";
                         if (i===23) {
                             classString += "selected-day-last ";

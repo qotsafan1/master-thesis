@@ -14,6 +14,7 @@
 		<table id="calendar"></table>
 	</div>
 	<footer>
+	<br>
 		<% include ../partials/footer %>
 	</footer>
 
@@ -36,10 +37,11 @@
 	}
 
 	function createVisualizations() {
+		var firstDateOfYear = new Date(data['firstYear'], 0, 1);
 		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);
 		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
 
-		var currentDate = new Date(firstDate.getFullYear(), firstDate.getMonth(), 15);
+		var currentDate = new Date(firstDateOfYear.getFullYear(), firstDateOfYear.getMonth(), 15);
 		while(currentDate.getTime() < lastDate.getTime()) {
 			var calendarObject = new MonthCalendar("#calendarDiv", currentDate, data['sumOfEachDay'], data['mostInADay'], data);
 			calendarObject.create();	

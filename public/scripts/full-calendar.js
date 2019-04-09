@@ -9,7 +9,7 @@ function FullCalendar(data, dayData, firstDate, lastDate, maxInstance, maxDayIns
 }
 
 FullCalendar.prototype.create = function() {
-    const table = d3.select('#fullCalendar').style("width", "100%");
+    const table = d3.select('#fullCalendar');
     const header = table.append('thead');
     const body = table.append('tbody');
     var theObject = this;
@@ -17,9 +17,12 @@ FullCalendar.prototype.create = function() {
     
     var monthTr = header.append("tr");
     monthTr.append("th").attr("class", "empty");
+    monthTr.append("th").attr("class", "empty");
 
-    const tr = header.append('tr').attr("id", "headerTr");
-    tr.append("th").attr("class", "hour").text("00:00");
+    const tr = header.append('tr').attr("id", "headerTr");    
+    tr.append("th").attr("class", "hour")
+        .append("span").attr("class", "hour-text").text("00:00")
+    tr.append("th").attr("class", "empty");
     var currentDate = new Date (this.firstDate.getTime());
     currentDate.setHours(0,0,0,0);
     var days = [];
@@ -68,9 +71,14 @@ FullCalendar.prototype.create = function() {
         for (var j=0; j<=days.length; j++) {
             if (j===0) {
                 if (i===24) {
-                    bodyTr.append("td").attr("class", "empty").text("sum");    
+                    bodyTr.append("td").attr("class", "empty").text("sum"); 
+                    bodyTr.append("td").attr("class", "hour-border")   
                 } else {
-                    bodyTr.append("td").attr("class", "hour").text(((i+1)<10 ? "0" : "") + (i+1) + ":00");
+                    bodyTr.append("td").attr("class", "hour")
+                        .append("span")
+                        .attr("class", "hour-text")
+                        .text(((i+1)<10 ? "0" : "") + (i+1) + ":00")
+                    bodyTr.append("td").attr("class", "hour-border");
                 } 
             } else if (i===24) {
                 var dayString = theObject.getDateAsDateString(days[(j-1)]);
@@ -80,7 +88,7 @@ FullCalendar.prototype.create = function() {
                         .text(this.dayData[dayString])
                         .style("background-color", theObject.dayColorScale(theObject.dayData[dayString]));
                 }
-                currentTd.attr("class", "day-sum");
+                currentTd.attr("class", "day-sum");                
             } else {
                 var hourByDay = theObject.getHourByDayString(i, days[j-1]);
                 var currentTd = bodyTr.append("td");

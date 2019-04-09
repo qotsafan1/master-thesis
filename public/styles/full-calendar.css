@@ -1,7 +1,7 @@
 #fullCalendar {
-    width: 100%;
+    min-width: 100%;
     border-collapse: collapse;
-    overflow: scroll;
+    
 }
 
 #fullCalendar thead th {
@@ -9,7 +9,8 @@
     text-align: center;
     vertical-align: top;
     max-width: 30px;
-    min-width: 30px;
+    min-width: 5px;
+    width: 30px;
     font-weight: bold;
     font-size: 11px;
     
@@ -20,21 +21,33 @@
     font-size: 20px;
 }
 
-#fullCalendar tbody td.hour, #fullCalendar thead th.hour {
-    font-size: 7px;
+#fullCalendar tbody td:nth-child(1), #fullCalendar thead th:nth-child(1){
+    font-size: 9px;
     font-weight: normal;
     vertical-align: bottom;
+    text-align: right;
+    border: none;
+}
+
+#fullCalendar tbody td:nth-child(2) {    
     border-left: none;
-    max-width: 2px;
-    border-top: none;
+    border-bottom: none;
+    width: 6px;
+    max-width: 6px;
+    min-width: 6px;
+}
+
+#fullCalendar tbody td.hour .hour-text, #fullCalendar thead th.hour .hour-text {
+    position: relative;
+    top: 7px;
 }
 
 #fullCalendar tbody td {
     border: 1px solid black;
     text-align: center;
     vertical-align: top;
-    max-width: 30px;
-    min-width: 30px;
+    max-width: 50px;
+    min-width: 25px;
     font-weight: bold;
     font-size: 11px;
     

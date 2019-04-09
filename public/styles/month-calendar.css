@@ -4,6 +4,14 @@
     border-collapse: collapse;
 }
 
+.calendar thead {
+    border: none;
+}
+
+.calendar thead tr.calendar-header-week {
+    border: none;
+}
+
 .calendar tbody td {
     border: 1px solid black;
     text-align: right;
@@ -34,6 +42,11 @@
 
 .calendar td.month-outside {
     color: grey;
+}
+
+.calendar td.hide-day {
+    visibility: hidden;
+    border: none;
 }
 
 .calendar td .note {
