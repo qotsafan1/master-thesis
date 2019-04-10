@@ -359,8 +359,8 @@ function createBarData(countArray) {
 }	
 
 function updateChildGraphs(firstDate, lastDate) {
-    setClockTo(firstDate, [0,0,0]);
-    setClockTo(lastDate, [23,59,59]);
+    firstDate.setHours(0,0,0,0);
+    lastDate.setHours(23,59,59);
     document.getElementById("firstDate").innerHTML = weekday[firstDate.getDay() === 0 ? 6 : (firstDate.getDay()-1)] + " " + month[firstDate.getMonth()] + " " + firstDate.getDate() + " " + firstDate.getFullYear();
     document.getElementById("lastDate").innerHTML = weekday[lastDate.getDay() === 0 ? 6 : (lastDate.getDay()-1)] + " " + month[lastDate.getMonth()] + " " + lastDate.getDate() + " " + lastDate.getFullYear();;
     if (childGraphs.length > 0) {

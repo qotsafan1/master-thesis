@@ -10,6 +10,7 @@ function FullCalendar(data, dayData, firstDate, lastDate, maxInstance, maxDayIns
 
 FullCalendar.prototype.create = function() {
     const table = d3.select('#fullCalendar');
+    this.table = table;
     const header = table.append('thead');
     const body = table.append('tbody');
     var theObject = this;
@@ -28,6 +29,7 @@ FullCalendar.prototype.create = function() {
     var days = [];
     while (currentDate <= this.lastDate)
     {
+        var dayString = theObject.getDateAsDateString(currentDate);
         var currentDay = currentDate.getDay() === 0 ? 6 : currentDate.getDay()-1;
         if (this.weekday !== "" && currentDay != this.weekday) {
             currentDate.setDate(currentDate.getDate() + 1);
@@ -37,16 +39,25 @@ FullCalendar.prototype.create = function() {
         if (currentDate.getDate() === 1 || days.length < 1
             || (currentDate.getDate() < 8 && this.weekday !== "")) {
             monthTr.append("th")
-            .attr('class', 'month-label')
-            .text(month[currentDate.getMonth()]);
+                .attr('data-timetable-date', dayString)
+                .attr('class', 'month-label')
+                .text(month[currentDate.getMonth()]);
         } else {
-            monthTr.append("th").attr('class', 'month-label');
+            monthTr.append("th")
+                .attr('data-timetable-date', dayString)
+                .attr('class', 'month-label');
         }
-
-        var dayString = theObject.getDateAsDateString(currentDate);
+        
         var headDay = tr.append('th');
         headDay
             .attr('data-timetable-date', dayString)
+            .style("background-color", function() {
+                if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+                    return "lightgrey";
+                } else {
+                    return "white";
+                }
+            })
             .text(currentDate.getDay() === 0 ? weekday[6].substr(0,3) : weekday[(currentDate.getDay()-1)].substr(0,3))
             .append('div')
                 .text(currentDate.getDate());
@@ -88,13 +99,17 @@ FullCalendar.prototype.create = function() {
                         .text(this.dayData[dayString])
                         .style("background-color", theObject.dayColorScale(theObject.dayData[dayString]));
                 }
-                currentTd.attr("class", "day-sum");                
+                currentTd.attr("class", "day-sum")
+                    .attr('data-timetable-date', dayString)
             } else {
                 var hourByDay = theObject.getHourByDayString(i, days[j-1]);
+                var dayString = theObject.getDateAsDateString(days[(j-1)]);
                 var currentTd = bodyTr.append("td");
                 currentTd.style("background-color", function(d) {
                     if (hourByDay in theObject.data) {                
                         return theObject.colorScale(theObject.data[hourByDay]);
+                    } else if (days[(j-1)].getDay() === 0 || days[(j-1)].getDay() === 6) {
+                        return "lightgrey";
                     }
                     return "white";
                 });
@@ -119,6 +134,7 @@ FullCalendar.prototype.create = function() {
                 currentTd
                     .attr('data-hour-key', hourByDay)
                     .attr('data-parent-day', dayString)
+                    .attr('data-timetable-date', dayString)
                     .attr('data-timetable-weekday', (j-1))
                     .attr('data-timetable-hour', i)
                     .on('dblclick', function() {

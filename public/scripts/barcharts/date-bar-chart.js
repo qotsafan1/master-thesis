@@ -83,15 +83,13 @@ DateBarChart.prototype.newWeekdayBrush = function(beginOfDay, endOfDay) {
 
 DateBarChart.prototype.getBeginningOfDay = function(day) {
     var beginOfDay = new Date(day);
-    beginOfDay.setHours(0);
-    beginOfDay.setMinutes(0);
+    beginOfDay.setHours(0,0,0,0);
     return beginOfDay;
 }
 
 DateBarChart.prototype.getEndOfDay = function(day) {
     var endOfDay = new Date(day);
-    endOfDay.setHours(23);
-    endOfDay.setMinutes(59);
+    endOfDay.setHours(23,59,59);
     return endOfDay;
 }
 

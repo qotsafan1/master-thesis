@@ -205,6 +205,8 @@ TimeTable.prototype.update = function(date,week, calendarMonth, calendarYear, da
         this.informationPanel.updateAverageDay(dayInstances);
         this.informationPanel.setChosenWeekdayAverage(wday);
     }
+
+    updateAverages(date);
 }
 
 TimeTable.prototype.addAnnotation = function(element, dateType) {

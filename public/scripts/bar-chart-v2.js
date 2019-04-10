@@ -141,8 +141,8 @@ CustomBarChart.prototype.createTitle = function() {
 
 CustomBarChart.prototype.rotateTickLabels = function() {
   this.svg.select('.x-axis').selectAll('text')
-    .attr("dx", "-1.8em")
-    .attr("dy", ".5em")
+    .attr("dx", "-2.4em")
+    .attr("dy", "-.2em")
     .attr("transform", "rotate(-65)");
 }
 
@@ -194,6 +194,14 @@ CustomBarChart.prototype.createBrush = function() {
       
       updateChildGraphs(extent[0], extent[1]);
     }
+}
+
+CustomBarChart.prototype.brushSpecific = function(leftPosition, rightPosition) {
+  this.g.call(this.brush.move, [this.x(leftPosition), this.x(rightPosition)]);
+  // removes handle to resize the brush
+  this.g.selectAll('.handle').remove();
+  // removes crosshair cursor
+  this.g.selectAll('.overlay').remove();
 }
 
 CustomBarChart.prototype.updateYAxis = function() {

@@ -9,23 +9,26 @@
 		<% include ../partials/header %>
 	</header>
 	<br>
-	<input type="date" name="first-date" id="firstDate" onchange="dateChanged()">
-	<span>-</span>
-	<input type="date" name="last-date" id="lastDate" onchange="dateChanged()">
-	<select style="float:right" name="specific-day" id="specificDay" onchange="specificDayChange(this.value)">
-		<option value=""></option>
-		<option value="0">Monday</option>
-		<option value="1">Tuesday</option>
-		<option value="2">Wednesday</option>
-		<option value="3">Thursday</option>
-		<option value="4">Friday</option>
-		<option value="5">Saturday</option>
-		<option value="6">Sunday</option>
-	</select>
-	<span style="float:right">Choose specific weekday:</span>
-	<div style="overflow-x: scroll">
+	<div class="row">
+		<span style="float:right">Choose specific weekday:</span>
+		<select style="float:right" name="specific-day" id="specificDay" onchange="specificDayChange(this.value)">
+			<option value=""></option>
+			<option value="0">Monday</option>
+			<option value="1">Tuesday</option>
+			<option value="2">Wednesday</option>
+			<option value="3">Thursday</option>
+			<option value="4">Friday</option>
+			<option value="5">Saturday</option>
+			<option value="6">Sunday</option>
+		</select>
+	</div>
+	<div class="row">
+		<div class='col-sm-1 graph' id='dateChart'></div>
+	</div>	
+	<div style="overflow-x: hidden">
 		<table id="fullCalendar"></table>
 	</div>
+	<br>
 	<footer>
 		<% include ../partials/footer %>
 	</footer>
@@ -43,6 +46,13 @@
 	dataset.dispatchEvent(event);
 
 	function removeAllVisualizations() {
+		var graphs = document.getElementsByClassName("graph");
+		for (var i in graphs) {				
+			while (graphs[i].firstChild) {
+				graphs[i].removeChild(graphs[i].firstChild);
+			}
+		}
+
 		var fullCalendar = document.getElementById("fullCalendar");			
 		while (fullCalendar.firstChild) {
 			fullCalendar.removeChild(fullCalendar.firstChild);
@@ -50,10 +60,42 @@
 	}
 
 	function createVisualizations() {
+		var firstDate = new Date(data['firstRecordedDay'].getFullYear(), data['firstRecordedDay'].getMonth(), data['firstRecordedDay'].getDate());
+		firstDate.setHours(0,0,0,0);
+		var lastDate = new Date(data['lastRecordedDay'].getFullYear(), data['lastRecordedDay'].getMonth(), data['lastRecordedDay'].getDate());
+		lastDate.setHours(23,59,59);
+
+		var dateChart = new DateBarChart(
+			data['eachDay'],
+			'dateChart', 
+			1100,
+			150,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per day", 
+			[firstDate, lastDate],
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));		
+
 		fullCalendar = new FullCalendar(data['hourByDay'], data['sumOfEachDay'], data['firstRecordedDay'], data['lastRecordedDay'], data['maxHourOfDay'], data["mostInADay"], "");
 		fullCalendar.create();
-		fullCalendar.setDatePickers(data['firstRecordedDay'], data['lastRecordedDay']);
+		//fullCalendar.setDatePickers(data['firstRecordedDay'], data['lastRecordedDay']);
 		document.getElementById("specificDay").value = "";
+
+		dateChart.createBrush();
+
+		if ((lastDate.getTime() - firstDate.getTime()) < 3456000) {
+			dateChart.brushSpecific(firstDate, lastDate);
+		} else {
+			var newDate = new Date(lastDate.getTime());
+			newDate.setDate(lastDate.getDate()-40);
+			dateChart.brushSpecific(newDate, lastDate);
+		}
 	}
 
 	function dateChanged() {
@@ -68,7 +110,22 @@
 		var firstDate = data['firstRecordedDay'].getFullYear() +"-"+ (data['firstRecordedDay'].getMonth()+1) +"-"+ data['firstRecordedDay'].getDate();
 		var lastDate = data['lastRecordedDay'].getFullYear() +"-"+ (data['lastRecordedDay'].getMonth()+1) +"-"+ data['lastRecordedDay'].getDate();
 		
-		fullCalendar.setDatePickers(data['firstRecordedDay'], data['lastRecordedDay']);		
+		//fullCalendar.setDatePickers(data['firstRecordedDay'], data['lastRecordedDay']);		
 		fullCalendar.update(firstDate, lastDate, day);
+	}
+
+	function updateChildGraphs(firstDate, lastDate) {
+		fullCalendar.table.selectAll('[data-timetable-date]')
+			.style("display", function(d,i) {
+				var dayString = this.getAttribute('data-timetable-date');
+				var currentDate = new Date(dayString);
+				if (currentDate.getTime() >= firstDate.getTime() 
+					&& currentDate.getTime() <= lastDate.getTime()
+				) {
+					return "";
+				} else {
+					return "none";
+				}
+			});
 	}
 </script>

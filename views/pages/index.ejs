@@ -16,6 +16,7 @@
 			</div>
 			<div id="informationPanel">
 				<p class="header">Average observations</p>
+				<div id="dayComparisonChart" class="graph"></div>
 				<p class="detail" id="averageDay"></p>
 				<p class="detail" id="averageWorkday"></p>
 				<p class="detail" id="averagePerWeekday"></p>
@@ -39,6 +40,8 @@
 
 <script type='text/javascript'>	
 	var childGraphs;
+	var currentDayComparisonChart;
+	var weekDayComparisonChart;
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
 	dataset.dispatchEvent(event);	
@@ -65,6 +68,13 @@
 		while (barChartBreakdown.firstChild) {
 			barChartBreakdown.removeChild(barChartBreakdown.firstChild);
 		}
+
+		var graphs = document.getElementsByClassName("graph");
+		for (var i in graphs) {				
+			while (graphs[i].firstChild) {
+				graphs[i].removeChild(graphs[i].firstChild);
+			}
+		}
 		
 		document.getElementById("averageHourPerWeekday").innerText = "";
 	}	
@@ -82,7 +92,7 @@
 
 		calendarObject.timeTable = timetableObject;
 		timetableObject.calendar = calendarObject;
-
+/*
 		var informationPanel = new InformationPanel(data);
 		informationPanel.setAverageWorkday();
 		informationPanel.setChosenWeekdayAverage(data['lastRecordedDay'].getDay());
@@ -90,5 +100,98 @@
 
 		calendarObject.informationPanel = informationPanel;
 		timetableObject.informationPanel = informationPanel;
+*/
+
+		var dayComparisonChart = new ComparisonChart(			
+			'dayComparisonChart', 
+			300, 
+			70,
+			{top: 30, right: 5, bottom: 5, left: 5},
+			"Weekday vs. weekend day",
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "13px"
+			}
+		);
+		dayComparisonChart.compare(
+			data["averageWorkday"],
+			data["averageWeekend"],
+			"Weekday",
+			"Weekend"
+		);
+
+		currentDayComparisonChart = new ComparisonChart(			
+			'dayComparisonChart', 
+			300, 
+			70,
+			{top: 30, right: 5, bottom: 5, left: 5},
+			"Chosen day vs. overall",
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "13px"
+			}
+		);
+		currentDayComparisonChart.compare(
+			data["sumOfEachDay"][data["lastRecordedDay"].getFullYear() + "-" + (data["lastRecordedDay"].getMonth()+1) + "-" + data["lastRecordedDay"].getDate()],
+			data["averageDay"],
+			"Chosen day",
+			"Overall average day"
+		);
+
+		var day = data["lastRecordedDay"].getDay() === 0 ? 6 : (data["lastRecordedDay"].getDay()-1);
+		weekDayComparisonChart = new ComparisonChart(			
+			'dayComparisonChart', 
+			300, 
+			70,
+			{top: 30, right: 5, bottom: 5, left: 5},
+			("Average " + weekday[day] + " vs. chosen " + weekday[day]),
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "13px"
+			}
+		);
+
+		weekDayComparisonChart.compare(
+			data["sumOfEachDay"][data["lastRecordedDay"].getFullYear() + "-" + (data["lastRecordedDay"].getMonth()+1) + "-" + data["lastRecordedDay"].getDate()],
+			data["averagePerWeekday"][day],
+			("Chosen " + weekday[day]),
+			("Average " + weekday[day])
+		);
+	}
+
+	function updateAverages(date) {
+		var dayString = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
+		var day = date.getDay() === 0 ? 6 : (date.getDay()-1);
+		if (dayString in data["sumOfEachDay"]) {
+			currentDayComparisonChart.update(
+				data["sumOfEachDay"][dayString],
+				data["averageDay"],
+				"Chosen day",
+				"Overall average day"
+			);
+			
+			weekDayComparisonChart.update(
+				data["sumOfEachDay"][dayString],
+				data["averagePerWeekday"][day],
+				("Chosen " + weekday[day]),
+				("Average " + weekday[day])
+			);
+		} else {
+			currentDayComparisonChart.update(
+				0,
+				data["averageDay"],
+				"Chosen day",
+				"Overall average day"
+			);
+
+			weekDayComparisonChart.update(
+				0,
+				data["averagePerWeekday"][day],
+				("Chosen " + weekday[day]),
+				("Average " + weekday[day])
+			);
+		}
+		weekDayComparisonChart.updateTitle(("Average " + weekday[day] + " vs. chosen " + weekday[day]));
+
 	}
 </script>

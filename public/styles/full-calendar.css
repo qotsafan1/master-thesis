@@ -1,7 +1,8 @@
 #fullCalendar {
-    min-width: 100%;
-    border-collapse: collapse;
+    width: 100%;
     
+    border-collapse: collapse;
+    overflow: hidden;
 }
 
 #fullCalendar thead th {
@@ -10,7 +11,7 @@
     vertical-align: top;
     max-width: 30px;
     min-width: 5px;
-    width: 30px;
+    
     font-weight: bold;
     font-size: 11px;
     
@@ -39,7 +40,7 @@
 
 #fullCalendar tbody td.hour .hour-text, #fullCalendar thead th.hour .hour-text {
     position: relative;
-    top: 7px;
+    top: 6.5px;
 }
 
 #fullCalendar tbody td {
@@ -70,6 +71,10 @@
 
 #fullCalendar tbody td.day-sum {
     border-top: 3px double black;
+}
+
+#fullCalendar .weekend {
+    background-color: lightgray;
 }
 
 #fullCalendar .overlay {
