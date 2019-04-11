@@ -4,8 +4,8 @@ function FullCalendar(data, dayData, firstDate, lastDate, maxInstance, maxDayIns
     this.firstDate = new Date(firstDate.getTime());
     this.lastDate = new Date(lastDate.getTime());
     this.weekday = weekday;
-    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxInstance]);
-    this.dayColorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxDayInstance]);
+    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([1, maxInstance]);
+    this.dayColorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([1, maxDayInstance]);
 }
 
 FullCalendar.prototype.create = function() {
@@ -82,7 +82,7 @@ FullCalendar.prototype.create = function() {
         for (var j=0; j<=days.length; j++) {
             if (j===0) {
                 if (i===24) {
-                    bodyTr.append("td").attr("class", "empty").text("sum"); 
+                    bodyTr.append("td").attr("class", "empty").text("sum").style("font-weight", "bold"); 
                     bodyTr.append("td").attr("class", "hour-border")   
                 } else {
                     bodyTr.append("td").attr("class", "hour")
@@ -94,13 +94,21 @@ FullCalendar.prototype.create = function() {
             } else if (i===24) {
                 var dayString = theObject.getDateAsDateString(days[(j-1)]);
                 var currentTd = bodyTr.append("td");
+                currentTd.attr("class", "day-sum")
+                    .attr('data-timetable-date', dayString)
+                    .style("background-color", function() {
+                        if (days[(j-1)].getDay() === 0 || days[(j-1)].getDay() === 6) {
+                            return "lightgrey";
+                        } else {
+                            return "white";
+                        }
+                    });
                 if (dayString in this.dayData && this.dayData[dayString] !== 0) {
                     currentTd
                         .text(this.dayData[dayString])
                         .style("background-color", theObject.dayColorScale(theObject.dayData[dayString]));
                 }
-                currentTd.attr("class", "day-sum")
-                    .attr('data-timetable-date', dayString)
+                
             } else {
                 var hourByDay = theObject.getHourByDayString(i, days[j-1]);
                 var dayString = theObject.getDateAsDateString(days[(j-1)]);

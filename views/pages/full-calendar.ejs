@@ -13,13 +13,15 @@
 		<span style="float:right">Choose specific weekday:</span>
 		<select style="float:right" name="specific-day" id="specificDay" onchange="specificDayChange(this.value)">
 			<option value=""></option>
-			<option value="0">Monday</option>
-			<option value="1">Tuesday</option>
-			<option value="2">Wednesday</option>
-			<option value="3">Thursday</option>
-			<option value="4">Friday</option>
-			<option value="5">Saturday</option>
-			<option value="6">Sunday</option>
+			<option value="1">Monday</option>
+			<option value="2">Tuesday</option>
+			<option value="3">Wednesday</option>
+			<option value="4">Thursday</option>
+			<option value="5">Friday</option>
+			<option value="6">Saturday</option>
+			<option value="0">Sunday</option>
+			<option value="weekdays">Weekdays</option>
+			<option value="weekends">Weekends</option>
 		</select>
 	</div>
 	<div class="row">
@@ -27,6 +29,9 @@
 	</div>	
 	<div style="overflow-x: hidden">
 		<table id="fullCalendar"></table>
+	</div>
+	<br>
+	<div class="row" id="colorScales">
 	</div>
 	<br>
 	<footer>
@@ -56,6 +61,11 @@
 		var fullCalendar = document.getElementById("fullCalendar");			
 		while (fullCalendar.firstChild) {
 			fullCalendar.removeChild(fullCalendar.firstChild);
+		}
+		
+		var colorScales = document.getElementById("colorScales");
+		while (colorScales.firstChild) {
+			colorScales.removeChild(colorScales.firstChild);
 		}
 	}
 
@@ -96,6 +106,9 @@
 			newDate.setDate(lastDate.getDate()-40);
 			dateChart.brushSpecific(newDate, lastDate);
 		}
+
+		new ColorScaleLegend(fullCalendar.dayColorScale, "Color scale for days");
+		new ColorScaleLegend(fullCalendar.colorScale, "Color scale for hours");
 	}
 
 	function dateChanged() {
@@ -107,11 +120,29 @@
 	}
 
 	function specificDayChange(day) {
-		var firstDate = data['firstRecordedDay'].getFullYear() +"-"+ (data['firstRecordedDay'].getMonth()+1) +"-"+ data['firstRecordedDay'].getDate();
-		var lastDate = data['lastRecordedDay'].getFullYear() +"-"+ (data['lastRecordedDay'].getMonth()+1) +"-"+ data['lastRecordedDay'].getDate();
-		
-		//fullCalendar.setDatePickers(data['firstRecordedDay'], data['lastRecordedDay']);		
-		fullCalendar.update(firstDate, lastDate, day);
+		fullCalendar.table.selectAll('[data-timetable-date]')
+			.style("display", function(d,i) {
+				var dayString = this.getAttribute('data-timetable-date');
+				var currentDate = new Date(dayString);
+			if (day === "weekdays") {
+				if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+					return "";
+				} else {
+					return "none";
+				}
+			} else if (day === "weekends") {
+				if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+					return "";
+				} else {
+					return "none";
+				}
+			}
+			else if (currentDate.getDay() === parseInt(day)) {
+				return "";
+			} else {
+				return "none";
+			}
+		});
 	}
 
 	function updateChildGraphs(firstDate, lastDate) {

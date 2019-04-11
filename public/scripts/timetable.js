@@ -5,7 +5,7 @@ function TimeTable(date, week, data, calendarMonth, calendarYear, maxInstance) {
     this.week = week;
     this.data = data;
     
-    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxInstance]);
+    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([1, maxInstance]);
 
     this.calendar = null;
     this.informationPanel = null;

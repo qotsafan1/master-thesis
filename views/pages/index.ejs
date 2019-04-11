@@ -8,26 +8,29 @@
 	<header>
 		<% include ../partials/header %>
 	</header>
-	<br>	
+	<div class="row" id="colorScales">
+		
+	</div>
+	
 	<div class="row">
 		<div class="col-lg-5">
 			<div class="row">
 				<table id="calendar"></table>
 			</div>
 			<div id="informationPanel">
+				<div id="minuteBreakdown"></div>
 				<p class="header">Average observations</p>
 				<div id="dayComparisonChart" class="graph"></div>
 				<p class="detail" id="averageDay"></p>
 				<p class="detail" id="averageWorkday"></p>
 				<p class="detail" id="averagePerWeekday"></p>
 				<p class="detail" id="averageHourPerWeekday"></p>
-				<div id="minuteBreakdown"></div>
 			</div>
 		</div>
 		<div class="col-lg-7">
 			<table id="timetable"></table>
 		</div>
-	</div>
+	</div>	
 	<footer>
 		<% include ../partials/footer %>
 	</footer>
@@ -74,6 +77,11 @@
 			while (graphs[i].firstChild) {
 				graphs[i].removeChild(graphs[i].firstChild);
 			}
+		}
+
+		var colorScales = document.getElementById("colorScales");			
+		while (colorScales.firstChild) {
+			colorScales.removeChild(colorScales.firstChild);
 		}
 		
 		document.getElementById("averageHourPerWeekday").innerText = "";
@@ -157,6 +165,10 @@
 			("Chosen " + weekday[day]),
 			("Average " + weekday[day])
 		);
+
+
+		new ColorScaleLegend(calendarObject.colorScale, "Color scale for days");
+		new ColorScaleLegend(timetableObject.colorScale, "Color scale for hours");
 	}
 
 	function updateAverages(date) {
