@@ -1,16 +1,23 @@
 <!-- Modal -->
-<dialog id="myDialog">
+<dialog id="writeAnnotation">	
 	<p>Write annotation: </p>
 	<textarea name="annotaition-comment" id="annotation-comment" cols="30" rows="10"></textarea>
 	<input type="hidden" name="annotation-type" id="annotation-type">
 	<input type="hidden" name="annotation-system-name" id="annotation-system-name">
 	<br>
-	<button id="saveAnnotation" onclick="saveAnnotation()">Save</button>
-	<button id="closeAnnotation" onclick="closeDialog()">Cancel</button>
+	<div class="row">
+		<div class="col">
+			<button id="saveAnnotation" onclick="saveAnnotation()">Save</button>
+			<button id="closeAnnotation" onclick="closeDialog()">Cancel</button>
+		</div>
+		<div class="col">
+			<button id="invalidateObservation" value="add" onclick="invalidateAnnotation(this)">Invalidate observations</button>
+		</div>
+	</div>
 </dialog>
 
 <script>
-	var dialogWindow = document.getElementById("myDialog");
+	var dialogWindow = document.getElementById("writeAnnotation");
 	function closeDialog() { 
 		dialogWindow.close(); 
 	}
@@ -54,7 +61,7 @@
 				
 				var parentItem = null;
 				if (type === "day") {
-					parentItem = document.querySelector("[data-timetable-date='"+systemName+"']");
+					parentItem = document.querySelector("[data-date-key='"+systemName+"']");
 				} else {
 					parentItem = document.querySelector("[data-hour-key='"+systemName+"']");
 				}
@@ -86,7 +93,7 @@
 
 	function deleteAnnotationMark(systemName, dateType) {
 		if (dateType === 'day') {
-			var day = document.querySelector("[data-timetable-date='"+systemName+"']");
+			var day = document.querySelector("[data-date-key'"+systemName+"']");
 			day.removeChild(day.lastChild);
 		} else {
 			var hour = document.querySelector("[data-hour-key='"+systemName+"']");
@@ -94,4 +101,32 @@
 		}
 	}
 
+	function invalidateAnnotation(theObj) {
+		var dataset = document.getElementById("datasets").value;
+		var systemName = document.getElementById("annotation-system-name").value;
+		var comment = document.getElementById("annotation-comment").value;
+		var type = document.getElementById("annotation-type").value;
+		var creationDate = new Date();
+
+		if (theObj.value === "delete") {
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 204) {
+					location.reload();
+				}
+			};
+			xmlhttp.open("DELETE", ("/observations/"+systemName), true);
+			xmlhttp.send();
+		} else {
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 201) {
+					location.reload();
+				}
+			};
+			xmlhttp.open("POST", "/observations", true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			xmlhttp.send(JSON.stringify({systemName, dataset, type, creationDate, comment}));
+		}
+	}
 </script>

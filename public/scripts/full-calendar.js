@@ -60,18 +60,11 @@ FullCalendar.prototype.create = function() {
             })
             .text(currentDate.getDay() === 0 ? weekday[6].substr(0,3) : weekday[(currentDate.getDay()-1)].substr(0,3))
             .append('div')
-                .text(currentDate.getDate());
+                .text(currentDate.getDate());                
 
-        if (dayString in annotations) {
-            headDay.append("i")
-                .attr('class', 'far fa-comment note')
-                .append("div")
-                    .text(annotations[dayString][0].comment)
-                    .attr("class", "overlay");
+        if (currentDate.getDate() === 1) {
+            headDay.style("border-left-width", "1.7px")
         }
-        headDay.on('dblclick', function() {
-            theObject.addAnnotation(this, "day");
-        });
 
         days.push(new Date(currentDate.getTime()));
         currentDate.setDate(currentDate.getDate() + 1);
@@ -96,6 +89,7 @@ FullCalendar.prototype.create = function() {
                 var currentTd = bodyTr.append("td");
                 currentTd.attr("class", "day-sum")
                     .attr('data-timetable-date', dayString)
+                    .attr('data-date-key', dayString)
                     .style("background-color", function() {
                         if (days[(j-1)].getDay() === 0 || days[(j-1)].getDay() === 6) {
                             return "lightgrey";
@@ -107,6 +101,27 @@ FullCalendar.prototype.create = function() {
                     currentTd
                         .text(this.dayData[dayString])
                         .style("background-color", theObject.dayColorScale(theObject.dayData[dayString]));
+                }  else if (dayString in data["invalidatedObservations"]) {
+                    currentTd
+                        .text(data["invalidatedObservations"][dayString])
+                        .style("background-color", "lightblue");
+                } 
+                currentTd.on('dblclick', function() {
+                    theObject.addAnnotation(this, "day");
+                });
+
+                if (dayString in invalidObservations && invalidObservations[dayString][0].comment !== "") {
+                    currentTd.append("i")
+                        .attr('class', 'far fa-comment note')
+                        .append("div")
+                            .text(invalidObservations[dayString][0].comment)
+                            .attr("class", "overlay");
+                } else if (dayString in annotations) {
+                    currentTd.append("i")
+                        .attr('class', 'far fa-comment note')
+                        .append("div")
+                            .text(annotations[dayString][0].comment)
+                            .attr("class", "overlay");
                 }
                 
             } else {
@@ -116,6 +131,8 @@ FullCalendar.prototype.create = function() {
                 currentTd.style("background-color", function(d) {
                     if (hourByDay in theObject.data) {                
                         return theObject.colorScale(theObject.data[hourByDay]);
+                    } else if (hourByDay in data["invalidatedObservations"]) {
+                        return "lightblue";
                     } else if (days[(j-1)].getDay() === 0 || days[(j-1)].getDay() === 6) {
                         return "lightgrey";
                     }
@@ -124,19 +141,25 @@ FullCalendar.prototype.create = function() {
                 currentTd.text(function() {
                     if (hourByDay in theObject.data) {                
                         return theObject.data[hourByDay];
+                    } else if (hourByDay in data["invalidatedObservations"]) {
+                        return data["invalidatedObservations"][hourByDay];
                     }
                     return "\u00A0";
                 });
     
-                if (hourByDay in annotations) {
+                if (hourByDay in invalidObservations  && invalidObservations[hourByDay][0].comment !== "") {
+                    currentTd.append("i")
+                        .attr('class', 'far fa-comment note')
+                        .append("div")
+                            .text(invalidObservations[hourByDay][0].comment)
+                            .attr("class", "overlay");
+                } else if (hourByDay in annotations) {
                     currentTd
                         .append("i")
                         .attr('class', 'far fa-comment note')
                         .append("div")
                             .text(annotations[hourByDay][0].comment)
                             .attr("class", "overlay");
-                        
-    
                 }
 
                 currentTd
@@ -148,6 +171,14 @@ FullCalendar.prototype.create = function() {
                     .on('dblclick', function() {
                         theObject.addAnnotation(this, "hour");
                 })
+
+                if (i===12) {
+                    currentTd.style("border-top-width", "1.7px")
+                }
+
+                if (days[(j-1)].getDate() === 1) {
+                    currentTd.style("border-left-width", "1.7px")
+                }
             }
         }
     }
@@ -189,7 +220,7 @@ FullCalendar.prototype.addAnnotation = function(element, dateType) {
     var type = "";
 
     if (dateType === "day") {
-        systemName = element.getAttribute('data-timetable-date');
+        systemName = element.getAttribute('data-date-key');
         type = 'day';
     } else {
         systemName = element.getAttribute('data-hour-key');
@@ -207,7 +238,16 @@ FullCalendar.prototype.addAnnotation = function(element, dateType) {
         document.getElementById("annotation-comment").value = "";
     }
     
-    document.getElementById("myDialog").showModal(); 
+    var validateButton = document.getElementById("invalidateObservation");
+    if (systemName in invalidObservations) {
+        validateButton.innerHTML = "Allow observations";
+        validateButton.value = "delete";
+    } else {
+        validateButton.innerHTML = "Invalidate observations";
+        validateButton.value = "add";
+    }
+
+    document.getElementById("writeAnnotation").showModal(); 
 }
 
 FullCalendar.prototype.setDatePickers = function(firstDate, lastDate) {

@@ -77,7 +77,8 @@
   }
   
   function getDataset(dataset) {
-		annotations = [];
+    annotations = [];
+    invalidObservations = [];
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
@@ -95,8 +96,22 @@
 						"type": result.annotations[annotation].type,
 						"id": result.annotations[annotation].id
 					});
+        }
+        
+        for (observation in result.observations)
+				{
+					if (!(result.observations[observation].systemName in invalidObservations)) {
+						invalidObservations[result.observations[observation].systemName] = [];
+					}
+
+					invalidObservations[result.observations[observation].systemName].push({
+						"comment": result.observations[observation].comment,
+						"creationDate": result.observations[observation].creationDate,
+						"type": result.observations[observation].type,
+						"id": result.observations[observation].id
+					});
 				}
-				
+				console.log(invalidObservations)
 				processData();
 				createVisualizations();
 			}

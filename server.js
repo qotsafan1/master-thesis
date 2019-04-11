@@ -40,10 +40,14 @@ app.get('/datasets/:name', function(req, res) {
 	var annotations = database.getAnnotations(req.params.name);
 	
 	annotations.then(function(result) {
-		res.send(JSON.stringify({
-			annotations: result,
-			data: rawData
-		}));
+		var observations = database.getObservations(req.params.name);
+		observations.then(function(obResults) {
+			res.send(JSON.stringify({
+				annotations: result,
+				observations: obResults,
+				data: rawData
+			}));
+		});
 	});	
 });
 
@@ -118,7 +122,64 @@ app.delete('/annotations/:id', function(req, res) {
 	});
 });
 
+app.post('/observations', function(req, res) {
+	console.log(req.body)
+	if (!("dataset" in req.body)
+		|| !("type" in req.body)
+		|| !("comment" in req.body)
+		|| !("creationDate" in req.body)
+		|| !("systemName" in req.body)
+	) {		
+		res.status(400).send("Missing parameter");
+	} else {
+		var observationBody = [
+			req.body.dataset,
+			req.body.type,
+			req.body.comment, 
+			new Date(),
+			req.body.systemName
+		];
+
+		var data = database.invalidateObservation(observationBody);
+		data.then(function(result) {			
+			if (isNaN(result)) {
+				res.status(500).send(JSON.stringify({"status": 500, "error": result, "response": null}));
+			} else {
+				req.body.id = result;
+				res.status(201).send(JSON.stringify({"status": 201, "error": null, "invalidatedObservation": req.body}));
+			}
+		});		
+	}
+});
+
+app.delete('/observations/:systemName', function(req, res) {
+	var data = database.deleteObservation(req.params.systemName);
+	data.then(function(result) {		
+		if (result.length > 0) {
+			res.send(JSON.stringify({"status": 500, "error": "Unable to delete observation", "response": null}));
+		} else {
+			res.status(204).send();
+		}
+	})
+	.catch(function(err) {
+		console.log(err)
+	});
+});
+
 app.listen(3000);
 console.log('3000 is the magic port');
+ /*
+ CREATE TABLE `observations` (
+	`id` int(11) NOT NULL,
+	`dataset` varchar(255) NOT NULL,
+	`type` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+	`comment` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+	`creationDate` date NOT NULL,
+	`systemName` varchar(10000) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-
+  ALTER TABLE `observations`
+  ADD PRIMARY KEY (`id`);
+  ALTER TABLE `observations`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  */

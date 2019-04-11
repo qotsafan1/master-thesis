@@ -1,4 +1,5 @@
 var unFilteredData;
+var invalidObservations = [];
 
 //2016-09-05T18:13:46.105Z
 var strictIsoParse;
@@ -46,6 +47,8 @@ function processData(dataset) {
     data['recordsEachDayAndHour'] = [];
 
     data['filteredData'] = [];
+
+    data['invalidatedObservations'] = [];
 
     var lastLoopedDay;
     var lastRecordDate = new Date("1971-1-1");
@@ -97,6 +100,29 @@ function processData(dataset) {
             continue;
         }        
 
+        var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
+        var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
+
+        if (dayOfMonth in invalidObservations) {
+            if (!(dayOfMonth in data['invalidatedObservations'])) {
+                data['invalidatedObservations'][dayOfMonth] = 0;
+            }
+            data['invalidatedObservations'][dayOfMonth]++;
+            
+            if (!(hourOfDay in data['invalidatedObservations'])) {
+                data['invalidatedObservations'][hourOfDay] = 0;
+            }
+            data['invalidatedObservations'][hourOfDay]++;
+            continue;
+        }
+        
+        if (hourOfDay in invalidObservations) {
+            if (!(hourOfDay in data['invalidatedObservations'])) {
+                data['invalidatedObservations'][hourOfDay] = 0;
+            }
+            data['invalidatedObservations'][hourOfDay]++;
+            continue;
+        }
         var diff = isoDate.getTime() - lastRecordDate.getTime();
         if (diff > 4000) {
             data['filteredData'].push(isoDate);
@@ -132,16 +158,14 @@ function processData(dataset) {
 
         sumData(currentDay, countWeekday);
         sumData(isoDate.getHours(), countHour);
-        
-        var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
+                
         if (dayOfMonth in countEachDay) {
             countEachDay[dayOfMonth]++;
         } else {
             countEachDay[dayOfMonth] = 1;					
         }
 
-        // sum of each hour of each day
-        var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
+        // sum of each hour of each day        
         if (hourOfDay in countEachHourOfEachDay) {
             countEachHourOfEachDay[hourOfDay]++;
         } else {

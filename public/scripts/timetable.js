@@ -41,9 +41,9 @@ TimeTable.prototype.create = function() {
             }
             return classString;
         })        
-        .attr('data-timetable-date', function(d,i) { return theObject.getDateAsDateString(theObject.week[i])})
+        .attr('data-date-key', function(d,i) { return theObject.getDateAsDateString(theObject.week[i])})
         .on('click', function() {
-            theObject.changeSelectedDay(this.getAttribute('data-timetable-date'), this);
+            theObject.changeSelectedDay(this.getAttribute('data-date-key'), this);
         })
         .on('dblclick', function() {
             theObject.addAnnotation(this, "day");
@@ -214,7 +214,7 @@ TimeTable.prototype.addAnnotation = function(element, dateType) {
     var type = "";
 
     if (dateType === "day") {
-        systemName = element.getAttribute('data-timetable-date');
+        systemName = element.getAttribute('data-date-key');
         type = 'day';
     } else {
         systemName = element.getAttribute('data-hour-key');
@@ -231,8 +231,8 @@ TimeTable.prototype.addAnnotation = function(element, dateType) {
     } else {
         document.getElementById("annotation-comment").value = "";
     }
-    
-    document.getElementById("myDialog").showModal(); 
+
+    document.getElementById("writeAnnotation").showModal(); 
 }
 
 TimeTable.prototype.markChosenDay = function(element, dayString) {    
@@ -317,7 +317,7 @@ TimeTable.prototype.removeBreakdownBarChart = function() {
 }
 
 TimeTable.prototype.addDistributionChart = function() {    
-    var chosenDayString = d3.select('.selected-head').node().getAttribute('data-timetable-date');
+    var chosenDayString = d3.select('.selected-head').node().getAttribute('data-date-key');
     var chosenDay = new Date(chosenDayString);
     var chosenWeek = (chosenDay.getWeekNumber()+"-"+chosenDay.getFullYear());
     
