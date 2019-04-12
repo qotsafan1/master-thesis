@@ -66,6 +66,7 @@ MonthCalendar.prototype.create = function() {
     const header = table.append('thead');
     const body = table.append('tbody');
     var theObject = this;
+    this.mainElement = floatableDiv;
       
     const tr = header.append('tr');
     /*
@@ -241,4 +242,8 @@ MonthCalendar.prototype.toggleDistribution = function() {
     dist.classed("calendar-hidden-distribution", function() {
         return (this.classList.contains('calendar-hidden-distribution')) ? false : true;
     })
+}
+
+MonthCalendar.prototype.makeGrey = function() {
+    this.mainElement.style("color", "grey");
 }

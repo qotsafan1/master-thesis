@@ -231,6 +231,7 @@ function processData(dataset) {
     data['byDay'] = createBarData(countWeekday);
     data['byHour'] = createBarData(countHour);
     data['byWeek'] = createBarData(countWeeks);
+    data['sumOfEachMonth'] = countMonth;
     data['sumOfEachWeek'] = countWeeks;
     data['sumOfEachDay'] = countEachDay;
     data['hourByDay'] = countEachHourOfEachDay;
@@ -309,10 +310,11 @@ function processData(dataset) {
     data["averageWeek"] = (weekSum/amountOfWeeks);
     
     data["averageDayPerMonth"] = [];
+    data["averageDayEachMonth"] = [];
     data["maxAverageDayPerMonth"] = 0;
     var amountOfDaysInFirstMonth = daysInMonth(data['firstRecordedDay'].getMonth(), data['firstRecordedDay'].getFullYear()) - data['firstRecordedDay'].getDate()+1;
     var amountOfDaysInLastMonth = data['lastRecordedDay'].getDate();
-    var cnt = 0;
+    var cnt = 0;    
     for (var i in countMonth) {
         var sum = 0;
         if (cnt === 0) {
@@ -326,6 +328,8 @@ function processData(dataset) {
         if (data["maxAverageDayPerMonth"] < sum) {
             data["maxAverageDayPerMonth"] = Math.floor(sum);
         }
+
+        data["averageDayEachMonth"][i] = sum;
 
         data["averageDayPerMonth"].push({
             sum: sum,

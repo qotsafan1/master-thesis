@@ -168,18 +168,3 @@ app.delete('/observations/:systemName', function(req, res) {
 
 app.listen(3000);
 console.log('3000 is the magic port');
- /*
- CREATE TABLE `observations` (
-	`id` int(11) NOT NULL,
-	`dataset` varchar(255) NOT NULL,
-	`type` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-	`comment` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-	`creationDate` date NOT NULL,
-	`systemName` varchar(10000) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
-  ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-  ALTER TABLE `observations`
-  ADD PRIMARY KEY (`id`);
-  ALTER TABLE `observations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-  */

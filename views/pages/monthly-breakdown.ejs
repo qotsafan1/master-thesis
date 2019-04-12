@@ -51,7 +51,12 @@
 		var currentDate = new Date(firstDateOfYear.getFullYear(), firstDateOfYear.getMonth(), 15);
 		while(currentDate.getTime() < lastDate.getTime()) {
 			var calendarObject = new MonthCalendar("#calendarDiv", currentDate, data['sumOfEachDay'], data['mostInADay'], data);
-			calendarObject.create();	
+			calendarObject.create();
+			
+			if (currentDate.getTime() < firstDate.getTime()) {
+				calendarObject.makeGrey();
+			}
+			
 			currentDate = new Date(
 				currentDate.getMonth() === 11 ? currentDate.getFullYear()+1 : currentDate.getFullYear(),
 				currentDate.getMonth() === 11 ? 0 : currentDate.getMonth()+1,

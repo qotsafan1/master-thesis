@@ -75,18 +75,10 @@ ComparisonChart.prototype.update = function(first, second, firstLabel, secondLab
     this.g.selectAll(".bar-labels")
         .text(function(d, i) {
             return labels[i] + "  "  + (comparableData[i].toFixed(2));;
-        })        
-    /*
-        .data([first,second])
-        .enter()
-        .attr("width", function() {
-            console.log("inn")
-        });
-        */
+        })
 }
 
 ComparisonChart.prototype.updateTitle = function(newTitle) {
     this.title = newTitle;
-    console.log(newTitle)
     this.g.selectAll(".title").text(newTitle);
 }

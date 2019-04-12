@@ -45,6 +45,7 @@
 	var childGraphs;
 	var currentDayComparisonChart;
 	var weekDayComparisonChart;
+	var monthComparisonChart;
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
 	dataset.dispatchEvent(event);	
@@ -166,6 +167,25 @@
 			("Average " + weekday[day])
 		);
 
+		monthComparisonChart = new ComparisonChart(			
+			'dayComparisonChart', 
+			300, 
+			70,
+			{top: 30, right: 5, bottom: 5, left: 5},
+			("Average day vs. average day in chosen month"),
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "13px"
+			}
+		);
+
+		monthComparisonChart.compare(
+			data["averageDay"],
+			data["averageDayEachMonth"][month[data["lastRecordedDay"].getMonth()]],
+			("Average day overall"),
+			("Average day in " + month[data["lastRecordedDay"].getMonth()])
+		);
+
 
 		new ColorScaleLegend(calendarObject.colorScale, "Color scale for days");
 		new ColorScaleLegend(timetableObject.colorScale, "Color scale for hours");
@@ -174,6 +194,7 @@
 	function updateAverages(date) {
 		var dayString = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
 		var day = date.getDay() === 0 ? 6 : (date.getDay()-1);
+		var monthNumber = date.getMonth();
 		if (dayString in data["sumOfEachDay"]) {
 			currentDayComparisonChart.update(
 				data["sumOfEachDay"][dayString],
@@ -187,7 +208,7 @@
 				data["averagePerWeekday"][day],
 				("Chosen " + weekday[day]),
 				("Average " + weekday[day])
-			);
+			);			
 		} else {
 			currentDayComparisonChart.update(
 				0,
@@ -205,5 +226,16 @@
 		}
 		weekDayComparisonChart.updateTitle(("Average " + weekday[day] + " vs. chosen " + weekday[day]));
 
+		var averageInMonth = 0;
+		if (month[monthNumber] in data["averageDayEachMonth"]) {
+			averageInMonth = data["averageDayEachMonth"][month[monthNumber]]
+		}
+
+		monthComparisonChart.update(
+			data["averageDay"],
+			averageInMonth,
+			("Average day overall"),
+			("Average day in " + month[monthNumber])
+		);
 	}
 </script>
