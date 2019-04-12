@@ -108,6 +108,8 @@ TimeTable.prototype.create = function() {
                 tempTd.text(function() {
                     if (hourByDay in theObject.data) {
                         return theObject.data[hourByDay];
+                    } else if (hourByDay in data["invalidatedObservations"]) {
+                        return data["invalidatedObservations"][hourByDay];
                     }
                     return "\u00A0";
                 })
@@ -124,6 +126,8 @@ TimeTable.prototype.create = function() {
                 .style("background-color", function(d) {
                     if (hourByDay in theObject.data) {                
                         return theObject.colorScale(theObject.data[hourByDay]);
+                    } else if (hourByDay in data["invalidatedObservations"]) {
+                        return "lightblue";
                     }
                     return "white";
                 })
@@ -138,15 +142,19 @@ TimeTable.prototype.create = function() {
                     return classString;
                 });
                 
-                if (hourByDay in annotations) {
+                if (hourByDay in invalidObservations  && invalidObservations[hourByDay][0].comment !== "") {
+                    tempTd.append("i")
+                        .attr('class', 'far fa-comment note')
+                        .append("div")
+                            .text(invalidObservations[hourByDay][0].comment)
+                            .attr("class", "overlay");
+                } else if (hourByDay in annotations) {
                     tempTd
                         .append("i")
                         .attr('class', 'far fa-comment note')
                         .append("div")
                             .text(annotations[hourByDay][0].comment)
                             .attr("class", "overlay");
-                        
-
                 }
             }
 
@@ -230,6 +238,15 @@ TimeTable.prototype.addAnnotation = function(element, dateType) {
         document.getElementById("annotation-comment").value = annotations[systemName][0].comment;
     } else {
         document.getElementById("annotation-comment").value = "";
+    }
+
+    var validateButton = document.getElementById("invalidateObservation");
+    if (systemName in invalidObservations) {
+        validateButton.innerHTML = "Allow observations";
+        validateButton.value = "delete";
+    } else {
+        validateButton.innerHTML = "Invalidate observations";
+        validateButton.value = "add";
     }
 
     document.getElementById("writeAnnotation").showModal(); 

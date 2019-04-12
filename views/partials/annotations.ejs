@@ -93,7 +93,7 @@
 
 	function deleteAnnotationMark(systemName, dateType) {
 		if (dateType === 'day') {
-			var day = document.querySelector("[data-date-key'"+systemName+"']");
+			var day = document.querySelector("[data-date-key='"+systemName+"']");
 			day.removeChild(day.lastChild);
 		} else {
 			var hour = document.querySelector("[data-hour-key='"+systemName+"']");

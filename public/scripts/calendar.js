@@ -9,7 +9,7 @@ function Calendar(date, data, maxInstance, overallData) {
     this.month = date.getMonth();
     this.year = date.getFullYear();
     
-    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, maxInstance]);
+    this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([1, maxInstance]);
 
     this.timeTable = null;
     this.informationPanel = null;
