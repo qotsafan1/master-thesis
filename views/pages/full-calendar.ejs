@@ -44,11 +44,12 @@
 
 <script src="scripts/data-processing.js"></script>
 
-<script type='text/javascript'>		
+<script type='text/javascript'>
+	checkForChosenDataset();
 	var fullCalendar;
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
-	dataset.dispatchEvent(event);
+	dataset.dispatchEvent(event);	
 
 	function removeAllVisualizations() {
 		var graphs = document.getElementsByClassName("graph");

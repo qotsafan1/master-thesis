@@ -46,9 +46,12 @@
 	var currentDayComparisonChart;
 	var weekDayComparisonChart;
 	var monthComparisonChart;
+
+	checkForChosenDataset();
+
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
-	dataset.dispatchEvent(event);	
+	dataset.dispatchEvent(event);
 
 	function removeAllVisualizations() {
 		var graphs = document.getElementsByClassName("graph");

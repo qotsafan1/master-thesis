@@ -385,3 +385,26 @@ function createBarData(countArray) {
     }
     return barData;
 }
+
+function checkForChosenDataset() {
+    var possibleDataset = window.localStorage.getItem('dataset');
+    if (possibleDataset !== "" && possibleDataset !== "custom") {
+        document.getElementById("datasets").value = possibleDataset;
+    } else if (possibleDataset === 'custom') {
+        var customDateString = parseInt(window.localStorage.getItem('custom-date'));        
+        var timeNow = new Date();
+        if ((timeNow.getTime() - customDateString) < 1800000) {
+            document.getElementById("datasets").value = possibleDataset;
+            rawData = JSON.parse(window.localStorage.getItem('custom-data')).data
+            annotations = [];
+            invalidObservations = [];
+            processData();
+            createVisualizations();
+            window.localStorage.setItem('custom-date', timeNow.getTime());
+        } else {
+            window.localStorage.setItem('custom-data', "");
+            window.localStorage.setItem('custom-date', "");
+            window.localStorage.setItem('dataset', "");				  
+        }
+    }
+}
