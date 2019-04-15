@@ -388,7 +388,8 @@ function createBarData(countArray) {
 
 function checkForChosenDataset() {
     var possibleDataset = window.localStorage.getItem('dataset');
-    if (possibleDataset !== "" && possibleDataset !== "custom") {
+    console.log(possibleDataset)
+    if (possibleDataset && possibleDataset !== "" && possibleDataset !== "custom") {
         document.getElementById("datasets").value = possibleDataset;
     } else if (possibleDataset === 'custom') {
         var customDateString = parseInt(window.localStorage.getItem('custom-date'));        
