@@ -36,16 +36,16 @@ FullCalendar.prototype.create = function() {
             continue;
         }
 
+        var monthLabel = monthTr.append("th")
+            .attr('data-timetable-date', dayString)
+            .attr('class', 'month-label')
+            .append("div")
+            .text(month[currentDate.getMonth()]);
         if (currentDate.getDate() === 1 || days.length < 1
-            || (currentDate.getDate() < 8 && this.weekday !== "")) {
-            monthTr.append("th")
-                .attr('data-timetable-date', dayString)
-                .attr('class', 'month-label')
-                .text(month[currentDate.getMonth()]);
+            || (currentDate.getDate() < 8 && this.weekday !== "")) {            
         } else {
-            monthTr.append("th")
-                .attr('data-timetable-date', dayString)
-                .attr('class', 'month-label');
+            monthLabel
+                .style("display", "none");
         }
         
         var headDay = tr.append('th');
@@ -248,9 +248,4 @@ FullCalendar.prototype.addAnnotation = function(element, dateType) {
     }
 
     document.getElementById("writeAnnotation").showModal(); 
-}
-
-FullCalendar.prototype.setDatePickers = function(firstDate, lastDate) {
-    document.getElementById("firstDate").value = firstDate.getFullYear() +"-"+((firstDate.getMonth()+1) < 10 ? "0" : "") + (firstDate.getMonth()+1) +"-"+ ((firstDate.getDate()) < 10 ? "0" : "") + firstDate.getDate();
-    document.getElementById("lastDate").value = lastDate.getFullYear() +"-"+((lastDate.getMonth()+1) < 10 ? "0" : "") + (lastDate.getMonth()+1) +"-"+ ((lastDate.getDate()) < 10 ? "0" : "") + lastDate.getDate();
 }

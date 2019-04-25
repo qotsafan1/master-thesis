@@ -10,16 +10,16 @@
 	</header>
 	<br>
 	<div class="row">
-		<span style="float:right">Choose specific weekday:</span>
+		<span style="float:right">Choose specific days:</span>
 		<select style="float:right" name="specific-day" id="specificDay" onchange="specificDayChange(this.value)">
-			<option value=""></option>
-			<option value="1">Monday</option>
-			<option value="2">Tuesday</option>
-			<option value="3">Wednesday</option>
-			<option value="4">Thursday</option>
-			<option value="5">Friday</option>
-			<option value="6">Saturday</option>
-			<option value="0">Sunday</option>
+			<option value="">All days</option>
+			<option value="1">Mondays</option>
+			<option value="2">Tuesdays</option>
+			<option value="3">Wednesdays</option>
+			<option value="4">Thursdays</option>
+			<option value="5">Fridays</option>
+			<option value="6">Saturdays</option>
+			<option value="0">Sundays</option>
 			<option value="weekdays">Weekdays</option>
 			<option value="weekends">Weekends</option>
 		</select>
@@ -47,6 +47,7 @@
 <script type='text/javascript'>
 	checkForChosenDataset();
 	var fullCalendar;
+	var dateChart;
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
 	dataset.dispatchEvent(event);	
@@ -76,7 +77,7 @@
 		var lastDate = new Date(data['lastRecordedDay'].getFullYear(), data['lastRecordedDay'].getMonth(), data['lastRecordedDay'].getDate());
 		lastDate.setHours(23,59,59);
 
-		var dateChart = new DateBarChart(
+		dateChart = new DateBarChart(
 			data['eachDay'],
 			'dateChart', 
 			1100,
@@ -112,13 +113,6 @@
 		new ColorScaleLegend(fullCalendar.colorScale, "Color scale for hours");
 	}
 
-	function dateChanged() {
-		var firstDate = document.getElementById("firstDate");	
-		var lastDate = document.getElementById("lastDate");	
-		
-		fullCalendar.update(firstDate.value, lastDate.value, "");
-		document.getElementById("specificDay").value = "";
-	}
 
 	function specificDayChange(day) {
 		fullCalendar.table.selectAll('[data-timetable-date]')
@@ -138,15 +132,48 @@
 					return "none";
 				}
 			}
+			else if (day === "") {
+				return "";
+			}
 			else if (currentDate.getDay() === parseInt(day)) {
 				return "";
 			} else {
 				return "none";
 			}
 		});
+
+		firstDate = new Date(data['firstRecordedDay'].getFullYear(), data['firstRecordedDay'].getMonth(), data['firstRecordedDay'].getDate());
+		firstDate.setHours(0,0,0,0);
+		lastDate = new Date(data['lastRecordedDay'].getFullYear(), data['lastRecordedDay'].getMonth(), data['lastRecordedDay'].getDate());
+		lastDate.setHours(23,59,59);		
+
+		if (day === "" && lastDate.getTime()- firstDate.getTime() > 3456000000) {
+			firstDate = new Date(lastDate.getTime());
+			firstDate.setDate(lastDate.getDate()-40);
+		} else if(day !== "" && !isNaN(day)) {
+			var correctDay = parseInt(day) === 6 ? 0 : (parseInt(day)-1);			
+			if (data["amountOfEachWeekday"][correctDay] > 40) {
+				firstDate = new Date(lastDate.getTime());
+				firstDate.setDate(lastDate.getDate()-273);
+			}
+		} else if (day === "weekdays") {
+			if (lastDate.getTime()- firstDate.getTime() > 4665600000) {
+				firstDate = new Date(lastDate.getTime());
+				firstDate.setDate(lastDate.getDate()-54);
+			}
+		} else if (day === "weekends") {
+			var amountOfWeekendDays = data["amountOfEachWeekday"][5] + data["amountOfEachWeekday"][6];
+			if (amountOfWeekendDays > 40) {
+				firstDate = new Date(lastDate.getTime());
+				firstDate.setDate(lastDate.getDate()-136);
+			}
+		}
+
+		dateChart.brushSpecific(firstDate, lastDate);
 	}
 
 	function updateChildGraphs(firstDate, lastDate) {
+		var chosenDays = document.getElementById("specificDay").value;		
 		fullCalendar.table.selectAll('[data-timetable-date]')
 			.style("display", function(d,i) {
 				var dayString = this.getAttribute('data-timetable-date');
@@ -154,7 +181,76 @@
 				if (currentDate.getTime() >= firstDate.getTime() 
 					&& currentDate.getTime() <= lastDate.getTime()
 				) {
-					return "";
+					if (chosenDays === "") {
+						if (this.classList.contains('month-label')) {
+							if (currentDate.getDate() === 1) {							
+								this.childNodes[0].style.display = "";
+							} else {
+								this.childNodes[0].style.display = "none";
+							}
+						} else if (currentDate.getDate() === 1){
+							this.style.borderLeft = "2px solid black";
+						} else {
+							this.style.borderLeft = "1px solid black";							
+						}
+						return "";
+					} else if (chosenDays === "weekdays") {
+						if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+							if (this.classList.contains('month-label')) {
+								if ((currentDate.getDate() === 1)
+									|| (currentDate.getDay() === 1 && currentDate.getDate() === 2)
+									|| (currentDate.getDay() === 1 && currentDate.getDate() === 3)) {
+									this.childNodes[0].style.display = "";
+								} else {
+									this.childNodes[0].style.display = "none";
+								}
+							} else if ((currentDate.getDate() === 1)
+									|| (currentDate.getDay() === 1 && currentDate.getDate() === 2)
+									|| (currentDate.getDay() === 1 && currentDate.getDate() === 3)) {
+								this.style.borderLeft = "2px solid black";
+							} else {
+								this.style.borderLeft = "1px solid black";							
+							}
+							return "";
+						} else {
+							return "none";
+						}
+					} else if (chosenDays === "weekends") {
+						if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {							
+							if (this.classList.contains('month-label')) {
+								if ((currentDate.getDay() === 0 && currentDate.getDate() === 1) 
+									|| (currentDate.getDay() === 6 && currentDate.getDate() < 7)) {							
+									this.childNodes[0].style.display = "";
+								} else {
+									this.childNodes[0].style.display = "none";
+								}
+							} else if ((currentDate.getDay() === 0 && currentDate.getDate() === 1) 
+									|| (currentDate.getDay() === 6 && currentDate.getDate() < 7)) {
+								this.style.borderLeft = "2px solid black";
+							} else {
+								this.style.borderLeft = "1px solid black";							
+							}
+							return "";
+						} else {
+							return "none";
+						}
+					}
+					else if (currentDate.getDay() === parseInt(chosenDays)) {
+						if (this.classList.contains('month-label')) {
+							if (currentDate.getDate() < 8) {							
+								this.childNodes[0].style.display = "";
+							} else {
+								this.childNodes[0].style.display = "none";
+							}
+						} else if (currentDate.getDate() < 8) {
+							this.style.borderLeft = "2px solid black";
+						} else {
+							this.style.borderLeft = "1px solid black";
+						}
+						return "";
+					} else {
+						return "none";
+					}
 				} else {
 					return "none";
 				}
