@@ -127,6 +127,7 @@ FullCalendar.prototype.create = function() {
             } else {
                 var hourByDay = theObject.getHourByDayString(i, days[j-1]);
                 var dayString = theObject.getDateAsDateString(days[(j-1)]);
+
                 var currentTd = bodyTr.append("td");
                 currentTd.style("background-color", function(d) {
                     if (hourByDay in theObject.data) {                
@@ -145,6 +146,13 @@ FullCalendar.prototype.create = function() {
                         return data["invalidatedObservations"][hourByDay];
                     }
                     return "\u00A0";
+                });
+
+                currentTd.style("color", function(d) {
+                    if (hourByDay in data["hourToMarkAsChanged"]) {
+                        return "#2DC446";
+                    } 
+                    return "black";
                 });
     
                 if (hourByDay in invalidObservations  && invalidObservations[hourByDay][0].comment !== "") {
@@ -246,6 +254,58 @@ FullCalendar.prototype.addAnnotation = function(element, dateType) {
         validateButton.innerHTML = "Invalidate observations";
         validateButton.value = "add";
     }
+
+    var observationColumn = document.getElementById("listHourObs");
+    while (observationColumn.firstChild) {
+        observationColumn.removeChild(observationColumn.firstChild);
+    }
+    observationColumn.parentElement.style.display = "none";
+
+    var newHeaderLabel = "Write annotation for day " + systemName;
+
+    if (type === "hour") {
+        observationColumn.parentElement.style.display = "";
+        var hour = element.getAttribute('data-timetable-hour');
+        var dayKey = element.getAttribute('data-parent-day');
+        newHeaderLabel = "Write annotation for day " + dayKey + " at hour " + (parseInt(hour) < 10 ? "0" : "") + hour + ":00";
+        if (dayKey in data["allRecordsEachDayAndHour"]) {
+            for (var i in data["allRecordsEachDayAndHour"][dayKey][hour]) {
+                var time = data["allRecordsEachDayAndHour"][dayKey][hour][i];
+                var milliSecondString = (time.getFullYear() 
+                    + "-" + (time.getMonth()+1) + "-" + time.getDate() 
+                    + "-" + time.getHours() + "-" + time.getMilliseconds());
+                var node = document.createElement("LI");
+                var textnode = document.createTextNode(
+                    (time.getHours() < 10 ? "0" : "") + time.getHours() 
+                    +  ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()  
+                    +  ":" + (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
+                );
+                node.appendChild(textnode);
+                var button = document.createElement("button");
+                
+                if (milliSecondString in data["singleInvalidatedObservations"]) {
+                    button.classList += "btn btn-primary btn-sm";
+                    button.appendChild(document.createTextNode("Allow"));
+                    button.addEventListener("click", function() {
+                        invalidateSingleObservation(this, "delete");
+                    });
+                } else {
+                    button.classList += "btn btn-secondary btn-sm";
+                    button.appendChild(document.createTextNode("Invalidate"));
+                    button.addEventListener("click", function() {
+                        invalidateSingleObservation(this, "create");
+                    });
+                }
+                button.setAttribute("data-system-name", milliSecondString);
+
+                node.appendChild(button);
+                observationColumn.appendChild(node);
+            }
+
+        }
+    }
+
+    document.getElementById("annotationHeader").innerText = newHeaderLabel;
 
     document.getElementById("writeAnnotation").showModal(); 
 }

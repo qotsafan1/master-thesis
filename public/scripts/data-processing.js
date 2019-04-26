@@ -45,10 +45,13 @@ function processData(dataset) {
     data['lastRecordedDay'] = new Date("1971-1-1");
     data['firstRecordedDay'] = new Date("2050-1-1");
     data['recordsEachDayAndHour'] = [];
+    data['allRecordsEachDayAndHour'] = [];
 
     data['filteredData'] = [];
 
     data['invalidatedObservations'] = [];
+    data['singleInvalidatedObservations'] = [];
+    data['hourToMarkAsChanged'] = [];
 
     var lastLoopedDay;
     var lastRecordDate = new Date("1971-1-1");
@@ -102,6 +105,50 @@ function processData(dataset) {
 
         var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
         var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
+        var millisecondString = hourOfDay + "-" +isoDate.getMilliseconds();
+
+        if (isoDate > data['lastRecordedDay']) {
+            data['lastRecordedDay'] = isoDate;
+        }
+
+        if (isoDate < data['firstRecordedDay']) {
+            data['firstRecordedDay'] = isoDate;            
+        }
+
+        if (isoDate.getFullYear() < data['firstYear']) {
+            data['firstYear'] = isoDate.getFullYear();
+        }
+        if (isoDate.getFullYear() > data['lastYear']) {
+            data['lastYear'] = isoDate.getFullYear();
+        }
+
+        if (isoDate.getFullYear() === data['firstYear']) {
+            //Find first and last month
+            if (isoDate.getMonth() < data["firstMonth"]) {
+                data["firstMonth"] = isoDate.getMonth();
+            }						
+        }
+        if (isoDate.getFullYear() === data['lastYear']) {
+            if (isoDate.getMonth() > data["lastMonth"]) {
+                data["lastMonth"] = isoDate.getMonth();
+            }
+        }
+
+        if (dayOfMonth in data['allRecordsEachDayAndHour']) {
+            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
+        } else {
+            data['allRecordsEachDayAndHour'][dayOfMonth] = [];
+            for (var i=0; i<24; i++) {
+                data['allRecordsEachDayAndHour'][dayOfMonth][i] = [];
+            }
+            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
+        }
+
+        if (millisecondString in invalidObservations) {
+            data['singleInvalidatedObservations'][millisecondString] = invalidObservations[millisecondString];
+            data['hourToMarkAsChanged'][hourOfDay] = true;
+            continue;
+        }        
 
         if (dayOfMonth in invalidObservations) {
             if (!(dayOfMonth in data['invalidatedObservations'])) {
@@ -194,34 +241,7 @@ function processData(dataset) {
                 countEachHourOfEachWeek[currentWeek][i] = 0;
             }
             countEachHourOfEachWeek[currentWeek][isoDate.getHours()]++;
-        }
-
-        if (isoDate > data['lastRecordedDay']) {
-            data['lastRecordedDay'] = isoDate;
-        }
-
-        if (isoDate < data['firstRecordedDay']) {
-            data['firstRecordedDay'] = isoDate;            
-        }
-
-        if (isoDate.getFullYear() < data['firstYear']) {
-            data['firstYear'] = isoDate.getFullYear();
-        }
-        if (isoDate.getFullYear() > data['lastYear']) {
-            data['lastYear'] = isoDate.getFullYear();
-        }
-
-        if (isoDate.getFullYear() === data['firstYear']) {
-            //Find first and last month
-            if (isoDate.getMonth() < data["firstMonth"]) {
-                data["firstMonth"] = isoDate.getMonth();
-            }						
-        }
-        if (isoDate.getFullYear() === data['lastYear']) {
-            if (isoDate.getMonth() > data["lastMonth"]) {
-                data["lastMonth"] = isoDate.getMonth();
-            }
-        }
+        }        
 
         lastLoopedDay = new Date(isoDate.getTime());
         lastLoopedDay.setHours(0,0,0,0);

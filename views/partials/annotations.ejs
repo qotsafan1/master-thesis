@@ -1,9 +1,18 @@
 <!-- Modal -->
-<dialog id="writeAnnotation">	
-	<p>Write annotation: </p>
-	<textarea name="annotaition-comment" id="annotation-comment" cols="30" rows="10"></textarea>
-	<input type="hidden" name="annotation-type" id="annotation-type">
-	<input type="hidden" name="annotation-system-name" id="annotation-system-name">
+<dialog id="writeAnnotation">
+	<p id="annotationHeader">Write annotation: </p>
+	<div class="row">
+		<div class="col">
+			<textarea name="annotaition-comment" id="annotation-comment" cols="20" rows="10"></textarea>
+			<input type="hidden" name="annotation-type" id="annotation-type">
+			<input type="hidden" name="annotation-system-name" id="annotation-system-name">
+		</div>
+		<div class="col">
+			<p>Observations on chosen hour:</p>
+			<ul id="listHourObs"></ul>
+		</div>
+		<br>
+	</div>
 	<br>
 	<div class="row">
 		<div class="col">
@@ -11,7 +20,7 @@
 			<button id="closeAnnotation" onclick="closeDialog()">Cancel</button>
 		</div>
 		<div class="col">
-			<button id="invalidateObservation" value="add" onclick="invalidateAnnotation(this)">Invalidate observations</button>
+			<button id="invalidateObservation" value="add" onclick="invalidateObservation(this)">Invalidate observations</button>
 		</div>
 	</div>
 </dialog>
@@ -38,6 +47,11 @@
 				delete annotations[systemName];
 				return;
 			}
+		}
+
+		if (comment === "") {
+			closeDialog();
+			return;
 		}
 
 		var xmlhttp = new XMLHttpRequest();
@@ -101,7 +115,7 @@
 		}
 	}
 
-	function invalidateAnnotation(theObj) {
+	function invalidateObservation(theObj) {
 		var dataset = document.getElementById("datasets").value;
 		var systemName = document.getElementById("annotation-system-name").value;
 		var comment = document.getElementById("annotation-comment").value;
@@ -109,24 +123,64 @@
 		var creationDate = new Date();
 
 		if (theObj.value === "delete") {
-			var xmlhttp = new XMLHttpRequest();
+			allowObservationOnServer(systemName, function() {
+				location.reload();
+			})
+		} else {
+			invalidateObservationFromServer(systemName, dataset, type, creationDate, comment, function() {
+				location.reload();
+			})
+		}
+	}
+
+	function invalidateSingleObservation(theObj, event) {
+		var dataset = document.getElementById("datasets").value;
+		var systemName = theObj.getAttribute("data-system-name");
+		var comment = document.getElementById("annotation-comment").value;
+		var type = document.getElementById("annotation-type").value;
+		var creationDate = new Date();
+
+		if (event === "delete") {
+			allowObservationOnServer(systemName, function() {
+				theObj.classList.remove("btn-primary");
+				theObj.classList += " btn-secondary";
+				theObj.innerHTML = "Invalidate";
+				theObj.addEventListener("click", function() {
+					invalidateSingleObservation(this, "create");
+				});
+			})
+		} else {
+			invalidateObservationFromServer(systemName, dataset, type, creationDate, comment, function() {
+				theObj.classList.remove("btn-secondary");
+				theObj.classList += " btn-primary";
+				theObj.innerHTML = "Allow";
+				theObj.addEventListener("click", function() {
+					invalidateSingleObservation(this, "delete");
+				});
+			})
+		}
+	}
+
+	function allowObservationOnServer(systemName, _callback) {
+		var xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
 				if (this.readyState == 4 && this.status == 204) {
-					location.reload();
+					_callback();
 				}
 			};
 			xmlhttp.open("DELETE", ("/observations/"+systemName), true);
 			xmlhttp.send();
-		} else {
-			var xmlhttp = new XMLHttpRequest();
+	}
+
+	function invalidateObservationFromServer(systemName, dataset, type, creationDate, comment, _callback) {
+		var xmlhttp = new XMLHttpRequest();
 			xmlhttp.onreadystatechange = function() {
 				if (this.readyState == 4 && this.status == 201) {
-					location.reload();
+					_callback();
 				}
 			};
 			xmlhttp.open("POST", "/observations", true);
 			xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 			xmlhttp.send(JSON.stringify({systemName, dataset, type, creationDate, comment}));
-		}
 	}
 </script>

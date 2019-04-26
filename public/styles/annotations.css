@@ -1,1 +1,12 @@
-#writeAnnotation
+#writeAnnotation #listHourObs {
+    overflow-y: scroll; 
+    max-height: 300px;
+    list-style-type: none;
+}
+
+#writeAnnotation #listHourObs button {
+    font-size: 10px;
+    padding: 1px;
+    vertical-align: middle;
+    margin-left: 5px;
+}
