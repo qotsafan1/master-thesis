@@ -28,12 +28,20 @@
 	</div>
 
 	<div class="row">
-		<div class='col-lg-5 graph' id='dayBarChart'></div>
-		<div class='col-lg-5 graph' id='hourBarChart'></div>
+		<div class="col">
+			<div class='graph' id='dayBarChart'></div>
+		</div>
+		<div class="col">
+			<div class='graph' id='hourBarChart'></div>
+		</div>
 	</div>
 	<div class="row">
-		<div class='col-sm-5 graph' id='monthBarChart'></div>
-		<div class='col-sm-5 graph' id='weekBarChart'></div>
+		<div class="col">
+			<div class='graph' id='monthBarChart'></div>
+		</div>
+		<div class="col">
+			<div class='graph' id='weekBarChart'></div>
+		</div>
 	</div>
 	<br>
 	<footer>
@@ -69,7 +77,7 @@
 		var dateChart = new DateBarChart(
 			data['eachDay'],
 			'dateChart', 
-			900,
+			1000,
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
 			"Observations per day", 
@@ -87,7 +95,7 @@
 		var monthChart = new NormalBarChart(
 			data['averageDayPerMonth'], 
 			'monthBarChart', 
-			500, 
+			data['byMonth'].length > 6 ? 1000 : 500,
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
 			"Average observations per day each month", 
@@ -105,7 +113,7 @@
 		var weekChart = new NormalBarChart(
 			data['byWeek'], 
 			'weekBarChart', 
-			500, 
+			data['byMonth'].length > 6 ? 1000 : 500,
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
 			"Observations per week", 
