@@ -1,4 +1,4 @@
-function DateBarChart(data, elementId, chartWidth, chartHeight, margin, title, xScaleData, meanLine, styles) {
+function StackedBarChart(data, elementId, chartWidth, chartHeight, margin, title, xScaleData, meanLine, styles) {
     this.data = data;
     this.elementId = elementId;
     this.chartWidth = chartWidth;
@@ -12,9 +12,9 @@ function DateBarChart(data, elementId, chartWidth, chartHeight, margin, title, x
     this.meanLine = meanLine;
 }
 
-DateBarChart.prototype = Object.create(new CustomBarChart());
+StackedBarChart.prototype = Object.create(new CustomBarChart());
 
-DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
+StackedBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.yLabel = yLabel;
     this.yTicks = yTicks;
     this.createFrame(this.elementId, this.chartWidth, this.chartHeight)    
@@ -28,12 +28,13 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.createXAxis(xLabel);
     this.createYAxis(yLabel);
     //this.createBars();
-    this.createColorBarChart();
+    this.createStackedBars();
+    this.createLegend();
     this.createTitle();
-    this.createMeanLine();
+    //this.createMeanLine();
 }
 
-DateBarChart.prototype.updateToSpecificTime = function(type, time) {
+StackedBarChart.prototype.updateToSpecificTime = function(type, time) {
     this.removeWeekdayBrushes();
     
     if (type === 'month') {
@@ -69,7 +70,7 @@ DateBarChart.prototype.updateToSpecificTime = function(type, time) {
     }
 }
 
-DateBarChart.prototype.newWeekdayBrush = function(beginOfDay, endOfDay) {
+StackedBarChart.prototype.newWeekdayBrush = function(beginOfDay, endOfDay) {
     var brush = d3.brushX()
         .extent([[0, 0], [this.width, this.height]]);
     var thisObj = this;
@@ -82,44 +83,80 @@ DateBarChart.prototype.newWeekdayBrush = function(beginOfDay, endOfDay) {
     newG.call(brush.move, [this.x(beginOfDay), this.x(endOfDay)]);
 }
 
-DateBarChart.prototype.getBeginningOfDay = function(day) {
+StackedBarChart.prototype.getBeginningOfDay = function(day) {
     var beginOfDay = new Date(day);
     beginOfDay.setHours(0,0,0,0);
     return beginOfDay;
 }
 
-DateBarChart.prototype.getEndOfDay = function(day) {
+StackedBarChart.prototype.getEndOfDay = function(day) {
     var endOfDay = new Date(day);
     endOfDay.setHours(23,59,59);
     return endOfDay;
 }
 
-DateBarChart.prototype.removeWeekdayBrushes = function() {
+StackedBarChart.prototype.removeWeekdayBrushes = function() {
     this.g.selectAll('.weekday-brush').remove();
 }
 
-DateBarChart.prototype.createColorBarChart = function() {    
-    var thisObj = this;
-    var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
+StackedBarChart.prototype.createStackedBars = function() {
+    console.log(data["stackedHoursEachDay"]);
+    this.keys = ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-00:00"]
+    stack = d3.stack().keys(this.keys);
+    series = stack(data["stackedHoursEachDay"]);
+    console.log(series)
+    thisObj = this;
 
-    // Define the div for the tooltip
-    var div = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-    
+    this.colors = ["#0000ff","#FF0000","#FFA500","#008000"];
+    var colorScale = d3.scaleOrdinal()
+        .range(this.colors);
+
     this.bars = this.g.selectAll(".bar")
-        .data(this.data)
-        .enter().append("rect")
+        .data(series)
+        .enter()
+        .append("g")
         .attr("class", "bar")
-        .attr("x", function(d) { return thisObj.xBarPosition(thisObj.x,d,thisObj.xScaleType); })
-        .attr("y", function(d) { return thisObj.y(d.sum); })
-        .attr("width", this.getBarWidth(this.xScaleType))
-        .attr("height", function(d) { return (thisObj.height - thisObj.y(d.sum)); })
-        .style("fill", function(d,i) {
-            var dayString = (d.date.getFullYear() +"-"+ (d.date.getMonth()+1) +"-"+ d.date.getDate());
-            if (dayString in data["sumStackedHoursEachDay"]) {
-                return colors[indexOfMax(data["sumStackedHoursEachDay"][dayString])];
-            }
+        .style("fill", function(d, i) {
+            return colorScale(i);
         });
+
+    var rects = this.bars.selectAll("rect")
+        .data(function(d) {return d;})
+        .enter()
+        .append("rect")
+            .attr("x", function(d,i) { 
+                return thisObj.xBarPosition(thisObj.x,d["data"],thisObj.xScaleType); 
+            })
+            .attr("y", function(d,i) {
+                return thisObj.y(d[1]); })
+            .attr("width", this.getBarWidth(this.xScaleType))
+            .attr("height", function(d) { 
+                return (thisObj.y(d[0]) - thisObj.y(d[1])); 
+            });
 }
 
+StackedBarChart.prototype.createLegend = function() {
+    var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
+    var legend = this.svg.selectAll(".legend")
+        .data(this.keys)
+        .enter().append("g")
+        .attr("class", "legend")        
+        .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+
+        legend.append("rect")
+            .attr("x", this.width+this.margin.left-20)
+            .attr("y", 15)
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", function(d, i) {
+                return colors[i];
+            })
+            .style("stroke", "grey");
+
+        legend.append("text")
+            .attr("x", this.width+this.margin.left-5)
+            .attr("y", 20)
+            .attr("dy", ".35em")
+            .style("font-size", "12px")
+            .text(function (d) { return d; });
+}

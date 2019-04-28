@@ -74,6 +74,7 @@ function processData(dataset) {
     var countEachHourOfEachWeek = [];
     var countEachHourOfEachDay = [];
     var countEachHourOfEachWeekday = [];
+    var countStackedHoursOfEachDay = [];
 
     for (var i=0; i<24;i++) {
         countHour[i] = 0;
@@ -84,7 +85,7 @@ function processData(dataset) {
         for (var i=0; i<24; i++) {
             countEachHourOfEachWeekday[d][i] = 0;
         }
-    }
+    }    
 
     for (var instance in rawData) {
         var date = Object.keys(rawData[instance])[0]
@@ -176,6 +177,7 @@ function processData(dataset) {
             lastRecordDate = isoDate;	
         }        
 
+        // count days and weeks that don't appear in dataset
         if (lastLoopedDay) {
             var tempDate = new Date(isoDate.getTime());
             tempDate.setHours(0,0,0,0);
@@ -193,6 +195,23 @@ function processData(dataset) {
                     lastLoopedDay.setDate(lastLoopedDay.getDate() + 1);
                 }
             }
+        }
+
+        // calculate stacked bards
+        if (!(dayOfMonth in countStackedHoursOfEachDay)) {
+            countStackedHoursOfEachDay[dayOfMonth] = [];
+            for (var i=0; i<4; i++) {
+                countStackedHoursOfEachDay[dayOfMonth][i] = 0;
+            }
+        }
+        if (isoDate.getHours() < 6) {
+            countStackedHoursOfEachDay[dayOfMonth][0]++;
+        } else if (isoDate.getHours() >= 6 && isoDate.getHours() < 12) {
+            countStackedHoursOfEachDay[dayOfMonth][1]++;
+        } else if (isoDate.getHours() >= 12 && isoDate.getHours() < 18) {
+            countStackedHoursOfEachDay[dayOfMonth][2]++;
+        } else {
+            countStackedHoursOfEachDay[dayOfMonth][3]++;
         }
 
         var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getFullYear();
@@ -246,7 +265,7 @@ function processData(dataset) {
         lastLoopedDay = new Date(isoDate.getTime());
         lastLoopedDay.setHours(0,0,0,0);
     }    
- 
+ console.log(countStackedHoursOfEachDay)
     data['byMonth'] = createBarData(countMonth);
     data['byDay'] = createBarData(countWeekday);
     data['byHour'] = createBarData(countHour);
@@ -271,6 +290,18 @@ function processData(dataset) {
             data['maxHourOfDay'] = countEachHourOfEachDay[i];
         }
     }
+
+    data["stackedHoursEachDay"] = [];
+    for (var i in countStackedHoursOfEachDay) {
+        data["stackedHoursEachDay"].push({
+            "date": new Date(i),
+            "00:00-06:00": countStackedHoursOfEachDay[i][0],
+            "06:00-12:00": countStackedHoursOfEachDay[i][1],
+            "12:00-18:00": countStackedHoursOfEachDay[i][2],
+            "18:00-00:00": countStackedHoursOfEachDay[i][3]
+        });
+    }
+    data["sumStackedHoursEachDay"] = countStackedHoursOfEachDay;
 
     console.log(data)
     data['mostInADay'] = d3.max(data['eachDay'],function(d) { return d.sum});
