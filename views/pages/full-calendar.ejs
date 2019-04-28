@@ -92,7 +92,8 @@
 				"titleFontSize": "15px"
 			}
 		);
-		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));		
+		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
+		dateChart.createBars();		
 
 		fullCalendar = new FullCalendar(data['hourByDay'], data['sumOfEachDay'], data['firstRecordedDay'], data['lastRecordedDay'], data['maxHourOfDay'], data["mostInADay"], "");
 		fullCalendar.create();

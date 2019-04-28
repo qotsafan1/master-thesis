@@ -28,7 +28,7 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.createXAxis(xLabel);
     this.createYAxis(yLabel);
     //this.createBars();
-    this.createColorBarChart();
+    //this.createColorBarChart();
     this.createTitle();
     this.createMeanLine();
 }
