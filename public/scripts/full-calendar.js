@@ -307,5 +307,5 @@ FullCalendar.prototype.addAnnotation = function(element, dateType) {
 
     document.getElementById("annotationHeader").innerText = newHeaderLabel;
 
-    document.getElementById("writeAnnotation").showModal(); 
+    document.getElementById("writeAnnotation").showModal();
 }
