@@ -75,26 +75,7 @@
 
 	function createVisualizations() {
 		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
-		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
-
-		var stackedChart = new DateBarChart(
-			data['eachDay'],
-			'stackedChart', 
-			1000,
-			250,
-			{top: 40, right: 60, bottom: 40, left: 40},
-			"Observations per day", 
-			[firstDate, lastDate],
-			'default',
-			true,
-			{
-				"xBarFontSize": "12px",
-				"titleFontSize": "15px"
-			}
-		);
-		stackedChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
-		stackedChart.createStackedBars();
-		stackedChart.createLegend();
+		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);		
 
 		var dateChart = new DateBarChart(
 			data['eachDay'],
@@ -112,7 +93,7 @@
 			}
 		);
 		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
-		dateChart.createColorBarChart();
+		dateChart.createStackedBars();
 		dateChart.createLegend();
 		dateChart.createBrush();
 
