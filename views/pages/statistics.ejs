@@ -77,7 +77,7 @@
 		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
 		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
 
-		var stackedChart = new StackedBarChart(
+		var stackedChart = new DateBarChart(
 			data['eachDay'],
 			'stackedChart', 
 			1000,
@@ -93,6 +93,8 @@
 			}
 		);
 		stackedChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
+		stackedChart.createStackedBars();
+		stackedChart.createLegend();
 
 		var dateChart = new DateBarChart(
 			data['eachDay'],
@@ -111,6 +113,7 @@
 		);
 		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
 		dateChart.createColorBarChart();
+		dateChart.createLegend();
 		dateChart.createBrush();
 
 		var monthChart = new NormalBarChart(

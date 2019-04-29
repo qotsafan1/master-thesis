@@ -131,3 +131,66 @@ DateBarChart.prototype.createColorBarChart = function() {
         });
 }
 
+DateBarChart.prototype.createStackedBars = function() {
+    console.log(data["stackedHoursEachDay"]);
+    this.keys = ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-00:00"];
+    stack = d3.stack().keys(this.keys);
+    series = stack(data["stackedHoursEachDay"]);
+    console.log(series)
+    thisObj = this;
+
+    this.colors = ["#0000ff","#FF0000","#FFA500","#008000"];
+    var colorScale = d3.scaleOrdinal()
+        .range(this.colors);
+
+    this.bars = this.g.selectAll(".bar")
+        .data(series)
+        .enter()
+        .append("g")
+        .attr("class", "bar")
+        .style("fill", function(d, i) {
+            return colorScale(i);
+        });
+
+    var rects = this.bars.selectAll("rect")
+        .data(function(d) {return d;})
+        .enter()
+        .append("rect")
+            .attr("x", function(d,i) { 
+                return thisObj.xBarPosition(thisObj.x,d["data"],thisObj.xScaleType); 
+            })
+            .attr("y", function(d,i) {
+                return thisObj.y(d[1]); })
+            .attr("width", this.getBarWidth(this.xScaleType))
+            .attr("height", function(d) { 
+                return (thisObj.y(d[0]) - thisObj.y(d[1])); 
+            });
+}
+
+DateBarChart.prototype.createLegend = function() {
+    var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
+    var keys = ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-00:00"];
+    var legend = this.svg.selectAll(".legend")
+        .data(keys)
+        .enter().append("g")
+        .attr("class", "legend")        
+        .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+
+        legend.append("rect")
+            .attr("x", this.width+this.margin.left-20)
+            .attr("y", 15)
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", function(d, i) {
+                return colors[i];
+            })
+            .style("stroke", "grey");
+
+        legend.append("text")
+            .attr("x", this.width+this.margin.left-5)
+            .attr("y", 20)
+            .attr("dy", ".35em")
+            .style("font-size", "12px")
+            .text(function (d) { return d; });
+}
+

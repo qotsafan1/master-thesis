@@ -93,7 +93,10 @@
 			}
 		);
 		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
-		dateChart.createBars();		
+		dateChart.createBars();
+		//dateChart.createColorBarChart();
+		//dateChart.createStackedBars();
+		//dateChart.createLegend();
 
 		fullCalendar = new FullCalendar(data['hourByDay'], data['sumOfEachDay'], data['firstRecordedDay'], data['lastRecordedDay'], data['maxHourOfDay'], data["mostInADay"], "");
 		fullCalendar.create();
