@@ -23,7 +23,15 @@ StackedBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
 
     this.xAxis = this.xAxisBottom(this.x, yTicks, 'time');
     this.yAxis = this.yAxisLeft(this.y, -1);
-    this.barWidth = 3;
+    
+    var d1 = new Date(this.xScaleData[0].getTime());
+    d1.setHours(0,0,0,0);
+    var d2 = new Date(d1.getTime());
+    d2.setDate(d1.getDate() + 1);
+    var d1Obj = {date: d1};
+    var d2Obj = {date: d2};
+    var dayWidth = this.xBarPosition(this.x,d2Obj,this.xScaleType) - this.xBarPosition(this.x,d1Obj,this.xScaleType);
+    this.barWidth = dayWidth - (dayWidth < 2.5 ? 0 :0.5);
 
     this.createXAxis(xLabel);
     this.createYAxis(yLabel);
