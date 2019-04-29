@@ -39,6 +39,7 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     //this.createColorBarChart();
     this.createTitle();
     this.createMeanLine();
+    this.createDayTicks();
 }
 
 DateBarChart.prototype.updateToSpecificTime = function(type, time) {
@@ -192,5 +193,18 @@ DateBarChart.prototype.createLegend = function() {
             .attr("dy", ".35em")
             .style("font-size", "12px")
             .text(function (d) { return d; });
+}
+
+DateBarChart.prototype.createDayTicks = function() {
+    var smallAxis = d3.axisBottom(this.x)
+        .ticks(d3.timeDay.every(1))
+        .tickSize(4);
+
+    var u = this.g.append("g")
+        .attr("transform", "translate(0 ," + this.height + ")")
+        .attr("class", "x-axis-small")
+        .style("opacity", "0.4")
+        .call(smallAxis)
+    u.selectAll("text").remove();
 }
 

@@ -52,6 +52,7 @@ CustomBarChart.prototype.xAxisBottom = function(x, ticks, tickFormat) {
   }
   if (tickFormat === 'time') {
     xAxis.tickFormat(d3.timeFormat("%d %b %Y"));
+    xAxis.ticks(d3.timeMonth.every(1));
   }
   return xAxis;
 }
