@@ -2,3 +2,8 @@ g.weekday-brush .selection {
     fill: silver;
     opacity: 0.3;
 }
+
+.stacked-label {
+    font-size: 12px;
+    margin-right: 5px;
+}

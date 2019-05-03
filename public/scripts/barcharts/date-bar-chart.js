@@ -39,7 +39,7 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     //this.createColorBarChart();
     this.createTitle();
     this.createMeanLine();
-    this.createDayTicks();
+    this.createDayTicks();    
 }
 
 DateBarChart.prototype.updateToSpecificTime = function(type, time) {
@@ -133,11 +133,9 @@ DateBarChart.prototype.createColorBarChart = function() {
 }
 
 DateBarChart.prototype.createStackedBars = function() {
-    console.log(data["stackedHoursEachDay"]);
     this.keys = ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-00:00"];
     stack = d3.stack().keys(this.keys);
     series = stack(data["stackedHoursEachDay"]);
-    console.log(series)
     thisObj = this;
 
     this.colors = ["#0000ff","#FF0000","#FFA500","#008000"];
@@ -170,15 +168,15 @@ DateBarChart.prototype.createStackedBars = function() {
 
 DateBarChart.prototype.createLegend = function() {
     var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
-    var keys = ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-00:00"];
+    var keys = ["00-06", "06-12", "12-18", "18-00"];
     var legend = this.svg.selectAll(".legend")
         .data(keys)
         .enter().append("g")
         .attr("class", "legend")        
-        .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+        .attr("transform", function (d, i) { return "translate(0," + i * 15 + ")"; });
 
         legend.append("rect")
-            .attr("x", this.width+this.margin.left-20)
+            .attr("x", this.width+this.margin.left+5)
             .attr("y", 15)
             .attr("width", 10)
             .attr("height", 10)
@@ -188,7 +186,7 @@ DateBarChart.prototype.createLegend = function() {
             .style("stroke", "grey");
 
         legend.append("text")
-            .attr("x", this.width+this.margin.left-5)
+            .attr("x", this.width+this.margin.left+20)
             .attr("y", 20)
             .attr("dy", ".35em")
             .style("font-size", "12px")
@@ -206,5 +204,33 @@ DateBarChart.prototype.createDayTicks = function() {
         .style("opacity", "0.4")
         .call(smallAxis)
     u.selectAll("text").remove();
+}
+
+DateBarChart.prototype.addStackSwitch = function(turnOn) {
+    var thisObj = this;
+    var checked = turnOn ? "checked" : "";
+    this.svg.append("foreignObject")
+        .attr("width", 200)
+        .attr("height", 100)
+        .append("xhtml:body")
+        .html(("<form><span class='stacked-label'>Show hour breakdown</span><input type=checkbox id=stackBars "+ checked +" /></form>"))
+        .on("click", function(d, i){
+            thisObj.deleteBars();
+            if (thisObj.svg.select("#stackBars").node().checked) {
+                thisObj.createStackedBars();
+                thisObj.createLegend();
+            } else {
+                thisObj.removeLegend();
+                thisObj.createBars();
+            }
+        });
+}
+
+DateBarChart.prototype.deleteBars = function() {
+    this.g.selectAll(".bar").remove();
+}
+
+DateBarChart.prototype.removeLegend = function() {
+    this.svg.selectAll(".legend").remove();
 }
 
