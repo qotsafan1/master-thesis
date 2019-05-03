@@ -266,6 +266,8 @@ function processData(dataset) {
         lastLoopedDay.setHours(0,0,0,0);
     }    
  console.log(countStackedHoursOfEachDay)
+    data['firstRecordedDay'].setHours(0,0,0,0);
+    data['lastRecordedDay'].setHours(23,59,59);
     data['byMonth'] = createBarData(countMonth);
     data['byDay'] = createBarData(countWeekday);
     data['byHour'] = createBarData(countHour);

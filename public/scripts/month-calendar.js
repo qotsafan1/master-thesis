@@ -147,11 +147,22 @@ MonthCalendar.prototype.create = function() {
             .on('click', function() {
                 //theObject.changeDay(this);
             })
+            .style("color", function(d) {
+                if (d.getTime() < data["firstRecordedDay"].getTime() 
+                || d.getTime() > data["lastRecordedDay"].getTime()
+                ) {
+                    return "grey";
+                }
+            })
             .append('div')
                 .text(function(d) {
                     var dayString = theObject.getDateAsDateString(d);
                     if (dayString in theObject.data && theObject.data[dayString] !== 0) {                  
                         return theObject.data[dayString];
+                    } else if (d.getTime() > data["firstRecordedDay"].getTime() 
+                        && d.getTime() < data["lastRecordedDay"].getTime()
+                    ) {
+                        return 0;
                     }
                     return "\u00A0";
                 })
