@@ -36,7 +36,7 @@ TimeTable.prototype.create = function() {
         .append('td')
         .attr('class', function(d,i) {
             var classString = 'time-slot ';
-            if (theObject.date.getDate() === theObject.week[i].getDate()) {
+            if (theObject.date.getUTCDate() === theObject.week[i].getUTCDate()) {
                 classString += "selected-head ";
             }
             return classString;
@@ -54,7 +54,7 @@ TimeTable.prototype.create = function() {
         })
         .append('div')
             .text(function(d, i) {                
-                return theObject.week[i].getDate();
+                return theObject.week[i].getUTCDate();
             })
             .attr('style', 'text-align: center')
         .select(function(d,i) { return this.parentNode; })
@@ -133,7 +133,7 @@ TimeTable.prototype.create = function() {
                 })
                 .attr('class', function() {
                     var classString = "";
-                    if (theObject.date.getDate() === theObject.week[(j-2)].getDate()) {
+                    if (theObject.date.getUTCDate() === theObject.week[(j-2)].getUTCDate()) {
                         classString += "selected-day ";
                         if (i===23) {
                             classString += "selected-day-last ";
@@ -172,7 +172,7 @@ TimeTable.prototype.create = function() {
 }
 
 TimeTable.prototype.getDateAsDateString = function(date) {
-    return (date.getFullYear() +"-"+ (date.getMonth()+1) +"-"+ date.getDate());
+    return (date.getUTCFullYear() +"-"+ (date.getUTCMonth()+1) +"-"+ date.getUTCDate());
 }
 
 TimeTable.prototype.getHourByDayString = function(hour, day) {
@@ -182,15 +182,15 @@ TimeTable.prototype.getHourByDayString = function(hour, day) {
 }
 
 TimeTable.prototype.getTitle = function() {
-    var title = month[this.week[0].getMonth()] + " " + this.week[0].getFullYear();
+    var title = month[this.week[0].getUTCMonth()] + " " + this.week[0].getUTCFullYear();
     for (var i=1; i < this.week.length; i++) {
-        if (this.week[i].getMonth() !== this.week[0].getMonth()) {
-            if (this.week[i].getFullYear() !== this.week[0].getFullYear()) {
-                title = month[this.week[0].getMonth()] + " " + this.week[0].getFullYear() 
-                    + " - " + month[this.week[i].getMonth()] + " " + this.week[i].getFullYear();
+        if (this.week[i].getUTCMonth() !== this.week[0].getUTCMonth()) {
+            if (this.week[i].getUTCFullYear() !== this.week[0].getUTCFullYear()) {
+                title = month[this.week[0].getUTCMonth()] + " " + this.week[0].getUTCFullYear() 
+                    + " - " + month[this.week[i].getUTCMonth()] + " " + this.week[i].getUTCFullYear();
             } else {
-                title = month[this.week[0].getMonth()] 
-                    + " - " + month[this.week[i].getMonth()] + " " + this.week[i].getFullYear();
+                title = month[this.week[0].getUTCMonth()] 
+                    + " - " + month[this.week[i].getUTCMonth()] + " " + this.week[i].getUTCFullYear();
             }
             return title;
         }
@@ -272,14 +272,14 @@ TimeTable.prototype.addAnnotation = function(element, dateType) {
         if (dayKey in data["allRecordsEachDayAndHour"]) {
             for (var i in data["allRecordsEachDayAndHour"][dayKey][hour]) {
                 var time = data["allRecordsEachDayAndHour"][dayKey][hour][i];
-                var milliSecondString = (time.getFullYear() 
-                    + "-" + (time.getMonth()+1) + "-" + time.getDate() 
-                    + "-" + time.getHours() + "-" + time.getMilliseconds());
+                var milliSecondString = (time.getUTCFullYear() 
+                    + "-" + (time.getUTCMonth()+1) + "-" + time.getUTCDate() 
+                    + "-" + time.getUTCHours() + "-" + time.getUTCMilliseconds());
                 var node = document.createElement("LI");
                 var textnode = document.createTextNode(
-                    (time.getHours() < 10 ? "0" : "") + time.getHours() 
-                    +  ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()  
-                    +  ":" + (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
+                    (time.getUTCHours() < 10 ? "0" : "") + time.getUTCHours() 
+                    +  ":" + (time.getUTCMinutes() < 10 ? "0" : "") + time.getUTCMinutes()  
+                    +  ":" + (time.getUTCSeconds() < 10 ? "0" : "") + time.getUTCSeconds()
                 );
                 node.appendChild(textnode);
                 var button = document.createElement("button");
@@ -311,7 +311,7 @@ TimeTable.prototype.addAnnotation = function(element, dateType) {
     document.getElementById("writeAnnotation").showModal();
 }
 
-TimeTable.prototype.markChosenDay = function(element, dayString) {    
+TimeTable.prototype.markChosenDay = function(element, dayString) {
     var dayString = element.getAttribute('data-parent-day');
     var hourByDay = element.getAttribute('data-hour-key');
     
@@ -333,7 +333,7 @@ TimeTable.prototype.changeSelectedDay = function(dayString, element) {
     if (calendarDate !== null) { 
         this.calendar.changeDay(calendarDate);    
     } else {
-        var newDate = new Date(element.getAttribute('data-parent-day'));
+        var newDate = getCorrectUTCDate(element.getAttribute('data-parent-day'));
         this.date = newDate;
         this.remove();
         this.create();
@@ -363,7 +363,7 @@ TimeTable.prototype.addBreakdownBarChart = function(dayString, theHour) {
     }
 
     for (var instance in hourData) {
-        var hour = hourData[instance].getMinutes();
+        var hour = hourData[instance].getUTCMinutes();
         collectedData[hour].sum++;
     }
 
@@ -394,8 +394,8 @@ TimeTable.prototype.removeBreakdownBarChart = function() {
 
 TimeTable.prototype.addDistributionChart = function() {    
     var chosenDayString = d3.select('.selected-head').node().getAttribute('data-date-key');
-    var chosenDay = new Date(chosenDayString);
-    var chosenWeek = (chosenDay.getWeekNumber()+"-"+chosenDay.getFullYear());
+    var chosenDay = getCorrectUTCDate(chosenDayString);
+    var chosenWeek = (chosenDay.getWeekNumber()+"-"+chosenDay.getUTCFullYear());
     
 
     var barLength = d3.scaleLinear().rangeRound([0, 90]);

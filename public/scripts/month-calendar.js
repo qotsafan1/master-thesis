@@ -3,12 +3,12 @@ function MonthCalendar(htmlElement, date, data, maxInstance, overallData) {
     this.date = date;
     this.data = data;
     this.overallData = overallData;
-    this.day = date.getDate();
+    this.day = date.getUTCDate();
 
-    this.monthArray = this.getMonthMatrix(date.getFullYear(), date.getMonth());
+    this.monthArray = this.getMonthMatrix(date.getUTCFullYear(), date.getUTCMonth());
 
-    this.month = date.getMonth();
-    this.year = date.getFullYear();
+    this.month = date.getUTCMonth();
+    this.year = date.getUTCFullYear();
     
     this.colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([1, maxInstance]);
 
@@ -20,27 +20,27 @@ function MonthCalendar(htmlElement, date, data, maxInstance, overallData) {
 MonthCalendar.prototype.getMonthMatrix = function(y, m) {
     var calendarMatrix = []
 
-    var startDay = new Date(y, m, 1)
-    var lastDay = new Date(y, m+1, 0)
+    var startDay = new Date(Date.UTC(y, m, 1))
+    var lastDay = new Date(Date.UTC(y, m+1, 0))
 
     // Modify the result of getDay so that we treat Monday = 0 instead of Sunday = 0
-    var startDow = (startDay.getDay() + 6) % 7;
-    var endDow = (lastDay.getDay() + 6) % 7;
+    var startDow = (startDay.getUTCDay() + 6) % 7;
+    var endDow = (lastDay.getUTCDay() + 6) % 7;
 
     // If the month didn't start on a Monday, start from the last Monday of the previous month
-    startDay.setDate(startDay.getDate() - startDow);
-
+    startDay.setUTCDate(startDay.getUTCDate() - startDow);
     // If the month didn't end on a Sunday, end on the following Sunday in the next month
-    lastDay.setDate(lastDay.getDate() + (6-endDow));
+    lastDay.setUTCDate(lastDay.getUTCDate() + (6-endDow));
 
     var week = []
     while(startDay <= lastDay){
-        week.push(new Date(startDay));
+        var newDay = new Date(startDay.getTime());
+        week.push(newDay);
         if (week.length === 7){
           calendarMatrix.push(week);
           week = []
         }
-        startDay.setDate(startDay.getDate() + 1)
+        startDay.setUTCDate(startDay.getUTCDate() + 1)
     }
 
     return calendarMatrix;
@@ -49,8 +49,8 @@ MonthCalendar.prototype.getMonthMatrix = function(y, m) {
 MonthCalendar.prototype.getWeek = function() {
     for (var row in this.monthArray) {
         for (var col in this.monthArray[row]) {
-            if (this.date.getDate() == this.monthArray[row][col].getDate() 
-                && this.date.getMonth() == this.monthArray[row][col].getMonth()
+            if (this.date.getUTCDate() == this.monthArray[row][col].getUTCDate() 
+                && this.date.getUTCMonth() == this.monthArray[row][col].getUTCMonth()
             ) {
                 return this.monthArray[row];
             }
@@ -128,7 +128,7 @@ MonthCalendar.prototype.create = function() {
             .enter()
             .append('td')
             .attr('data-date', function(d) { return theObject.getDateAsDateString(d)})
-            .attr('data-day', function(d) { return d.getDate()})
+            .attr('data-day', function(d) { return d.getUTCDate()})
             .attr('data-weekday', function(d,i) { return i})
             .attr('class', function(d) {
                 var classString = "";
@@ -136,13 +136,13 @@ MonthCalendar.prototype.create = function() {
                     //classString += 'chosen-day ';
                 }
                 
-                if (d.getMonth() !== theObject.month) {
+                if (d.getUTCMonth() !== theObject.month) {
                     classString += 'hide-day ';
                 }
                 return classString;
             })
             .text(function (d) {              
-                return d.getDate();
+                return d.getUTCDate();
             })
             .on('click', function() {
                 //theObject.changeDay(this);
@@ -178,7 +178,7 @@ MonthCalendar.prototype.create = function() {
 }
 
 MonthCalendar.prototype.getDateAsDateString = function(date) {
-    return (date.getFullYear() +"-"+ (date.getMonth()+1) +"-"+ date.getDate());
+    return (date.getUTCFullYear() +"-"+ (date.getUTCMonth()+1) +"-"+ date.getUTCDate());
 }
 
 MonthCalendar.prototype.changeMonth = function(direction) {
@@ -202,7 +202,7 @@ MonthCalendar.prototype.changeDay = function(newTd) {
         chosenDay[0].classList.remove("chosen-day")
     }
     newTd.classList.add("chosen-day");
-    this.date = new Date(newTd.getAttribute('data-date'));
+    this.date = getCorrectUTCDate(newTd.getAttribute('data-date'));
     this.day = newTd.getAttribute('data-day');
     var wday = newTd.getAttribute('data-weekday');
     this.week = this.getWeek();
@@ -241,7 +241,7 @@ MonthCalendar.prototype.addDistribution = function() {
         .append("div")            
             .style("width", function(d,i) {
                 var firstDayInWeek = thisObj.monthArray[i][0];
-                var weekString = (firstDayInWeek.getWeekNumber() === 1 && firstDayInWeek.getMonth() === 11) ? (firstDayInWeek.getWeekNumber()+"-"+(firstDayInWeek.getFullYear()+1)) : (firstDayInWeek.getWeekNumber()+"-"+firstDayInWeek.getFullYear());
+                var weekString = (firstDayInWeek.getWeekNumber() === 1 && firstDayInWeek.getUTCMonth() === 11) ? (firstDayInWeek.getWeekNumber()+"-"+(firstDayInWeek.getUTCFullYear()+1)) : (firstDayInWeek.getWeekNumber()+"-"+firstDayInWeek.getUTCFullYear());
                 return barLength(weekString in data["sumOfEachWeek"] ? data["sumOfEachWeek"][weekString] : 0) + "px";
             })
             .style("height", "100%")

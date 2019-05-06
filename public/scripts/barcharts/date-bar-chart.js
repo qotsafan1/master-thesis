@@ -25,9 +25,9 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.yAxis = this.yAxisLeft(this.y, -1);
     
     var d1 = new Date(this.xScaleData[0].getTime());
-    d1.setHours(0,0,0,0);
+    d1.setUTCHours(0,0,0,0);
     var d2 = new Date(d1.getTime());
-    d2.setDate(d1.getDate() + 1);
+    d2.setUTCDate(d1.getUTCDate() + 1);
     var d1Obj = {date: d1};
     var d2Obj = {date: d2};
     var dayWidth = this.xBarPosition(this.x,d2Obj,this.xScaleType) - this.xBarPosition(this.x,d1Obj,this.xScaleType);
@@ -47,17 +47,17 @@ DateBarChart.prototype.updateToSpecificTime = function(type, time) {
     
     if (type === 'month') {
         var monthIndex = month.indexOf(time); 
-        var year = this.xScaleData[0].getFullYear();
-        var firstInMonth = new Date(year, monthIndex, 1)
-        var lastInMonth = new Date(year, monthIndex+1, 0)
+        var year = this.xScaleData[0].getUTCFullYear();
+        var firstInMonth = new Date(Date.UTC(year, monthIndex, 1));
+        var lastInMonth = new Date(Date.UTC(year, monthIndex+1, 0));
         
         if (this.xScaleData[0].getTime() > firstInMonth.getTime()
             || this.xScaleData[1].getTime() < firstInMonth.getTime())
         {
-            firstInMonth = new Date(year+1, monthIndex, 1)
-            lastInMonth = new Date(year+1, monthIndex+1, 0)
+            firstInMonth = new Date(Date.UTC(year+1, monthIndex, 1));
+            lastInMonth = new Date(Date.UTC(year+1, monthIndex+1, 0));
         }
-        lastInMonth.setHours(23,59,59);
+        lastInMonth.setUTCHours(23,59,59);
 
         this.g.call(this.brush.move, [this.x(firstInMonth), this.x(lastInMonth)]);
     } else if (type === 'weekday') {
@@ -72,7 +72,7 @@ DateBarChart.prototype.updateToSpecificTime = function(type, time) {
         updateChildGraphsWithWeekdayData(weekdayIndex);
     } else if ('week') {
         if (time in data["daysInEachWeek"]) {
-            data["daysInEachWeek"][time]["lastDay"].setHours(23,59,59);
+            data["daysInEachWeek"][time]["lastDay"].setUTCHours(23,59,59);
             this.g.call(this.brush.move, [this.x(data["daysInEachWeek"][time]["firstDay"]), this.x(data["daysInEachWeek"][time]["lastDay"])]);
         }
     }
@@ -92,14 +92,14 @@ DateBarChart.prototype.newWeekdayBrush = function(beginOfDay, endOfDay) {
 }
 
 DateBarChart.prototype.getBeginningOfDay = function(day) {
-    var beginOfDay = new Date(day);
-    beginOfDay.setHours(0,0,0,0);
+    var beginOfDay = new Date(day.getTime());
+    beginOfDay.setUTCHours(0,0,0,0);
     return beginOfDay;
 }
 
 DateBarChart.prototype.getEndOfDay = function(day) {
-    var endOfDay = new Date(day);
-    endOfDay.setHours(23,59,59);
+    var endOfDay = new Date(day.getTime());
+    endOfDay.setUTCHours(23,59,59);
     return endOfDay;
 }
 
@@ -125,7 +125,7 @@ DateBarChart.prototype.createColorBarChart = function() {
         .attr("width", this.getBarWidth(this.xScaleType))
         .attr("height", function(d) { return (thisObj.height - thisObj.y(d.sum)); })
         .style("fill", function(d,i) {
-            var dayString = (d.date.getFullYear() +"-"+ (d.date.getMonth()+1) +"-"+ d.date.getDate());
+            var dayString = (d.date.getUTCFullYear() +"-"+ (d.date.getUTCMonth()+1) +"-"+ d.date.getUTCDate());
             if (dayString in data["sumStackedHoursEachDay"]) {
                 return colors[indexOfMax(data["sumStackedHoursEachDay"][dayString])];
             }

@@ -25,9 +25,9 @@ StackedBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.yAxis = this.yAxisLeft(this.y, -1);
     
     var d1 = new Date(this.xScaleData[0].getTime());
-    d1.setHours(0,0,0,0);
+    d1.setUTCHours(0,0,0,0);
     var d2 = new Date(d1.getTime());
-    d2.setDate(d1.getDate() + 1);
+    d2.setUTCDate(d1.getUTCDate() + 1);
     var d1Obj = {date: d1};
     var d2Obj = {date: d2};
     var dayWidth = this.xBarPosition(this.x,d2Obj,this.xScaleType) - this.xBarPosition(this.x,d1Obj,this.xScaleType);
@@ -47,7 +47,7 @@ StackedBarChart.prototype.updateToSpecificTime = function(type, time) {
     
     if (type === 'month') {
         var monthIndex = month.indexOf(time); 
-        var year = this.xScaleData[0].getFullYear();
+        var year = this.xScaleData[0].getUTCFullYear();
         var firstInMonth = new Date(year, monthIndex, 1)
         var lastInMonth = new Date(year, monthIndex+1, 0)
         
@@ -57,7 +57,7 @@ StackedBarChart.prototype.updateToSpecificTime = function(type, time) {
             firstInMonth = new Date(year+1, monthIndex, 1)
             lastInMonth = new Date(year+1, monthIndex+1, 0)
         }
-        lastInMonth.setHours(23,59,59);
+        lastInMonth.setUTCHours(23,59,59);
 
         this.g.call(this.brush.move, [this.x(firstInMonth), this.x(lastInMonth)]);
     } else if (type === 'weekday') {
@@ -72,7 +72,7 @@ StackedBarChart.prototype.updateToSpecificTime = function(type, time) {
         updateChildGraphsWithWeekdayData(weekdayIndex);
     } else if ('week') {
         if (time in data["daysInEachWeek"]) {
-            data["daysInEachWeek"][time]["lastDay"].setHours(23,59,59);
+            data["daysInEachWeek"][time]["lastDay"].setUTCHours(23,59,59);
             this.g.call(this.brush.move, [this.x(data["daysInEachWeek"][time]["firstDay"]), this.x(data["daysInEachWeek"][time]["lastDay"])]);
         }
     }
@@ -93,13 +93,13 @@ StackedBarChart.prototype.newWeekdayBrush = function(beginOfDay, endOfDay) {
 
 StackedBarChart.prototype.getBeginningOfDay = function(day) {
     var beginOfDay = new Date(day);
-    beginOfDay.setHours(0,0,0,0);
+    beginOfDay.setUTCHours(0,0,0,0);
     return beginOfDay;
 }
 
 StackedBarChart.prototype.getEndOfDay = function(day) {
     var endOfDay = new Date(day);
-    endOfDay.setHours(23,59,59);
+    endOfDay.setUTCHours(23,59,59);
     return endOfDay;
 }
 

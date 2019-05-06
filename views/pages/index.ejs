@@ -92,8 +92,6 @@
 	}	
 
 	function createVisualizations() {
-		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
-		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);
 
 		var calendarObject = new Calendar(data['lastRecordedDay'], data['sumOfEachDay'], data['mostInADay'], data);
 		calendarObject.create();
@@ -107,7 +105,7 @@
 /*
 		var informationPanel = new InformationPanel(data);
 		informationPanel.setAverageWorkday();
-		informationPanel.setChosenWeekdayAverage(data['lastRecordedDay'].getDay());
+		informationPanel.setChosenWeekdayAverage(data['lastRecordedDay'].getUTCDay());
 
 
 		calendarObject.informationPanel = informationPanel;
@@ -144,13 +142,13 @@
 			}
 		);
 		currentDayComparisonChart.compare(
-			data["sumOfEachDay"][data["lastRecordedDay"].getFullYear() + "-" + (data["lastRecordedDay"].getMonth()+1) + "-" + data["lastRecordedDay"].getDate()],
+			data["sumOfEachDay"][data["lastRecordedDay"].getUTCFullYear() + "-" + (data["lastRecordedDay"].getUTCMonth()+1) + "-" + data["lastRecordedDay"].getUTCDate()],
 			data["averageDay"],
 			"Chosen day",
 			"Overall average day"
 		);
 
-		var day = data["lastRecordedDay"].getDay() === 0 ? 6 : (data["lastRecordedDay"].getDay()-1);
+		var day = data["lastRecordedDay"].getUTCDay() === 0 ? 6 : (data["lastRecordedDay"].getUTCDay()-1);
 		weekDayComparisonChart = new ComparisonChart(			
 			'dayComparisonChart', 
 			300, 
@@ -164,7 +162,7 @@
 		);
 
 		weekDayComparisonChart.compare(
-			data["sumOfEachDay"][data["lastRecordedDay"].getFullYear() + "-" + (data["lastRecordedDay"].getMonth()+1) + "-" + data["lastRecordedDay"].getDate()],
+			data["sumOfEachDay"][data["lastRecordedDay"].getUTCFullYear() + "-" + (data["lastRecordedDay"].getUTCMonth()+1) + "-" + data["lastRecordedDay"].getUTCDate()],
 			data["averagePerWeekday"][day],
 			("Chosen " + weekday[day]),
 			("Average " + weekday[day])
@@ -184,9 +182,9 @@
 
 		monthComparisonChart.compare(
 			data["averageDay"],
-			data["averageDayEachMonth"][month[data["lastRecordedDay"].getMonth()]],
+			data["averageDayEachMonth"][month[data["lastRecordedDay"].getUTCMonth()]],
 			("Average day overall"),
-			("Average day in " + month[data["lastRecordedDay"].getMonth()])
+			("Average day in " + month[data["lastRecordedDay"].getUTCMonth()])
 		);
 
 
@@ -195,9 +193,9 @@
 	}
 
 	function updateAverages(date) {
-		var dayString = date.getFullYear() + "-" + (date.getMonth()+1) + "-" + date.getDate();
-		var day = date.getDay() === 0 ? 6 : (date.getDay()-1);
-		var monthNumber = date.getMonth();
+		var dayString = date.getUTCFullYear() + "-" + (date.getUTCMonth()+1) + "-" + date.getUTCDate();
+		var day = date.getUTCDay() === 0 ? 6 : (date.getUTCDay()-1);
+		var monthNumber = date.getUTCMonth();
 		if (dayString in data["sumOfEachDay"]) {
 			currentDayComparisonChart.update(
 				data["sumOfEachDay"][dayString],

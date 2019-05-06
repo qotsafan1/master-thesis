@@ -15,8 +15,8 @@ CustomBarChart.prototype.xScale = function(width, xScaleData) {
   var x;
   switch (this.xScaleType) {
     case 'time':
-      x = d3.scaleTime().range([0, width]);
-      x.domain(xScaleData);//[lowest,highest]
+      x = d3.scaleUtc().range([0, width]);
+      x.domain([xScaleData[0], xScaleData[1]]);//[lowest,highest]      
       break;
     case 'linear':
       x = d3.scaleLinear().range([0, width]);
@@ -76,8 +76,7 @@ CustomBarChart.prototype.getBarWidth = function() {
 CustomBarChart.prototype.getBarData = function(data) {
   var result;
   if (this.xScaleType === 'time') {
-    var parseDate = d3.timeParse("%m/%d/%Y");
-    result = this.x(parseDate((data.date.getMonth()+1) +"/"+data.date.getDate()+"/"+data.date.getFullYear()))
+    result = x(data.date);
   } else {
     result = this.x(data.type);
   }
@@ -90,8 +89,7 @@ CustomBarChart.prototype.getBarData = function(data) {
 CustomBarChart.prototype.xBarPosition = function(x, data, type) {
   var result;
   if (type === 'time') {
-    var parseDate = d3.timeParse("%m/%d/%Y");
-    result = x(parseDate((data.date.getMonth()+1) +"/"+data.date.getDate()+"/"+data.date.getFullYear()))
+    result = x(data.date);
   } else {
     result = x(data.type);
   }

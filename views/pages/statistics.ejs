@@ -74,8 +74,8 @@
 	}
 
 	function createVisualizations() {
-		var firstDate = new Date(data['firstYear'], data['firstMonth'], 1);				
-		var lastDate = new Date(data['lastRecordedDay'].getMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getMonth() === 11 ? 0 : (data['lastRecordedDay'].getMonth()+1), 1);		
+		var firstDate = new Date(Date.UTC(data['firstYear'], data['firstMonth'], 1));
+		var lastDate = new Date(Date.UTC(data['lastRecordedDay'].getUTCMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getUTCMonth() === 11 ? 0 : (data['lastRecordedDay'].getUTCMonth()+1), 1));
 
 		var dateChart = new DateBarChart(
 			data['eachDay'],
@@ -174,10 +174,10 @@
 	}
 
 	function updateChildGraphs(firstDate, lastDate) {
-		firstDate.setHours(0,0,0,0);
-		lastDate.setHours(23,59,59);
-		document.getElementById("firstDate").innerHTML = weekday[firstDate.getDay() === 0 ? 6 : (firstDate.getDay()-1)] + " " + month[firstDate.getMonth()] + " " + firstDate.getDate() + " " + firstDate.getFullYear();
-		document.getElementById("lastDate").innerHTML = weekday[lastDate.getDay() === 0 ? 6 : (lastDate.getDay()-1)] + " " + month[lastDate.getMonth()] + " " + lastDate.getDate() + " " + lastDate.getFullYear();;
+		firstDate.setUTCHours(0,0,0,0);
+		lastDate.setUTCHours(23,59,59);
+		document.getElementById("firstDate").innerHTML = weekday[firstDate.getUTCDay() === 0 ? 6 : (firstDate.getUTCDay()-1)] + " " + month[firstDate.getUTCMonth()] + " " + firstDate.getUTCDate() + " " + firstDate.getUTCFullYear();
+		document.getElementById("lastDate").innerHTML = weekday[lastDate.getUTCDay() === 0 ? 6 : (lastDate.getUTCDay()-1)] + " " + month[lastDate.getUTCMonth()] + " " + lastDate.getUTCDate() + " " + lastDate.getUTCFullYear();;
 		if (childGraphs.length > 0) {
 			var countWeekday = [];
 			var countHour = [];
@@ -197,17 +197,17 @@
 					continue;
 				}
 
-				var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
-        		var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
+				var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
+        		var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
 				if (dayOfMonth in invalidObservations
 					|| hourOfDay in invalidObservations) {
 					continue;
 				}
 
-				var currentDay = isoDate.getDay() === 0 ? weekday[6] : weekday[(isoDate.getDay()-1)];            
+				var currentDay = isoDate.getUTCDay() === 0 ? weekday[6] : weekday[(isoDate.getUTCDay()-1)];            
 				sumData(currentDay, countWeekday);
 
-				sumData(isoDate.getHours(), countHour);
+				sumData(isoDate.getUTCHours(), countHour);
 			}
 			
 			var weekdayData = createBarData(countWeekday);
@@ -238,14 +238,14 @@
 			
 			var isoDate = strictIsoParse(unFilteredData[instance][date]);
 
-			var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
-			var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
+			var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
+			var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
 			if (dayOfMonth in invalidObservations
 				|| hourOfDay in invalidObservations) {
 				continue;
 			}
 
-			var isoDay = isoDate.getDay() === 0 ? 6 : isoDate.getDay()-1;
+			var isoDay = isoDate.getUTCDay() === 0 ? 6 : isoDate.getUTCDay()-1;
 			if (isoDay === day) {
 				days.push(isoDate);
 			}
@@ -272,14 +272,14 @@
 
 				var isoDate = strictIsoParse(unFilteredData[instance][date]);
 
-				var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
-        		var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
+				var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
+        		var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
 				if (dayOfMonth in invalidObservations
 					|| hourOfDay in invalidObservations) {
 					continue;
 				}
 
-				var isoDay = isoDate.getDay() === 0 ? 6 : isoDay = isoDate.getDay()-1;
+				var isoDay = isoDate.getUTCDay() === 0 ? 6 : isoDay = isoDate.getUTCDay()-1;
 
 				if (weekdayIndex !== isoDay) {
 					continue;
@@ -289,7 +289,7 @@
 				
 				sumData(currentDay, countWeekday);
 
-				sumData(isoDate.getHours(), countHour);
+				sumData(isoDate.getUTCHours(), countHour);
 			}
 
 			var weekdayData = createBarData(countWeekday);

@@ -22,20 +22,20 @@ weekday[5] = "Saturday";
 weekday[6] = "Sunday";
 
 function setClockTo(dateObject, time) {
-    dateObject.setHours(time[0]);
-    dateObject.setMinutes(time[1]);
+    dateObject.setUTCHours(time[0]);
+    dateObject.setUTCMinutes(time[1]);
     dateObject.setSeconds(time[2]);
 }
 
 function daysInMonth (month, year) { // Use 1 for January, 2 for February, etc.
-    return new Date(year, month, 0).getDate();
+    return new Date(Date.UTC(year, month, 0)).getUTCDate();
   }
 
 function monthDiff(d1, d2) {
     var months;
-    months = (d2.getFullYear() - d1.getFullYear()) * 12;
-    months -= d1.getMonth() + 1;
-    months += d2.getMonth();
+    months = (d2.getUTCFullYear() - d1.getUTCFullYear()) * 12;
+    months -= d1.getUTCMonth() + 1;
+    months += d2.getUTCMonth();
     return months <= 0 ? 0 : months;
 }
 
@@ -51,9 +51,9 @@ function getCountOfEachWeekday(d1, d2) {
     var currentDate = date1;
     while ( currentDate.getTime() <= date2.getTime() )
     {
-        var currentDay = currentDate.getDay() === 0 ? 6 : currentDate.getDay()-1;
+        var currentDay = currentDate.getUTCDay() === 0 ? 6 : currentDate.getUTCDay()-1;
         weekdayCount[currentDay]++;
-        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
 
     return weekdayCount;
@@ -69,13 +69,13 @@ function getNumberOfDayBetweenTwoDates(d1, d2) {
     while (currentDate.getTime() <= date2.getTime())
     {
         totalDays++;
-        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
     return totalDays;
 }
 
 Date.prototype.getWeekNumber = function(){
-    var d = new Date(Date.UTC(this.getFullYear(), this.getMonth(), this.getDate()));
+    var d = new Date(Date.UTC(this.getUTCFullYear(), this.getUTCMonth(), this.getUTCDate()));
     var dayNum = d.getUTCDay() || 7;
     d.setUTCDate(d.getUTCDate() + 4 - dayNum);
     var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
@@ -98,4 +98,9 @@ function indexOfMax(arr) {
     }
 
     return maxIndex;
+}
+
+function getCorrectUTCDate(dateString) {
+    var parts = dateString.split('-');
+    return new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2])));
 }

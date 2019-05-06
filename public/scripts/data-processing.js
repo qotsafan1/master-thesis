@@ -104,9 +104,9 @@ function processData(dataset) {
             continue;
         }        
 
-        var dayOfMonth = isoDate.getFullYear() + "-" + (isoDate.getMonth()+1) + "-" + isoDate.getDate();
-        var hourOfDay = dayOfMonth + "-" +isoDate.getHours();
-        var millisecondString = hourOfDay + "-" +isoDate.getMilliseconds();
+        var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
+        var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
+        var millisecondString = hourOfDay + "-" +isoDate.getUTCMilliseconds();
 
         if (isoDate > data['lastRecordedDay']) {
             data['lastRecordedDay'] = isoDate;
@@ -116,33 +116,33 @@ function processData(dataset) {
             data['firstRecordedDay'] = isoDate;            
         }
 
-        if (isoDate.getFullYear() < data['firstYear']) {
-            data['firstYear'] = isoDate.getFullYear();
+        if (isoDate.getUTCFullYear() < data['firstYear']) {
+            data['firstYear'] = isoDate.getUTCFullYear();
         }
-        if (isoDate.getFullYear() > data['lastYear']) {
-            data['lastYear'] = isoDate.getFullYear();
+        if (isoDate.getUTCFullYear() > data['lastYear']) {
+            data['lastYear'] = isoDate.getUTCFullYear();
         }
 
-        if (isoDate.getFullYear() === data['firstYear']) {
+        if (isoDate.getUTCFullYear() === data['firstYear']) {
             //Find first and last month
-            if (isoDate.getMonth() < data["firstMonth"]) {
-                data["firstMonth"] = isoDate.getMonth();
+            if (isoDate.getUTCMonth() < data["firstMonth"]) {
+                data["firstMonth"] = isoDate.getUTCMonth();
             }						
         }
-        if (isoDate.getFullYear() === data['lastYear']) {
-            if (isoDate.getMonth() > data["lastMonth"]) {
-                data["lastMonth"] = isoDate.getMonth();
+        if (isoDate.getUTCFullYear() === data['lastYear']) {
+            if (isoDate.getUTCMonth() > data["lastMonth"]) {
+                data["lastMonth"] = isoDate.getUTCMonth();
             }
         }
 
         if (dayOfMonth in data['allRecordsEachDayAndHour']) {
-            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
+            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         } else {
             data['allRecordsEachDayAndHour'][dayOfMonth] = [];
             for (var i=0; i<24; i++) {
                 data['allRecordsEachDayAndHour'][dayOfMonth][i] = [];
             }
-            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
+            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         }
 
         if (millisecondString in invalidObservations) {
@@ -180,11 +180,11 @@ function processData(dataset) {
         // count days and weeks that don't appear in dataset
         if (lastLoopedDay) {
             var tempDate = new Date(isoDate.getTime());
-            tempDate.setHours(0,0,0,0);
+            tempDate.setUTCHours(0,0,0,0);
             if ((tempDate.getTime() - lastLoopedDay.getTime()) > 86400000) {
                 while(lastLoopedDay.getTime() < tempDate.getTime()) {
-                    var tempDay = lastLoopedDay.getFullYear() + "-" + (lastLoopedDay.getMonth()+1) + "-" + lastLoopedDay.getDate();
-                    var tempWeek = lastLoopedDay.getWeekNumber() + "-" + lastLoopedDay.getFullYear();
+                    var tempDay = lastLoopedDay.getUTCFullYear() + "-" + (lastLoopedDay.getUTCMonth()+1) + "-" + lastLoopedDay.getUTCDate();
+                    var tempWeek = lastLoopedDay.getWeekNumber() + "-" + lastLoopedDay.getUTCFullYear();
                     if (!(tempDay in countEachDay)) {
                         countEachDay[tempDay] = 0;
                     }
@@ -192,7 +192,7 @@ function processData(dataset) {
                     if (!(tempWeek in countWeeks)) {
                         countWeeks[tempWeek] = 0;
                     }
-                    lastLoopedDay.setDate(lastLoopedDay.getDate() + 1);
+                    lastLoopedDay.setUTCDate(lastLoopedDay.getUTCDate() + 1);
                 }
             }
         }
@@ -204,26 +204,26 @@ function processData(dataset) {
                 countStackedHoursOfEachDay[dayOfMonth][i] = 0;
             }
         }
-        if (isoDate.getHours() < 6) {
+        if (isoDate.getUTCHours() < 6) {
             countStackedHoursOfEachDay[dayOfMonth][0]++;
-        } else if (isoDate.getHours() >= 6 && isoDate.getHours() < 12) {
+        } else if (isoDate.getUTCHours() >= 6 && isoDate.getUTCHours() < 12) {
             countStackedHoursOfEachDay[dayOfMonth][1]++;
-        } else if (isoDate.getHours() >= 12 && isoDate.getHours() < 18) {
+        } else if (isoDate.getUTCHours() >= 12 && isoDate.getUTCHours() < 18) {
             countStackedHoursOfEachDay[dayOfMonth][2]++;
         } else {
             countStackedHoursOfEachDay[dayOfMonth][3]++;
         }
 
-        var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getFullYear();
+        var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getUTCFullYear();
         sumData(currentWeek, countWeeks);
 
-        var currentMonth = month[isoDate.getMonth()]
+        var currentMonth = month[isoDate.getUTCMonth()]
         sumData(currentMonth, countMonth);
 
-        var currentDay = isoDate.getDay() === 0 ? weekday[6] : weekday[(isoDate.getDay()-1)];
+        var currentDay = isoDate.getUTCDay() === 0 ? weekday[6] : weekday[(isoDate.getUTCDay()-1)];
 
         sumData(currentDay, countWeekday);
-        sumData(isoDate.getHours(), countHour);
+        sumData(isoDate.getUTCHours(), countHour);
                 
         if (dayOfMonth in countEachDay) {
             countEachDay[dayOfMonth]++;
@@ -239,35 +239,37 @@ function processData(dataset) {
         }
 
         // sum of each hour of each weekday
-        countEachHourOfEachWeekday[isoDate.getDay() === 0 ? 6 : (isoDate.getDay()-1)][isoDate.getHours()]++; 
+        countEachHourOfEachWeekday[isoDate.getUTCDay() === 0 ? 6 : (isoDate.getUTCDay()-1)][isoDate.getUTCHours()]++; 
 
         if (dayOfMonth in data['recordsEachDayAndHour']) {
-            data['recordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
+            data['recordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         } else {
             data['recordsEachDayAndHour'][dayOfMonth] = [];
             for (var i=0; i<24; i++) {
                 data['recordsEachDayAndHour'][dayOfMonth][i] = [];
             }
-            data['recordsEachDayAndHour'][dayOfMonth][isoDate.getHours()].push(isoDate);
+            data['recordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         }
 
         // sum of each hour of each week
         if (currentWeek in countEachHourOfEachWeek) {
-            countEachHourOfEachWeek[currentWeek][isoDate.getHours()]++;
+            countEachHourOfEachWeek[currentWeek][isoDate.getUTCHours()]++;
         } else {
             countEachHourOfEachWeek[currentWeek] = [];
             for (var i=0; i<24; i++) {
                 countEachHourOfEachWeek[currentWeek][i] = 0;
             }
-            countEachHourOfEachWeek[currentWeek][isoDate.getHours()]++;
+            countEachHourOfEachWeek[currentWeek][isoDate.getUTCHours()]++;
         }        
 
         lastLoopedDay = new Date(isoDate.getTime());
-        lastLoopedDay.setHours(0,0,0,0);
-    }    
- console.log(countStackedHoursOfEachDay)
-    data['firstRecordedDay'].setHours(0,0,0,0);
-    data['lastRecordedDay'].setHours(23,59,59);
+        lastLoopedDay.setUTCHours(0,0,0,0);
+    }
+
+    data['firstRecordedDay'] = new Date(data['firstRecordedDay'].getTime());
+    data['firstRecordedDay'].setUTCHours(0,0,0,0);
+    data['lastRecordedDay'] = new Date(data['lastRecordedDay'].getTime());
+    data['lastRecordedDay'].setUTCHours(23,59,59);
     data['byMonth'] = createBarData(countMonth);
     data['byDay'] = createBarData(countWeekday);
     data['byHour'] = createBarData(countHour);
@@ -282,7 +284,7 @@ function processData(dataset) {
 
     for(var i in countEachDay) {
         data['eachDay'].push({
-            "date": new Date(i),
+            "date": getCorrectUTCDate(i),
             "sum": countEachDay[i]
         });
     }
@@ -296,7 +298,7 @@ function processData(dataset) {
     data["stackedHoursEachDay"] = [];
     for (var i in countStackedHoursOfEachDay) {
         data["stackedHoursEachDay"].push({
-            "date": new Date(i),
+            "date": getCorrectUTCDate(i),
             "00:00-06:00": countStackedHoursOfEachDay[i][0],
             "06:00-12:00": countStackedHoursOfEachDay[i][1],
             "12:00-18:00": countStackedHoursOfEachDay[i][2],
@@ -365,8 +367,8 @@ function processData(dataset) {
     data["averageDayPerMonth"] = [];
     data["averageDayEachMonth"] = [];
     data["maxAverageDayPerMonth"] = 0;
-    var amountOfDaysInFirstMonth = daysInMonth(data['firstRecordedDay'].getMonth(), data['firstRecordedDay'].getFullYear()) - data['firstRecordedDay'].getDate()+1;
-    var amountOfDaysInLastMonth = data['lastRecordedDay'].getDate();
+    var amountOfDaysInFirstMonth = daysInMonth(data['firstRecordedDay'].getUTCMonth(), data['firstRecordedDay'].getUTCFullYear()) - data['firstRecordedDay'].getUTCDate()+1;
+    var amountOfDaysInLastMonth = data['lastRecordedDay'].getUTCDate();
     var cnt = 0;    
     for (var i in countMonth) {
         var sum = 0;
@@ -396,10 +398,10 @@ function processData(dataset) {
 
 function getDaysInEachWeek(firstDay, lastDay) {
     var currentDay = new Date(firstDay.getTime());
-    currentDay.setHours(0,0,0,0);
+    currentDay.setUTCHours(0,0,0,0);
     weekArray = [];
     while (currentDay.getTime() < lastDay.getTime()) {
-        var weekString = currentDay.getWeekNumber() +"-"+ currentDay.getFullYear();
+        var weekString = currentDay.getWeekNumber() +"-"+ currentDay.getUTCFullYear();
         if (weekString in weekArray) {
             if (weekArray[weekString]["firstDay"].getTime() > currentDay.getTime()) {
                 weekArray[weekString]["firstDay"] = new Date(currentDay.getTime());
@@ -414,7 +416,7 @@ function getDaysInEachWeek(firstDay, lastDay) {
             weekArray[weekString]["lastDay"] = new Date(currentDay.getTime());
         }
 
-        currentDay.setDate(currentDay.getDate() + 1);
+        currentDay.setUTCDate(currentDay.getUTCDate() + 1);
     }
 
     return weekArray;

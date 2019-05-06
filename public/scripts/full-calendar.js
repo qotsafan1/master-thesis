@@ -25,14 +25,14 @@ FullCalendar.prototype.create = function() {
         .append("span").attr("class", "hour-text").text("00:00")
     tr.append("th").attr("class", "empty");
     var currentDate = new Date (this.firstDate.getTime());
-    currentDate.setHours(0,0,0,0);
+    currentDate.setUTCHours(0,0,0,0);
     var days = [];
     while (currentDate <= this.lastDate)
     {
         var dayString = theObject.getDateAsDateString(currentDate);
-        var currentDay = currentDate.getDay() === 0 ? 6 : currentDate.getDay()-1;
+        var currentDay = currentDate.getUTCDay() === 0 ? 6 : currentDate.getUTCDay()-1;
         if (this.weekday !== "" && currentDay != this.weekday) {
-            currentDate.setDate(currentDate.getDate() + 1);
+            currentDate.setUTCDate(currentDate.getUTCDate() + 1);
             continue;
         }
 
@@ -40,9 +40,9 @@ FullCalendar.prototype.create = function() {
             .attr('data-timetable-date', dayString)
             .attr('class', 'month-label')
             .append("div")
-            .text(month[currentDate.getMonth()]);
-        if (currentDate.getDate() === 1 || days.length < 1
-            || (currentDate.getDate() < 8 && this.weekday !== "")) {            
+            .text(month[currentDate.getUTCMonth()]);
+        if (currentDate.getUTCDate() === 1 || days.length < 1
+            || (currentDate.getUTCDate() < 8 && this.weekday !== "")) {            
         } else {
             monthLabel
                 .style("display", "none");
@@ -52,22 +52,22 @@ FullCalendar.prototype.create = function() {
         headDay
             .attr('data-timetable-date', dayString)
             .style("background-color", function() {
-                if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+                if (currentDate.getUTCDay() === 0 || currentDate.getUTCDay() === 6) {
                     return "lightgrey";
                 } else {
                     return "white";
                 }
             })
-            .text(currentDate.getDay() === 0 ? weekday[6].substr(0,3) : weekday[(currentDate.getDay()-1)].substr(0,3))
+            .text(currentDate.getUTCDay() === 0 ? weekday[6].substr(0,3) : weekday[(currentDate.getUTCDay()-1)].substr(0,3))
             .append('div')
-                .text(currentDate.getDate());                
+                .text(currentDate.getUTCDate());                
 
-        if (currentDate.getDate() === 1) {
+        if (currentDate.getUTCDate() === 1) {
             headDay.style("border-left-width", "1.7px")
         }
 
         days.push(new Date(currentDate.getTime()));
-        currentDate.setDate(currentDate.getDate() + 1);
+        currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
 
     for (var i=0; i<=24; i++) {
@@ -91,7 +91,7 @@ FullCalendar.prototype.create = function() {
                     .attr('data-timetable-date', dayString)
                     .attr('data-date-key', dayString)
                     .style("background-color", function() {
-                        if (days[(j-1)].getDay() === 0 || days[(j-1)].getDay() === 6) {
+                        if (days[(j-1)].getUTCDay() === 0 || days[(j-1)].getUTCDay() === 6) {
                             return "lightgrey";
                         } else {
                             return "white";
@@ -134,7 +134,7 @@ FullCalendar.prototype.create = function() {
                         return theObject.colorScale(theObject.data[hourByDay]);
                     } else if (hourByDay in data["invalidatedObservations"]) {
                         return "lightblue";
-                    } else if (days[(j-1)].getDay() === 0 || days[(j-1)].getDay() === 6) {
+                    } else if (days[(j-1)].getUTCDay() === 0 || days[(j-1)].getUTCDay() === 6) {
                         return "lightgrey";
                     }
                     return "white";
@@ -184,7 +184,7 @@ FullCalendar.prototype.create = function() {
                     currentTd.style("border-top-width", "1.7px")
                 }
 
-                if (days[(j-1)].getDate() === 1) {
+                if (days[(j-1)].getUTCDate() === 1) {
                     currentTd.style("border-left-width", "1.7px")
                 }
             }
@@ -193,7 +193,7 @@ FullCalendar.prototype.create = function() {
 }
 
 FullCalendar.prototype.getDateAsDateString = function(date) {
-    return (date.getFullYear() +"-"+ (date.getMonth()+1) +"-"+ date.getDate());
+    return (date.getUTCFullYear() +"-"+ (date.getUTCMonth()+1) +"-"+ date.getUTCDate());
 }
 
 FullCalendar.prototype.getHourByDayString = function(hour, day) {
@@ -208,19 +208,6 @@ FullCalendar.prototype.remove = function() {
     while (timetable.firstChild) {
         timetable.removeChild(timetable.firstChild);
     }
-}
-
-FullCalendar.prototype.update = function(firstDate, lastDate, weekday) {
-    this.weekday = weekday;
-    this.firstDate = new Date(firstDate);
-    this.lastDate = new Date(lastDate);
-
-    if (!firstDate || !lastDate || this.firstDate > this.lastDate) {
-        console.log("aaaaa")
-        return;
-    }
-    this.remove();
-    this.create();
 }
 
 FullCalendar.prototype.addAnnotation = function(element, dateType) {
@@ -271,14 +258,14 @@ FullCalendar.prototype.addAnnotation = function(element, dateType) {
         if (dayKey in data["allRecordsEachDayAndHour"]) {
             for (var i in data["allRecordsEachDayAndHour"][dayKey][hour]) {
                 var time = data["allRecordsEachDayAndHour"][dayKey][hour][i];
-                var milliSecondString = (time.getFullYear() 
-                    + "-" + (time.getMonth()+1) + "-" + time.getDate() 
-                    + "-" + time.getHours() + "-" + time.getMilliseconds());
+                var milliSecondString = (time.getUTCFullYear() 
+                    + "-" + (time.getUTCMonth()+1) + "-" + time.getUTCDate() 
+                    + "-" + time.getUTCHours() + "-" + time.getUTCMilliseconds());
                 var node = document.createElement("LI");
                 var textnode = document.createTextNode(
-                    (time.getHours() < 10 ? "0" : "") + time.getHours() 
-                    +  ":" + (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()  
-                    +  ":" + (time.getSeconds() < 10 ? "0" : "") + time.getSeconds()
+                    (time.getUTCHours() < 10 ? "0" : "") + time.getUTCHours() 
+                    +  ":" + (time.getUTCMinutes() < 10 ? "0" : "") + time.getUTCMinutes()  
+                    +  ":" + (time.getUTCSeconds() < 10 ? "0" : "") + time.getUTCSeconds()
                 );
                 node.appendChild(textnode);
                 var button = document.createElement("button");
