@@ -31,7 +31,7 @@ function getAnnotations(dataset) {
     xmlhttp.send();
 }
 
-function processData(dataset) {    
+function processData(timezone) {    
     childGraphs = [];
     data = [];
     data["byMonth"] = [];
@@ -52,12 +52,10 @@ function processData(dataset) {
     data['invalidatedObservations'] = [];
     data['singleInvalidatedObservations'] = [];
     data['hourToMarkAsChanged'] = [];
+    data['totalDaysWithObservations'] = 0;
 
     var lastLoopedDay;
     var lastRecordDate = new Date("1971-1-1");
-    
-    numberOfMonths = [];
-
     
     unFilteredData = rawData;
     console.log(rawData)
@@ -71,6 +69,7 @@ function processData(dataset) {
     var countHour = [];
     var countEachDay = [];
     var countWeeks = [];
+    var countEachMonth = [];
     var countEachHourOfEachWeek = [];
     var countEachHourOfEachDay = [];
     var countEachHourOfEachWeekday = [];
@@ -102,7 +101,22 @@ function processData(dataset) {
         var isoDate = strictIsoParse(rawData[instance][date]);
         if (!isoDate || isoDate === null || isoDate === "") {
             continue;
-        }        
+        }
+
+        if (timezone === "2" && "timezone" in rawData[instance]) {
+            var tzString = rawData[instance]["timezone"];
+            if (tzString.includes("+")) {
+                isoDate.setUTCHours(isoDate.getUTCHours() + parseInt(tzString.slice(1,3)));
+            } else if (tzString.includes("-")) {
+                isoDate.setUTCHours(isoDate.getUTCHours() - parseInt(tzString.slice(1,3)));
+            }
+        }
+
+        if (timezone === "1") {
+            thisTZDate = new Date(isoDate.getTime())
+            isoDate.setUTCMinutes(isoDate.getUTCMinutes() + (-1*thisTZDate.getTimezoneOffset()));
+        }
+
 
         var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
         var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
@@ -138,6 +152,7 @@ function processData(dataset) {
         if (dayOfMonth in data['allRecordsEachDayAndHour']) {
             data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         } else {
+            data['totalDaysWithObservations']++;
             data['allRecordsEachDayAndHour'][dayOfMonth] = [];
             for (var i=0; i<24; i++) {
                 data['allRecordsEachDayAndHour'][dayOfMonth][i] = [];
@@ -215,10 +230,18 @@ function processData(dataset) {
         }
 
         var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getUTCFullYear();
+        if (isoDate.getWeekNumber() === 52 && isoDate.getUTCDate() < 7) {
+            var possibleDifferentWeek = isoDate.getWeekNumber() + "-" + (isoDate.getUTCFullYear()-1);
+            if (possibleDifferentWeek in countWeeks) {
+                currentWeek = possibleDifferentWeek;
+            }
+        }
         sumData(currentWeek, countWeeks);
 
         var currentMonth = month[isoDate.getUTCMonth()]
         sumData(currentMonth, countMonth);
+
+        sumData((isoDate.getUTCMonth()+"-"+isoDate.getUTCFullYear()), countEachMonth);
 
         var currentDay = isoDate.getUTCDay() === 0 ? weekday[6] : weekday[(isoDate.getUTCDay()-1)];
 
@@ -266,8 +289,10 @@ function processData(dataset) {
         lastLoopedDay.setUTCHours(0,0,0,0);
     }
 
+    data['firstObservation'] = data['firstRecordedDay'];
     data['firstRecordedDay'] = new Date(data['firstRecordedDay'].getTime());
     data['firstRecordedDay'].setUTCHours(0,0,0,0);
+    data['lastObservation'] = data['lastRecordedDay'];
     data['lastRecordedDay'] = new Date(data['lastRecordedDay'].getTime());
     data['lastRecordedDay'].setUTCHours(23,59,59);
     data['byMonth'] = createBarData(countMonth);
@@ -275,6 +300,7 @@ function processData(dataset) {
     data['byHour'] = createBarData(countHour);
     data['byWeek'] = createBarData(countWeeks);
     data['sumOfEachMonth'] = countMonth;
+    data['sumOfEachYearMonth'] = createBarData(countEachMonth);
     data['sumOfEachWeek'] = countWeeks;
     data['sumOfEachDay'] = countEachDay;
     data['hourByDay'] = countEachHourOfEachDay;
@@ -394,6 +420,114 @@ function processData(dataset) {
     }
 
     data["daysInEachWeek"] = getDaysInEachWeek(data['firstRecordedDay'], data['lastRecordedDay']);
+
+    data['comparingWeeks'] = [];
+    var indexOfThisWeek = (data['byWeek'].length-1);
+    data['comparingWeeks'].push({
+        "type": "This week",
+        "sum": data['byWeek'][indexOfThisWeek].sum
+    });
+    if (data['byWeek'].length > 2) {
+        data['comparingWeeks'].push({
+            "type": "Last week",
+            "sum": data['byWeek'][indexOfThisWeek-1].sum
+        });
+    }
+
+    if (data['byWeek'].length > 3) {
+        var avgLastTwoWeeks = (data['byWeek'][indexOfThisWeek-1].sum + data['byWeek'][indexOfThisWeek-2].sum)/2;
+        data['comparingWeeks'].push({
+            "type": "Avg last two weeks",
+            "sum": avgLastTwoWeeks
+        });
+    }
+
+    if (data['byWeek'].length > 5) {
+        var avgLastFourWeeks = 0;
+        for(var i=indexOfThisWeek-1; i>indexOfThisWeek-5; i--) {
+            avgLastFourWeeks += data['byWeek'][i].sum; 
+        }
+        avgLastFourWeeks = avgLastFourWeeks/4;
+        data['comparingWeeks'].push({
+            "type": "Avg last four weeks",
+            "sum": avgLastFourWeeks
+        });
+    }
+
+    if (data['byWeek'].length > 9) {
+        var avgLastEightWeeks = 0;
+        for(var i=indexOfThisWeek-1; i>indexOfThisWeek-9; i--) {
+            avgLastEightWeeks += data['byWeek'][i].sum; 
+        }
+        avgLastEightWeeks = avgLastEightWeeks/8;
+        data['comparingWeeks'].push({
+            "type": "Avg last eight weeks",
+            "sum": avgLastEightWeeks
+        });
+    }
+
+    if (data['byWeek'].length > 13) {
+        var avgLastTwelveWeeks = 0;
+        for(var i=indexOfThisWeek-1; i>indexOfThisWeek-13; i--) {
+            avgLastTwelveWeeks += data['byWeek'][i].sum; 
+        }
+        avgLastTwelveWeeks = avgLastTwelveWeeks/12;
+        data['comparingWeeks'].push({
+            "type": "Avg last twelve weeks",
+            "sum": avgLastTwelveWeeks
+        });
+    }
+
+    data['comparingWeeks'].push({
+        "type": "Average week",
+        "sum": data['averageWeek'].toFixed(2)
+    });
+    
+    data["trivia"] = [];
+    data["trivia"].push({
+        "key": "First observation",
+        "value": data["firstObservation"].getUTCDate() 
+            + " " + month[data["firstObservation"].getUTCMonth()] 
+            + " " + data["firstObservation"].getUTCFullYear()
+            + " " + (data["firstObservation"].getUTCHours() < 10 ? "0" : "") + data["firstObservation"].getUTCHours() 
+            +":"+ (data["firstObservation"].getUTCMinutes() < 10 ? "0" : "") + data["firstObservation"].getUTCMinutes() 
+            +":"+ (data["firstObservation"].getUTCSeconds() < 10 ? "0" : "") + data["firstObservation"].getUTCSeconds()
+    });
+    data["trivia"].push({
+        "key": "Last observation",
+        "value": data["lastObservation"].getUTCDate() 
+        + " " + month[data["lastObservation"].getUTCMonth()] 
+        + " " + data["lastObservation"].getUTCFullYear()
+        + " " + (data["lastObservation"].getUTCHours() < 10 ? "0" : "") + data["lastObservation"].getUTCHours() 
+            +":"+ (data["lastObservation"].getUTCMinutes() < 10 ? "0" : "") + data["lastObservation"].getUTCMinutes() 
+            +":"+ (data["lastObservation"].getUTCSeconds() < 10 ? "0" : "") + data["lastObservation"].getUTCSeconds()
+    });
+    data["trivia"].push({
+        "key": "Total days",
+        "value": data["totalDays"]
+    });    
+    data["trivia"].push({
+        "key": "Total weeks",
+        "value": data["byWeek"].length
+    });
+    data["trivia"].push({
+        "key": "Total months",
+        "value": data["sumOfEachYearMonth"].length
+    });
+    data["trivia"].push({
+        "key": "Total observations",
+        "value": rawData.length
+    });
+    data["trivia"].push({
+        "key": "Days with observations",
+        "value": data["totalDaysWithObservations"] 
+            + " (" + ((data["totalDaysWithObservations"]/data["totalDays"])*100).toFixed(2) + "% of total days)"
+    });
+    data["trivia"].push({
+        "key": "Days without observations",
+        "value": data["totalDays"] - data["totalDaysWithObservations"] 
+            + " (" + (((data["totalDays"] - data["totalDaysWithObservations"])/data["totalDays"])*100).toFixed(2) + "% of total days)"
+    });
 }
 
 function getDaysInEachWeek(firstDay, lastDay) {
@@ -454,7 +588,8 @@ function checkForChosenDataset() {
             rawData = JSON.parse(window.localStorage.getItem('custom-data')).data
             annotations = [];
             invalidObservations = [];
-            processData();
+            var tz = document.getElementById("timezone");
+			processData(tz.value);            
             createVisualizations();
             window.localStorage.setItem('custom-date', timeNow.getTime());
         } else {

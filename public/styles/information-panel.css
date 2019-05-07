@@ -12,3 +12,11 @@
     margin: 5px;
     font-weight: bold;
 }
+
+#informationPanel table td.table-key {
+    font-weight: bold;
+}
+
+#informationPanel table td.table-value {
+    text-align: right;
+}

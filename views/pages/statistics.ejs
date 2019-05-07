@@ -177,7 +177,8 @@
 		firstDate.setUTCHours(0,0,0,0);
 		lastDate.setUTCHours(23,59,59);
 		document.getElementById("firstDate").innerHTML = weekday[firstDate.getUTCDay() === 0 ? 6 : (firstDate.getUTCDay()-1)] + " " + month[firstDate.getUTCMonth()] + " " + firstDate.getUTCDate() + " " + firstDate.getUTCFullYear();
-		document.getElementById("lastDate").innerHTML = weekday[lastDate.getUTCDay() === 0 ? 6 : (lastDate.getUTCDay()-1)] + " " + month[lastDate.getUTCMonth()] + " " + lastDate.getUTCDate() + " " + lastDate.getUTCFullYear();;
+		document.getElementById("lastDate").innerHTML = weekday[lastDate.getUTCDay() === 0 ? 6 : (lastDate.getUTCDay()-1)] + " " + month[lastDate.getUTCMonth()] + " " + lastDate.getUTCDate() + " " + lastDate.getUTCFullYear();
+		var timezone = document.getElementById("timezone").value;
 		if (childGraphs.length > 0) {
 			var countWeekday = [];
 			var countHour = [];
@@ -193,6 +194,20 @@
 				}
 
 				var isoDate = strictIsoParse(unFilteredData[instance][date]);
+
+				if (timezone === "2" && "timezone" in rawData[instance]) {
+					var tzString = rawData[instance]["timezone"];
+					if (tzString.includes("+")) {
+						isoDate.setUTCHours(isoDate.getUTCHours() + parseInt(tzString.slice(1,3)));
+					} else if (tzString.includes("-")) {
+						isoDate.setUTCHours(isoDate.getUTCHours() - parseInt(tzString.slice(1,3)));
+					}
+				}
+
+				if (timezone === "1") {
+					thisTZDate = new Date(isoDate.getTime())
+					isoDate.setUTCMinutes(isoDate.getUTCMinutes() + (-1*thisTZDate.getTimezoneOffset()));
+				}
 				if (firstDate > isoDate || lastDate < isoDate) {
 					continue;
 				}

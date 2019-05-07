@@ -19,8 +19,7 @@
 			</div>
 			<div id="informationPanel">
 				<div id="minuteBreakdown"></div>
-				<p class="header">Average observations</p>
-				<div id="dayComparisonChart" class="graph"></div>
+				<table id="trivia"></table>			
 				<p class="detail" id="averageDay"></p>
 				<p class="detail" id="averageWorkday"></p>
 				<p class="detail" id="averagePerWeekday"></p>
@@ -30,7 +29,14 @@
 		<div class="col-lg-7">
 			<table id="timetable"></table>
 		</div>
-	</div>	
+	</div>
+	<div id="dayComparisonChart" class="row graph">
+	</div>
+	<div class="row">		
+		<div class="col">
+			<div class='graph' id='weekBarChart'></div>
+		</div>
+	</div>
 	<footer>
 		<% include ../partials/footer %>
 	</footer>
@@ -87,11 +93,22 @@
 		while (colorScales.firstChild) {
 			colorScales.removeChild(colorScales.firstChild);
 		}
+
+		var trivia = document.getElementById("trivia");			
+		while (trivia.firstChild) {
+			trivia.removeChild(trivia.firstChild);
+		}
 		
 		document.getElementById("averageHourPerWeekday").innerText = "";
 	}	
 
 	function createVisualizations() {
+		var triviaTable = d3.select("#trivia");
+		for (var i in data['trivia']) {
+			var triviaRow = triviaTable.append("tr");
+			triviaRow.append("td").attr("class", "table-key").text(data['trivia'][i].key);
+			triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
+		}
 
 		var calendarObject = new Calendar(data['lastRecordedDay'], data['sumOfEachDay'], data['mostInADay'], data);
 		calendarObject.create();
@@ -114,7 +131,7 @@
 
 		var dayComparisonChart = new ComparisonChart(			
 			'dayComparisonChart', 
-			300, 
+			250, 
 			70,
 			{top: 30, right: 5, bottom: 5, left: 5},
 			"Weekday vs. weekend day",
@@ -132,7 +149,7 @@
 
 		currentDayComparisonChart = new ComparisonChart(			
 			'dayComparisonChart', 
-			300, 
+			250, 
 			70,
 			{top: 30, right: 5, bottom: 5, left: 5},
 			"Chosen day vs. overall",
@@ -151,7 +168,7 @@
 		var day = data["lastRecordedDay"].getUTCDay() === 0 ? 6 : (data["lastRecordedDay"].getUTCDay()-1);
 		weekDayComparisonChart = new ComparisonChart(			
 			'dayComparisonChart', 
-			300, 
+			250, 
 			70,
 			{top: 30, right: 5, bottom: 5, left: 5},
 			("Average " + weekday[day] + " vs. chosen " + weekday[day]),
@@ -170,7 +187,7 @@
 
 		monthComparisonChart = new ComparisonChart(			
 			'dayComparisonChart', 
-			300, 
+			250, 
 			70,
 			{top: 30, right: 5, bottom: 5, left: 5},
 			("Average day vs. average day in chosen month"),
@@ -190,6 +207,24 @@
 
 		new ColorScaleLegend(calendarObject.colorScale, "Color scale for days");
 		new ColorScaleLegend(timetableObject.colorScale, "Color scale for hours");
+
+		var weekChart = new NormalBarChart(
+			data['comparingWeeks'], 
+			'weekBarChart', 
+			1000,
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Comparing weeks", 
+			data['comparingWeeks'], 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		weekChart.create("", "Observations", -1);
+		//weekChart.rotateTickLabels();
 	}
 
 	function updateAverages(date) {

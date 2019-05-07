@@ -15,7 +15,7 @@
         </select>
       </li>
       <li class="nav-item" id="customDataUpload" style="display:none">
-        <input type="file" name="custom-dataset" id="customDataset" onchange="openFile(event)">
+        <input type="file" name="custom-dataset" id="customDataset" onchange="openFile(event)" style="max-width:220px;">
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/">Main</a>
@@ -29,11 +29,23 @@
       <li class="nav-item">
           <a class="nav-link" href="/monthly-breakdown">Monthly breakdown</a>
       </li>
+      <li>
+        <select name="timezone" id="timezone" onchange="changeTimezone()">
+          <option value="0">TZ: UTC</option>
+          <option value="1">TZ: Current</option>
+          <option value="2">TZ: From dataset</option>
+        </select>
+      </li>
     </ul>
   
 </nav>
 
 <script type="text/javascript">
+  var tz = window.localStorage.getItem('timezone');
+  if (tz === "1" || tz === "2") {
+    document.getElementById("timezone").value = tz;
+  }
+
   var openFile = function(event) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
       var input = event.target;
@@ -60,7 +72,8 @@
           window.localStorage.setItem('custom-date', (new Date()).getTime());
           
           removeAllVisualizations();
-          processData();
+          var tz = document.getElementById("timezone");
+				  processData(tz.value);
           createVisualizations();
         }
       };
@@ -120,13 +133,20 @@
 						"id": result.observations[observation].id
 					});
 				}
-				console.log(invalidObservations)
-				processData();
+        console.log(invalidObservations)
+        var tz = document.getElementById("timezone");
+				processData(tz.value);
 				createVisualizations();
 			}
 		};
 		xmlhttp.open("GET", ("/datasets/"+dataset), true);
 		xmlhttp.send();
-	}
+  }
+  
+  function changeTimezone() {
+    var tz = document.getElementById("timezone");
+    window.localStorage.setItem('timezone', tz.value);
+    location.reload();
+  }
 
 </script>
