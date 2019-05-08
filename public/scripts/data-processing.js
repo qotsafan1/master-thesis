@@ -628,6 +628,14 @@ function processData(timezone) {
         "value": data["totalDays"] - data["totalDaysWithObservations"] 
             + " (" + (((data["totalDays"] - data["totalDaysWithObservations"])/data["totalDays"])*100).toFixed(2) + "% of total days)"
     });
+    data["trivia"].push({
+        "key": "Average observations per day",
+        "value": data["averageDay"].toFixed(2)
+    });
+    data["trivia"].push({
+        "key": "Average observations per week",
+        "value": data["averageWeek"].toFixed(2)
+    });
 }
 
 function getDaysInEachWeek(firstDay, lastDay) {
