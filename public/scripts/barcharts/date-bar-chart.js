@@ -110,6 +110,7 @@ DateBarChart.prototype.removeWeekdayBrushes = function() {
 DateBarChart.prototype.createColorBarChart = function() {    
     var thisObj = this;
     var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
+    colors = ["#d53e4f","#fc8d59","#fee08b","#e6f598","#99d594","#3288bd"];
 
     // Define the div for the tooltip
     var div = d3.select("body").append("div")
@@ -126,21 +127,37 @@ DateBarChart.prototype.createColorBarChart = function() {
         .attr("height", function(d) { return (thisObj.height - thisObj.y(d.sum)); })
         .style("fill", function(d,i) {
             var dayString = (d.date.getUTCFullYear() +"-"+ (d.date.getUTCMonth()+1) +"-"+ d.date.getUTCDate());
-            if (dayString in data["sumStackedHoursEachDay"]) {
-                return colors[indexOfMax(data["sumStackedHoursEachDay"][dayString])];
+            if (dayString in data["sumStackedHoursEachDay"][1]) {
+                return colors[indexOfMax(data["sumStackedHoursEachDay"][2][dayString])];
             }
         });
 }
 
-DateBarChart.prototype.createStackedBars = function() {
-    this.keys = ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-00:00"];
-    stack = d3.stack().keys(this.keys);
-    series = stack(data["stackedHoursEachDay"]);
+DateBarChart.prototype.createStackedBars = function(hourChunks) {
+    var keys = ["00-06", "06-12", "12-18", "18-00"];
+    var barData = data["stackedHoursEachDay"][1]
+    //var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
+    var colors = ["#d7191c","#fdae61","#abdda4","#2b83ba"];
+
+    if (hourChunks === 2) {
+        keys = ["00-04", "04-08", "08-12", "12-16", "16-20", "20-00"];
+        colors = ["#d53e4f","#fc8d59","#fee08b","#e6f598","#99d594","#3288bd"];
+        barData = data["stackedHoursEachDay"][2];
+    } else if (hourChunks === 0) {
+        keys = ["00-12", "12-00"];
+        colors = ["#d7191c","#abdda4"];
+        barData = data["stackedHoursEachDay"][0];
+    } else if (hourChunks === 3) {
+        keys = ["00-03", "03-06", "06-09", "09-12", "12-15","15-18", "18-21","21-24"];
+        colors = ["#d53e4f","#f46d43","#fdae61","#fee08b","#e6f598","#abdda4","#66c2a5","#3288bd"];
+        barData = data["stackedHoursEachDay"][3];
+    }
+    stack = d3.stack().keys(keys);
+    series = stack(barData);
     thisObj = this;
 
-    this.colors = ["#0000ff","#FF0000","#FFA500","#008000"];
     var colorScale = d3.scaleOrdinal()
-        .range(this.colors);
+        .range(colors);
 
     this.bars = this.g.selectAll(".bar")
         .data(series)
@@ -151,7 +168,7 @@ DateBarChart.prototype.createStackedBars = function() {
             return colorScale(i);
         });
 
-    var rects = this.bars.selectAll("rect")
+    this.bars.selectAll("rect")
         .data(function(d) {return d;})
         .enter()
         .append("rect")
@@ -164,11 +181,11 @@ DateBarChart.prototype.createStackedBars = function() {
             .attr("height", function(d) { 
                 return (thisObj.y(d[0]) - thisObj.y(d[1])); 
             });
+
+    this.createLegend(colors, keys)
 }
 
-DateBarChart.prototype.createLegend = function() {
-    var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
-    var keys = ["00-06", "06-12", "12-18", "18-00"];
+DateBarChart.prototype.createLegend = function(colors, keys) {
     var legend = this.svg.selectAll(".legend")
         .data(keys)
         .enter().append("g")
@@ -208,22 +225,67 @@ DateBarChart.prototype.createDayTicks = function() {
 
 DateBarChart.prototype.addStackSwitch = function(turnOn) {
     var thisObj = this;
-    var checked = turnOn ? "checked" : "";
-    this.svg.append("foreignObject")
-        .attr("width", 200)
-        .attr("height", 100)
+    
+    var form = this.svg.append("foreignObject")
+        .attr("width", 400)
+        .attr("height", 40)
         .append("xhtml:body")
-        .html(("<form><span class='stacked-label'>Show hour breakdown</span><input type=checkbox id=stackBars "+ checked +" /></form>"))
+        .html("<span class='stacked-label'>Show hour breakdown</span>");
+
+    form.append("input")
+        .attr("type", "checkbox")
+        .attr("id", "stackBars")
+        .attr("class", "stacked-checkbox")
+        .property("checked", turnOn)
         .on("click", function(d, i){
             thisObj.deleteBars();
-            if (thisObj.svg.select("#stackBars").node().checked) {
-                thisObj.createStackedBars();
-                thisObj.createLegend();
+            thisObj.removeLegend();
+            if (thisObj.svg.select("#stackBars").node().checked) {                
+                thisObj.createStackedBars(parseInt(document.getElementById("chunkSelect").value));
+                thisObj.changeChunkSelect(true);
             } else {
-                thisObj.removeLegend();
                 thisObj.createBars();
+                thisObj.changeChunkSelect(false);
             }
         });
+    form.append("span").
+        attr("class", "stacked-label stacked-chunks")
+        .style("display", function() {
+            if (turnOn) {
+                return "";
+            }
+            return "none";
+        })
+        .text("Hour chunks: ");
+    
+    var chunck = ["2", "4", "6", "8"];
+
+    var select = form.append('select')
+        .attr('class','stacked-chunks')
+        .attr('id', "chunkSelect")
+        .on('change', function() {
+            thisObj.changeStack(this);
+        })
+        .style("display", function() {
+            if (turnOn) {
+                return "";
+            }
+            return "none";
+        });
+    
+    select.selectAll('option')
+        .data(chunck).enter()
+        .append('option')
+            .attr("value", function(d,i) {
+                return i;
+            })
+            .text(function (d) { return d; })
+            .property("selected", function(d,i) {
+                if (i===1) {
+                    return true;
+                }
+                return false;
+            });
 }
 
 DateBarChart.prototype.deleteBars = function() {
@@ -232,5 +294,18 @@ DateBarChart.prototype.deleteBars = function() {
 
 DateBarChart.prototype.removeLegend = function() {
     this.svg.selectAll(".legend").remove();
+}
+
+DateBarChart.prototype.changeStack = function(element) {
+    this.deleteBars();
+    this.removeLegend();
+    this.createStackedBars(parseInt(element.value));
+}
+
+DateBarChart.prototype.changeChunkSelect = function(turnOn) {
+    var display = turnOn ? "" : "none";
+    var stackedSelect = document.getElementsByClassName("stacked-chunks")
+    stackedSelect[0].style.display = display;
+    stackedSelect[1].style.display = display;
 }
 

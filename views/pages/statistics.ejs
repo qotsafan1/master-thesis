@@ -24,9 +24,6 @@
 		</div>
 	</div>
 	<div class="row">
-			<div class='col-sm-1 graph' id='stackedChart'></div>
-		</div>
-	<div class="row">
 		<div class='col-sm-1 graph' id='dateChart'></div>
 	</div>
 
@@ -94,7 +91,6 @@
 		);
 		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
 		dateChart.createStackedBars();
-		dateChart.createLegend();
 		dateChart.addStackSwitch(true);
 		dateChart.createBrush();
 

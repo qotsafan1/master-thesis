@@ -73,7 +73,10 @@ function processData(timezone) {
     var countEachHourOfEachWeek = [];
     var countEachHourOfEachDay = [];
     var countEachHourOfEachWeekday = [];
-    var countStackedHoursOfEachDay = [];
+    var countStackedTwoHoursOfEachDay = [];
+    var countStackedFourHoursOfEachDay = [];
+    var countStackedSixHoursOfEachDay = [];
+    var countStackedEightHoursOfEachDay = [];
 
     for (var i=0; i<24;i++) {
         countHour[i] = 0;
@@ -212,21 +215,79 @@ function processData(timezone) {
             }
         }
 
-        // calculate stacked bards
-        if (!(dayOfMonth in countStackedHoursOfEachDay)) {
-            countStackedHoursOfEachDay[dayOfMonth] = [];
+        // calculate stacked bars
+        if (!(dayOfMonth in countStackedTwoHoursOfEachDay)) {
+            countStackedTwoHoursOfEachDay[dayOfMonth] = [];
+            countStackedTwoHoursOfEachDay[dayOfMonth][0] = 0;
+            countStackedTwoHoursOfEachDay[dayOfMonth][1] = 0;
+        }
+
+        if (isoDate.getUTCHours() < 12) {
+            countStackedTwoHoursOfEachDay[dayOfMonth][0]++;
+        } else {
+            countStackedTwoHoursOfEachDay[dayOfMonth][1]++;
+        }
+
+        if (!(dayOfMonth in countStackedFourHoursOfEachDay)) {
+            countStackedFourHoursOfEachDay[dayOfMonth] = [];
             for (var i=0; i<4; i++) {
-                countStackedHoursOfEachDay[dayOfMonth][i] = 0;
+                countStackedFourHoursOfEachDay[dayOfMonth][i] = 0;
             }
         }
         if (isoDate.getUTCHours() < 6) {
-            countStackedHoursOfEachDay[dayOfMonth][0]++;
+            countStackedFourHoursOfEachDay[dayOfMonth][0]++;
         } else if (isoDate.getUTCHours() >= 6 && isoDate.getUTCHours() < 12) {
-            countStackedHoursOfEachDay[dayOfMonth][1]++;
+            countStackedFourHoursOfEachDay[dayOfMonth][1]++;
         } else if (isoDate.getUTCHours() >= 12 && isoDate.getUTCHours() < 18) {
-            countStackedHoursOfEachDay[dayOfMonth][2]++;
+            countStackedFourHoursOfEachDay[dayOfMonth][2]++;
         } else {
-            countStackedHoursOfEachDay[dayOfMonth][3]++;
+            countStackedFourHoursOfEachDay[dayOfMonth][3]++;
+        }
+        
+        // calculate stacked bars
+        if (!(dayOfMonth in countStackedSixHoursOfEachDay)) {
+            countStackedSixHoursOfEachDay[dayOfMonth] = [];
+            for (var i=0; i<6; i++) {
+                countStackedSixHoursOfEachDay[dayOfMonth][i] = 0;
+            }
+        }
+        if (isoDate.getUTCHours() < 4) {
+            countStackedSixHoursOfEachDay[dayOfMonth][0]++;
+        } else if (isoDate.getUTCHours() >= 4 && isoDate.getUTCHours() < 8) {
+            countStackedSixHoursOfEachDay[dayOfMonth][1]++;
+        } else if (isoDate.getUTCHours() >= 8 && isoDate.getUTCHours() < 12) {
+            countStackedSixHoursOfEachDay[dayOfMonth][2]++;
+        } else if (isoDate.getUTCHours() >= 12 && isoDate.getUTCHours() < 16) {
+            countStackedSixHoursOfEachDay[dayOfMonth][3]++;
+        } else if (isoDate.getUTCHours() >= 16 && isoDate.getUTCHours() < 20) {
+            countStackedSixHoursOfEachDay[dayOfMonth][4]++;
+        } else {
+            countStackedSixHoursOfEachDay[dayOfMonth][5]++;
+        }
+
+        // calculate stacked bars
+        if (!(dayOfMonth in countStackedEightHoursOfEachDay)) {
+            countStackedEightHoursOfEachDay[dayOfMonth] = [];
+            for (var i=0; i<8; i++) {
+                countStackedEightHoursOfEachDay[dayOfMonth][i] = 0;
+            }
+        }
+        if (isoDate.getUTCHours() < 3) {
+            countStackedEightHoursOfEachDay[dayOfMonth][0]++;
+        } else if (isoDate.getUTCHours() >= 3 && isoDate.getUTCHours() < 6) {
+            countStackedEightHoursOfEachDay[dayOfMonth][1]++;
+        } else if (isoDate.getUTCHours() >= 6 && isoDate.getUTCHours() < 9) {
+            countStackedEightHoursOfEachDay[dayOfMonth][2]++;
+        } else if (isoDate.getUTCHours() >= 9 && isoDate.getUTCHours() < 12) {
+            countStackedEightHoursOfEachDay[dayOfMonth][3]++;
+        } else if (isoDate.getUTCHours() >= 12 && isoDate.getUTCHours() < 15) {
+            countStackedEightHoursOfEachDay[dayOfMonth][4]++;
+        } else if (isoDate.getUTCHours() >= 15 && isoDate.getUTCHours() < 18) {
+            countStackedEightHoursOfEachDay[dayOfMonth][5]++;
+        } else if (isoDate.getUTCHours() >= 18 && isoDate.getUTCHours() < 21) {
+            countStackedEightHoursOfEachDay[dayOfMonth][6]++;
+        } else {
+            countStackedEightHoursOfEachDay[dayOfMonth][7]++;
         }
 
         var currentWeek = isoDate.getWeekNumber() + "-" + isoDate.getUTCFullYear();
@@ -322,16 +383,55 @@ function processData(timezone) {
     }
 
     data["stackedHoursEachDay"] = [];
-    for (var i in countStackedHoursOfEachDay) {
-        data["stackedHoursEachDay"].push({
+    data["stackedHoursEachDay"][0] = [];
+    data["stackedHoursEachDay"][1] = [];
+    data["stackedHoursEachDay"][2] = [];
+    data["stackedHoursEachDay"][3] = [];
+    for (var i in countStackedTwoHoursOfEachDay) {
+        data["stackedHoursEachDay"][0].push({
             "date": getCorrectUTCDate(i),
-            "00:00-06:00": countStackedHoursOfEachDay[i][0],
-            "06:00-12:00": countStackedHoursOfEachDay[i][1],
-            "12:00-18:00": countStackedHoursOfEachDay[i][2],
-            "18:00-00:00": countStackedHoursOfEachDay[i][3]
+            "00-12": countStackedTwoHoursOfEachDay[i][0],
+            "12-00": countStackedTwoHoursOfEachDay[i][1]
         });
     }
-    data["sumStackedHoursEachDay"] = countStackedHoursOfEachDay;
+    for (var i in countStackedFourHoursOfEachDay) {
+        data["stackedHoursEachDay"][1].push({
+            "date": getCorrectUTCDate(i),
+            "00-06": countStackedFourHoursOfEachDay[i][0],
+            "06-12": countStackedFourHoursOfEachDay[i][1],
+            "12-18": countStackedFourHoursOfEachDay[i][2],
+            "18-00": countStackedFourHoursOfEachDay[i][3]
+        });
+    }
+    for (var i in countStackedSixHoursOfEachDay) {
+        data["stackedHoursEachDay"][2].push({
+            "date": getCorrectUTCDate(i),
+            "00-04": countStackedSixHoursOfEachDay[i][0],
+            "04-08": countStackedSixHoursOfEachDay[i][1],
+            "08-12": countStackedSixHoursOfEachDay[i][2],
+            "12-16": countStackedSixHoursOfEachDay[i][3],
+            "16-20": countStackedSixHoursOfEachDay[i][4],
+            "20-00": countStackedSixHoursOfEachDay[i][5]
+        });
+    }
+    for (var i in countStackedEightHoursOfEachDay) {
+        data["stackedHoursEachDay"][3].push({
+            "date": getCorrectUTCDate(i),
+            "00-03": countStackedEightHoursOfEachDay[i][0],
+            "03-06": countStackedEightHoursOfEachDay[i][1],
+            "06-09": countStackedEightHoursOfEachDay[i][2],
+            "09-12": countStackedEightHoursOfEachDay[i][3],
+            "12-15": countStackedEightHoursOfEachDay[i][4],
+            "15-18": countStackedEightHoursOfEachDay[i][5],
+            "18-21": countStackedEightHoursOfEachDay[i][6],
+            "21-24": countStackedEightHoursOfEachDay[i][7]
+        });
+    }
+    data["sumStackedHoursEachDay"] = []
+    data["sumStackedHoursEachDay"][0] = countStackedFourHoursOfEachDay;
+    data["sumStackedHoursEachDay"][1] = countStackedSixHoursOfEachDay;
+    data["sumStackedHoursEachDay"][2] = countStackedTwoHoursOfEachDay;
+    data["sumStackedHoursEachDay"][3] = countStackedEightHoursOfEachDay;
 
     console.log(data)
     data['mostInADay'] = d3.max(data['eachDay'],function(d) { return d.sum});

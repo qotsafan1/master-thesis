@@ -7,3 +7,7 @@ g.weekday-brush .selection {
     font-size: 12px;
     margin-right: 5px;
 }
+
+.stacked-checkbox {
+    margin-right: 15px;
+}
