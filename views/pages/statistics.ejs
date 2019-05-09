@@ -183,13 +183,13 @@
 				countHour[i] = 0;
 			}
 
-			for (var instance in unFilteredData) {
-				var date = Object.keys(unFilteredData[instance])[0]
+			for (var instance in rawData) {
+				var date = Object.keys(rawData[instance])[0]
 				if (date !== "date") {
 					continue;
 				}
 
-				var isoDate = strictIsoParse(unFilteredData[instance][date]);
+				var isoDate = strictIsoParse(rawData[instance][date]);
 
 				if (timezone === "2" && "timezone" in rawData[instance]) {
 					var tzString = rawData[instance]["timezone"];
@@ -241,13 +241,13 @@
 
 	function getSpecificWeekdayData(day) {
 		var days = [];
-		for (var instance in unFilteredData) {
-			var date = Object.keys(unFilteredData[instance])[0]
+		for (var instance in rawData) {
+			var date = Object.keys(rawData[instance])[0]
 			if (date !== "date") {
 				continue;
 			}
 			
-			var isoDate = strictIsoParse(unFilteredData[instance][date]);
+			var isoDate = strictIsoParse(rawData[instance][date]);
 
 			var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
 			var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
@@ -275,13 +275,13 @@
 				countHour[i] = 0;
 			}
 
-			for (var instance in unFilteredData) {
-				var date = Object.keys(unFilteredData[instance])[0]
+			for (var instance in rawData) {
+				var date = Object.keys(rawData[instance])[0]
 				if (date !== "date") {
 					continue;
 				}
 
-				var isoDate = strictIsoParse(unFilteredData[instance][date]);
+				var isoDate = strictIsoParse(rawData[instance][date]);
 
 				var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
         		var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();

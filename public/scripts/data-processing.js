@@ -1,37 +1,8 @@
-var unFilteredData;
 var invalidObservations = [];
-
 //2016-09-05T18:13:46.105Z
 var strictIsoParse;
 
-function getAnnotations(dataset) {
-    annotations = [];
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var result = JSON.parse(this.responseText);
-
-            for (annotation in result.annotations)
-            {
-                if (!(result.annotations[annotation].systemName in annotations)) {
-                    annotations[result.annotations[annotation].systemName] = [];
-                }
-
-                annotations[result.annotations[annotation].systemName].push({
-                    "comment": result.annotations[annotation].comment,
-                    "creationDate": result.annotations[annotation].creationDate,
-                    "type": result.annotations[annotation].type,
-                    "id": result.annotations[annotation].id
-                });
-            }
-            data = processData(dataset);
-        }
-    };
-    xmlhttp.open("GET", ("/annotations?dataset="+dataset), true);
-    xmlhttp.send();
-}
-
-function processData(timezone) {    
+function processData(timezone, unFilteredData) {    
     childGraphs = [];
     var dataObj = [];
     dataObj["byMonth"] = [];
@@ -57,9 +28,6 @@ function processData(timezone) {
 
     var lastLoopedDay;
     var lastRecordDate = new Date("1971-1-1");
-    
-    unFilteredData = rawData;
-    console.log(rawData)
 
     var countMonth = [];
     var countWeekday = [];
@@ -89,26 +57,26 @@ function processData(timezone) {
             countEachHourOfEachWeekday[d][i] = 0;
         }
     }    
-
-    for (var instance in rawData) {
-        var date = Object.keys(rawData[instance])[0]
+console.log(unFilteredData)
+    for (var instance in unFilteredData) {
+        var date = Object.keys(unFilteredData[instance])[0]
         if (date !== "date") {
             continue;
         }
 
-        if (!rawData[instance][date].includes("-")) {
+        if (!unFilteredData[instance][date].includes("-")) {
             strictIsoParse = d3.utcParse("%Y%m%dT%H%M%SZ");
         } else {
             strictIsoParse = d3.utcParse("%Y-%m-%dT%H:%M:%S.%LZ");
         }
 
-        var isoDate = strictIsoParse(rawData[instance][date]);
+        var isoDate = strictIsoParse(unFilteredData[instance][date]);
         if (!isoDate || isoDate === null || isoDate === "") {
             continue;
         }
 
-        if (timezone === "2" && "timezone" in rawData[instance]) {
-            var tzString = rawData[instance]["timezone"];
+        if (timezone === "2" && "timezone" in unFilteredData[instance]) {
+            var tzString = unFilteredData[instance]["timezone"];
             if (tzString.includes("+")) {
                 isoDate.setUTCHours(isoDate.getUTCHours() + parseInt(tzString.slice(1,3)));
             } else if (tzString.includes("-")) {
@@ -305,7 +273,7 @@ function processData(timezone) {
         if (!(currentWeek in dataObj['recordsEachWeek'])) {
             dataObj['recordsEachWeek'][currentWeek] = [];
         } 
-        dataObj['recordsEachWeek'][currentWeek].push(isoDate);
+        dataObj['recordsEachWeek'][currentWeek].push(unFilteredData[instance]);
 
         var currentMonth = month[isoDate.getUTCMonth()]
         sumData(currentMonth, countMonth);
@@ -624,7 +592,7 @@ function processData(timezone) {
     });
     dataObj["trivia"].push({
         "key": "Total observations",
-        "value": rawData.length
+        "value": unFilteredData.length
     });
     dataObj["trivia"].push({
         "key": "Days with observations",
@@ -707,7 +675,7 @@ function checkForChosenDataset() {
             annotations = [];
             invalidObservations = [];
             var tz = document.getElementById("timezone");
-			data = processData(tz.value);            
+			data = processData(tz.value, rawData);            
             createVisualizations();
             window.localStorage.setItem('custom-date', timeNow.getTime());
         } else {

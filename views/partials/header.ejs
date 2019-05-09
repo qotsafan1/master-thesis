@@ -73,7 +73,7 @@
           
           removeAllVisualizations();
           var tz = document.getElementById("timezone");
-				  data = processData(tz.value);
+				  data = processData(tz.value, rawData);
           createVisualizations();
         }
       };
@@ -135,7 +135,7 @@
 				}
         console.log(invalidObservations)
         var tz = document.getElementById("timezone");
-				data = processData(tz.value);
+				data = processData(tz.value, rawData);
 				createVisualizations();
 			}
 		};
