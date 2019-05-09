@@ -24,7 +24,7 @@ function getAnnotations(dataset) {
                     "id": result.annotations[annotation].id
                 });
             }
-            processData(dataset);
+            data = processData(dataset);
         }
     };
     xmlhttp.open("GET", ("/annotations?dataset="+dataset), true);
@@ -33,26 +33,27 @@ function getAnnotations(dataset) {
 
 function processData(timezone) {    
     childGraphs = [];
-    data = [];
-    data["byMonth"] = [];
-    data["byDay"] = [];
-    data["byWeek"] = [];
-    data['firstMonth'] = 12;
-    data['lastMonth'] = 1;
-    data['firstYear'] = 2030;
-    data['lastYear'] = 1000;
-    data['maxHourOfDay'] = 0;
-    data['lastRecordedDay'] = new Date("1971-1-1");
-    data['firstRecordedDay'] = new Date("2050-1-1");
-    data['recordsEachDayAndHour'] = [];
-    data['allRecordsEachDayAndHour'] = [];
+    var dataObj = [];
+    dataObj["byMonth"] = [];
+    dataObj["byDay"] = [];
+    dataObj["byWeek"] = [];
+    dataObj['firstMonth'] = 12;
+    dataObj['lastMonth'] = 1;
+    dataObj['firstYear'] = 2030;
+    dataObj['lastYear'] = 1000;
+    dataObj['maxHourOfDay'] = 0;
+    dataObj['lastRecordedDay'] = new Date("1971-1-1");
+    dataObj['firstRecordedDay'] = new Date("2050-1-1");
+    dataObj['recordsEachDayAndHour'] = [];
+    dataObj['recordsEachWeek'] = [];
+    dataObj['allRecordsEachDayAndHour'] = [];
 
-    data['filteredData'] = [];
+    dataObj['filteredData'] = [];
 
-    data['invalidatedObservations'] = [];
-    data['singleInvalidatedObservations'] = [];
-    data['hourToMarkAsChanged'] = [];
-    data['totalDaysWithObservations'] = 0;
+    dataObj['invalidatedObservations'] = [];
+    dataObj['singleInvalidatedObservations'] = [];
+    dataObj['hourToMarkAsChanged'] = [];
+    dataObj['totalDaysWithObservations'] = 0;
 
     var lastLoopedDay;
     var lastRecordDate = new Date("1971-1-1");
@@ -125,73 +126,75 @@ function processData(timezone) {
         var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
         var millisecondString = hourOfDay + "-" +isoDate.getUTCMilliseconds();
 
-        if (isoDate > data['lastRecordedDay']) {
-            data['lastRecordedDay'] = isoDate;
+        if (isoDate > dataObj['lastRecordedDay']) {
+            dataObj['lastRecordedDay'] = isoDate;
         }
 
-        if (isoDate < data['firstRecordedDay']) {
-            data['firstRecordedDay'] = isoDate;            
+        if (isoDate < dataObj['firstRecordedDay']) {
+            dataObj['firstRecordedDay'] = isoDate;            
         }
 
-        if (isoDate.getUTCFullYear() < data['firstYear']) {
-            data['firstYear'] = isoDate.getUTCFullYear();
+        if (isoDate.getUTCFullYear() < dataObj['firstYear']) {
+            dataObj['firstYear'] = isoDate.getUTCFullYear();
         }
-        if (isoDate.getUTCFullYear() > data['lastYear']) {
-            data['lastYear'] = isoDate.getUTCFullYear();
+        if (isoDate.getUTCFullYear() > dataObj['lastYear']) {
+            dataObj['lastYear'] = isoDate.getUTCFullYear();
         }
 
-        if (isoDate.getUTCFullYear() === data['firstYear']) {
+        if (isoDate.getUTCFullYear() === dataObj['firstYear']) {
             //Find first and last month
-            if (isoDate.getUTCMonth() < data["firstMonth"]) {
-                data["firstMonth"] = isoDate.getUTCMonth();
+            if (isoDate.getUTCMonth() < dataObj["firstMonth"]) {
+                dataObj["firstMonth"] = isoDate.getUTCMonth();
             }						
         }
-        if (isoDate.getUTCFullYear() === data['lastYear']) {
-            if (isoDate.getUTCMonth() > data["lastMonth"]) {
-                data["lastMonth"] = isoDate.getUTCMonth();
+        if (isoDate.getUTCFullYear() === dataObj['lastYear']) {
+            if (isoDate.getUTCMonth() > dataObj["lastMonth"]) {
+                dataObj["lastMonth"] = isoDate.getUTCMonth();
             }
         }
 
-        if (dayOfMonth in data['allRecordsEachDayAndHour']) {
-            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
+
+
+        if (dayOfMonth in dataObj['allRecordsEachDayAndHour']) {
+            dataObj['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         } else {
-            data['totalDaysWithObservations']++;
-            data['allRecordsEachDayAndHour'][dayOfMonth] = [];
+            dataObj['totalDaysWithObservations']++;
+            dataObj['allRecordsEachDayAndHour'][dayOfMonth] = [];
             for (var i=0; i<24; i++) {
-                data['allRecordsEachDayAndHour'][dayOfMonth][i] = [];
+                dataObj['allRecordsEachDayAndHour'][dayOfMonth][i] = [];
             }
-            data['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
+            dataObj['allRecordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         }
 
         if (millisecondString in invalidObservations) {
-            data['singleInvalidatedObservations'][millisecondString] = invalidObservations[millisecondString];
-            data['hourToMarkAsChanged'][hourOfDay] = true;
+            dataObj['singleInvalidatedObservations'][millisecondString] = invalidObservations[millisecondString];
+            dataObj['hourToMarkAsChanged'][hourOfDay] = true;
             continue;
         }        
 
         if (dayOfMonth in invalidObservations) {
-            if (!(dayOfMonth in data['invalidatedObservations'])) {
-                data['invalidatedObservations'][dayOfMonth] = 0;
+            if (!(dayOfMonth in dataObj['invalidatedObservations'])) {
+                dataObj['invalidatedObservations'][dayOfMonth] = 0;
             }
-            data['invalidatedObservations'][dayOfMonth]++;
+            dataObj['invalidatedObservations'][dayOfMonth]++;
             
-            if (!(hourOfDay in data['invalidatedObservations'])) {
-                data['invalidatedObservations'][hourOfDay] = 0;
+            if (!(hourOfDay in dataObj['invalidatedObservations'])) {
+                dataObj['invalidatedObservations'][hourOfDay] = 0;
             }
-            data['invalidatedObservations'][hourOfDay]++;
+            dataObj['invalidatedObservations'][hourOfDay]++;
             continue;
         }
         
         if (hourOfDay in invalidObservations) {
-            if (!(hourOfDay in data['invalidatedObservations'])) {
-                data['invalidatedObservations'][hourOfDay] = 0;
+            if (!(hourOfDay in dataObj['invalidatedObservations'])) {
+                dataObj['invalidatedObservations'][hourOfDay] = 0;
             }
-            data['invalidatedObservations'][hourOfDay]++;
+            dataObj['invalidatedObservations'][hourOfDay]++;
             continue;
         }
         var diff = isoDate.getTime() - lastRecordDate.getTime();
         if (diff > 4000) {
-            data['filteredData'].push(isoDate);
+            dataObj['filteredData'].push(isoDate);
             lastRecordDate = isoDate;	
         }        
 
@@ -299,6 +302,11 @@ function processData(timezone) {
         }
         sumData(currentWeek, countWeeks);
 
+        if (!(currentWeek in dataObj['recordsEachWeek'])) {
+            dataObj['recordsEachWeek'][currentWeek] = [];
+        } 
+        dataObj['recordsEachWeek'][currentWeek].push(isoDate);
+
         var currentMonth = month[isoDate.getUTCMonth()]
         sumData(currentMonth, countMonth);
 
@@ -325,14 +333,14 @@ function processData(timezone) {
         // sum of each hour of each weekday
         countEachHourOfEachWeekday[isoDate.getUTCDay() === 0 ? 6 : (isoDate.getUTCDay()-1)][isoDate.getUTCHours()]++; 
 
-        if (dayOfMonth in data['recordsEachDayAndHour']) {
-            data['recordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
+        if (dayOfMonth in dataObj['recordsEachDayAndHour']) {
+            dataObj['recordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         } else {
-            data['recordsEachDayAndHour'][dayOfMonth] = [];
+            dataObj['recordsEachDayAndHour'][dayOfMonth] = [];
             for (var i=0; i<24; i++) {
-                data['recordsEachDayAndHour'][dayOfMonth][i] = [];
+                dataObj['recordsEachDayAndHour'][dayOfMonth][i] = [];
             }
-            data['recordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
+            dataObj['recordsEachDayAndHour'][dayOfMonth][isoDate.getUTCHours()].push(isoDate);
         }
 
         // sum of each hour of each week
@@ -350,52 +358,52 @@ function processData(timezone) {
         lastLoopedDay.setUTCHours(0,0,0,0);
     }
 
-    data['firstObservation'] = data['firstRecordedDay'];
-    data['firstRecordedDay'] = new Date(data['firstRecordedDay'].getTime());
-    data['firstRecordedDay'].setUTCHours(0,0,0,0);
-    data['lastObservation'] = data['lastRecordedDay'];
-    data['lastRecordedDay'] = new Date(data['lastRecordedDay'].getTime());
-    data['lastRecordedDay'].setUTCHours(23,59,59);
-    data['byMonth'] = createBarData(countMonth);
-    data['byDay'] = createBarData(countWeekday);
-    data['byHour'] = createBarData(countHour);
-    data['byWeek'] = createBarData(countWeeks);
-    data['sumOfEachMonth'] = countMonth;
-    data['sumOfEachYearMonth'] = createBarData(countEachMonth);
-    data['sumOfEachWeek'] = countWeeks;
-    data['sumOfEachDay'] = countEachDay;
-    data['hourByDay'] = countEachHourOfEachDay;
-    data['hourByWeek'] =  countEachHourOfEachWeek;
-    data['amountOfEachWeekday'] = getCountOfEachWeekday(data['firstRecordedDay'], data['lastRecordedDay']);
-    data['eachDay'] = [];
+    dataObj['firstObservation'] = dataObj['firstRecordedDay'];
+    dataObj['firstRecordedDay'] = new Date(dataObj['firstRecordedDay'].getTime());
+    dataObj['firstRecordedDay'].setUTCHours(0,0,0,0);
+    dataObj['lastObservation'] = dataObj['lastRecordedDay'];
+    dataObj['lastRecordedDay'] = new Date(dataObj['lastRecordedDay'].getTime());
+    dataObj['lastRecordedDay'].setUTCHours(23,59,59);
+    dataObj['byMonth'] = createBarData(countMonth);
+    dataObj['byDay'] = createBarData(countWeekday);
+    dataObj['byHour'] = createBarData(countHour);
+    dataObj['byWeek'] = createBarData(countWeeks);
+    dataObj['sumOfEachMonth'] = countMonth;
+    dataObj['sumOfEachYearMonth'] = createBarData(countEachMonth);
+    dataObj['sumOfEachWeek'] = countWeeks;
+    dataObj['sumOfEachDay'] = countEachDay;
+    dataObj['hourByDay'] = countEachHourOfEachDay;
+    dataObj['hourByWeek'] =  countEachHourOfEachWeek;
+    dataObj['amountOfEachWeekday'] = getCountOfEachWeekday(dataObj['firstRecordedDay'], dataObj['lastRecordedDay']);
+    dataObj['eachDay'] = [];
 
     for(var i in countEachDay) {
-        data['eachDay'].push({
+        dataObj['eachDay'].push({
             "date": getCorrectUTCDate(i),
             "sum": countEachDay[i]
         });
     }
 
     for (var i in countEachHourOfEachDay) {
-        if (countEachHourOfEachDay[i] > data['maxHourOfDay']) {
-            data['maxHourOfDay'] = countEachHourOfEachDay[i];
+        if (countEachHourOfEachDay[i] > dataObj['maxHourOfDay']) {
+            dataObj['maxHourOfDay'] = countEachHourOfEachDay[i];
         }
     }
 
-    data["stackedHoursEachDay"] = [];
-    data["stackedHoursEachDay"][0] = [];
-    data["stackedHoursEachDay"][1] = [];
-    data["stackedHoursEachDay"][2] = [];
-    data["stackedHoursEachDay"][3] = [];
+    dataObj["stackedHoursEachDay"] = [];
+    dataObj["stackedHoursEachDay"][0] = [];
+    dataObj["stackedHoursEachDay"][1] = [];
+    dataObj["stackedHoursEachDay"][2] = [];
+    dataObj["stackedHoursEachDay"][3] = [];
     for (var i in countStackedTwoHoursOfEachDay) {
-        data["stackedHoursEachDay"][0].push({
+        dataObj["stackedHoursEachDay"][0].push({
             "date": getCorrectUTCDate(i),
             "00-12": countStackedTwoHoursOfEachDay[i][0],
             "12-00": countStackedTwoHoursOfEachDay[i][1]
         });
     }
     for (var i in countStackedFourHoursOfEachDay) {
-        data["stackedHoursEachDay"][1].push({
+        dataObj["stackedHoursEachDay"][1].push({
             "date": getCorrectUTCDate(i),
             "00-06": countStackedFourHoursOfEachDay[i][0],
             "06-12": countStackedFourHoursOfEachDay[i][1],
@@ -404,7 +412,7 @@ function processData(timezone) {
         });
     }
     for (var i in countStackedSixHoursOfEachDay) {
-        data["stackedHoursEachDay"][2].push({
+        dataObj["stackedHoursEachDay"][2].push({
             "date": getCorrectUTCDate(i),
             "00-04": countStackedSixHoursOfEachDay[i][0],
             "04-08": countStackedSixHoursOfEachDay[i][1],
@@ -415,7 +423,7 @@ function processData(timezone) {
         });
     }
     for (var i in countStackedEightHoursOfEachDay) {
-        data["stackedHoursEachDay"][3].push({
+        dataObj["stackedHoursEachDay"][3].push({
             "date": getCorrectUTCDate(i),
             "00-03": countStackedEightHoursOfEachDay[i][0],
             "03-06": countStackedEightHoursOfEachDay[i][1],
@@ -427,41 +435,41 @@ function processData(timezone) {
             "21-24": countStackedEightHoursOfEachDay[i][7]
         });
     }
-    data["sumStackedHoursEachDay"] = []
-    data["sumStackedHoursEachDay"][0] = countStackedFourHoursOfEachDay;
-    data["sumStackedHoursEachDay"][1] = countStackedSixHoursOfEachDay;
-    data["sumStackedHoursEachDay"][2] = countStackedTwoHoursOfEachDay;
-    data["sumStackedHoursEachDay"][3] = countStackedEightHoursOfEachDay;
+    dataObj["sumStackedHoursEachDay"] = []
+    dataObj["sumStackedHoursEachDay"][0] = countStackedFourHoursOfEachDay;
+    dataObj["sumStackedHoursEachDay"][1] = countStackedSixHoursOfEachDay;
+    dataObj["sumStackedHoursEachDay"][2] = countStackedTwoHoursOfEachDay;
+    dataObj["sumStackedHoursEachDay"][3] = countStackedEightHoursOfEachDay;
 
-    console.log(data)
-    data['mostInADay'] = d3.max(data['eachDay'],function(d) { return d.sum});
+    console.log(dataObj)
+    dataObj['mostInADay'] = d3.max(dataObj['eachDay'],function(d) { return d.sum});
     
-    data['totalDays'] = getNumberOfDayBetweenTwoDates(data['firstRecordedDay'], data['lastRecordedDay']);
-    data['averagePerHour'] = [];
+    dataObj['totalDays'] = getNumberOfDayBetweenTwoDates(dataObj['firstRecordedDay'], dataObj['lastRecordedDay']);
+    dataObj['averagePerHour'] = [];
     for (var hour in countHour) {
-        data['averagePerHour'][hour] = (countHour[hour]/data['totalDays']);
+        dataObj['averagePerHour'][hour] = (countHour[hour]/dataObj['totalDays']);
     }
     
-    data['averageDay'] = (d3.sum(data['eachDay'],function(d) { return d.sum})/data['totalDays']);
+    dataObj['averageDay'] = (d3.sum(dataObj['eachDay'],function(d) { return d.sum})/dataObj['totalDays']);
 
-    data['averageWorkday'] = (data['byDay'][0].sum + data['byDay'][1].sum + data['byDay'][2].sum +data['byDay'][3].sum + data['byDay'][4].sum) / (data['totalDays']-data['amountOfEachWeekday'][5]-data['amountOfEachWeekday'][6]);
-    data['averageWeekend'] = (data['byDay'][5].sum + data['byDay'][6].sum) / (data['amountOfEachWeekday'][5]+data['amountOfEachWeekday'][6]);
+    dataObj['averageWorkday'] = (dataObj['byDay'][0].sum + dataObj['byDay'][1].sum + dataObj['byDay'][2].sum +dataObj['byDay'][3].sum + dataObj['byDay'][4].sum) / (dataObj['totalDays']-dataObj['amountOfEachWeekday'][5]-dataObj['amountOfEachWeekday'][6]);
+    dataObj['averageWeekend'] = (dataObj['byDay'][5].sum + dataObj['byDay'][6].sum) / (dataObj['amountOfEachWeekday'][5]+dataObj['amountOfEachWeekday'][6]);
 
-    data['averagePerWeekday'] = [];
+    dataObj['averagePerWeekday'] = [];
     for (var i=0;i<7;i++) {
-        data['averagePerWeekday'][i] = data['byDay'][i].sum/data['amountOfEachWeekday'][i];
+        dataObj['averagePerWeekday'][i] = dataObj['byDay'][i].sum/dataObj['amountOfEachWeekday'][i];
     }
 
-    data["averagePerHourPerWeekday"] = [];
+    dataObj["averagePerHourPerWeekday"] = [];
     for (var d in weekday) {
-        data["averagePerHourPerWeekday"][d] = [];
+        dataObj["averagePerHourPerWeekday"][d] = [];
         for (var i=0; i<24; i++) {
-            data["averagePerHourPerWeekday"][d][i] = countEachHourOfEachWeekday[d][i]/data['amountOfEachWeekday'][d];
+            dataObj["averagePerHourPerWeekday"][d][i] = countEachHourOfEachWeekday[d][i]/dataObj['amountOfEachWeekday'][d];
         }
     }
 
-    data["averageHourOverAllWeeks"] = [];   
-    data["maxHourOverAllWeeks"] = 0;    
+    dataObj["averageHourOverAllWeeks"] = [];   
+    dataObj["maxHourOverAllWeeks"] = 0;    
     for (var i=0; i<24; i++) {
         var hourSum = 0;
         var numWeeks = 0;
@@ -470,31 +478,31 @@ function processData(timezone) {
             hourSum += countEachHourOfEachWeek[w][i];
             numWeeks++;
 
-            if (countEachHourOfEachWeek[w][i] > data["maxHourOverAllWeeks"]) {
-                data["maxHourOverAllWeeks"] = countEachHourOfEachWeek[w][i];
+            if (countEachHourOfEachWeek[w][i] > dataObj["maxHourOverAllWeeks"]) {
+                dataObj["maxHourOverAllWeeks"] = countEachHourOfEachWeek[w][i];
             }
         }            
 
-        data["averageHourOverAllWeeks"][i] = hourSum/numWeeks;
+        dataObj["averageHourOverAllWeeks"][i] = hourSum/numWeeks;
     }
     
-    data["maxWeek"] = 0;
+    dataObj["maxWeek"] = 0;
     var weekSum = 0;
     var amountOfWeeks = 0;
     for (var i in countWeeks) {
-        if (countWeeks[i] > data["maxWeek"]) {
-            data["maxWeek"] = countWeeks[i];
+        if (countWeeks[i] > dataObj["maxWeek"]) {
+            dataObj["maxWeek"] = countWeeks[i];
         }
         weekSum += countWeeks[i];
         amountOfWeeks++;
     }
-    data["averageWeek"] = (weekSum/amountOfWeeks);
+    dataObj["averageWeek"] = (weekSum/amountOfWeeks);
     
-    data["averageDayPerMonth"] = [];
-    data["averageDayEachMonth"] = [];
-    data["maxAverageDayPerMonth"] = 0;
-    var amountOfDaysInFirstMonth = daysInMonth(data['firstRecordedDay'].getUTCMonth(), data['firstRecordedDay'].getUTCFullYear()) - data['firstRecordedDay'].getUTCDate()+1;
-    var amountOfDaysInLastMonth = data['lastRecordedDay'].getUTCDate();
+    dataObj["averageDayPerMonth"] = [];
+    dataObj["averageDayEachMonth"] = [];
+    dataObj["maxAverageDayPerMonth"] = 0;
+    var amountOfDaysInFirstMonth = daysInMonth(dataObj['firstRecordedDay'].getUTCMonth(), dataObj['firstRecordedDay'].getUTCFullYear()) - dataObj['firstRecordedDay'].getUTCDate()+1;
+    var amountOfDaysInLastMonth = dataObj['lastRecordedDay'].getUTCDate();
     var cnt = 0;    
     for (var i in countMonth) {
         var sum = 0;
@@ -503,139 +511,141 @@ function processData(timezone) {
         } else if (cnt === (Object.keys(countMonth).length-1)) {
             sum = +(countMonth[i] / amountOfDaysInLastMonth).toFixed(2);            
         } else {
-            sum= +(countMonth[i] / daysInMonth((month.indexOf(i)+1), data["firstYear"])).toFixed(2);
+            sum= +(countMonth[i] / daysInMonth((month.indexOf(i)+1), dataObj["firstYear"])).toFixed(2);
         }
         
-        if (data["maxAverageDayPerMonth"] < sum) {
-            data["maxAverageDayPerMonth"] = Math.floor(sum);
+        if (dataObj["maxAverageDayPerMonth"] < sum) {
+            dataObj["maxAverageDayPerMonth"] = Math.floor(sum);
         }
 
-        data["averageDayEachMonth"][i] = sum;
+        dataObj["averageDayEachMonth"][i] = sum;
 
-        data["averageDayPerMonth"].push({
+        dataObj["averageDayPerMonth"].push({
             sum: sum,
             type: i
         });
         cnt++;
     }
 
-    data["daysInEachWeek"] = getDaysInEachWeek(data['firstRecordedDay'], data['lastRecordedDay']);
+    dataObj["daysInEachWeek"] = getDaysInEachWeek(dataObj['firstRecordedDay'], dataObj['lastRecordedDay']);
 
-    data['comparingWeeks'] = [];
-    var indexOfThisWeek = (data['byWeek'].length-1);
-    data['comparingWeeks'].push({
+    dataObj['comparingWeeks'] = [];
+    var indexOfThisWeek = (dataObj['byWeek'].length-1);
+    dataObj['comparingWeeks'].push({
         "type": "This week",
-        "sum": data['byWeek'][indexOfThisWeek].sum
+        "sum": dataObj['byWeek'][indexOfThisWeek].sum
     });
-    if (data['byWeek'].length > 2) {
-        data['comparingWeeks'].push({
+    if (dataObj['byWeek'].length > 2) {
+        dataObj['comparingWeeks'].push({
             "type": "Last week",
-            "sum": data['byWeek'][indexOfThisWeek-1].sum
+            "sum": dataObj['byWeek'][indexOfThisWeek-1].sum
         });
     }
 
-    if (data['byWeek'].length > 3) {
-        var avgLastTwoWeeks = (data['byWeek'][indexOfThisWeek-1].sum + data['byWeek'][indexOfThisWeek-2].sum)/2;
-        data['comparingWeeks'].push({
+    if (dataObj['byWeek'].length > 3) {
+        var avgLastTwoWeeks = (dataObj['byWeek'][indexOfThisWeek-1].sum + dataObj['byWeek'][indexOfThisWeek-2].sum)/2;
+        dataObj['comparingWeeks'].push({
             "type": "Avg last two weeks",
             "sum": avgLastTwoWeeks
         });
     }
 
-    if (data['byWeek'].length > 5) {
+    if (dataObj['byWeek'].length > 5) {
         var avgLastFourWeeks = 0;
         for(var i=indexOfThisWeek-1; i>indexOfThisWeek-5; i--) {
-            avgLastFourWeeks += data['byWeek'][i].sum; 
+            avgLastFourWeeks += dataObj['byWeek'][i].sum; 
         }
         avgLastFourWeeks = avgLastFourWeeks/4;
-        data['comparingWeeks'].push({
+        dataObj['comparingWeeks'].push({
             "type": "Avg last four weeks",
             "sum": avgLastFourWeeks
         });
     }
 
-    if (data['byWeek'].length > 9) {
+    if (dataObj['byWeek'].length > 9) {
         var avgLastEightWeeks = 0;
         for(var i=indexOfThisWeek-1; i>indexOfThisWeek-9; i--) {
-            avgLastEightWeeks += data['byWeek'][i].sum; 
+            avgLastEightWeeks += dataObj['byWeek'][i].sum; 
         }
         avgLastEightWeeks = avgLastEightWeeks/8;
-        data['comparingWeeks'].push({
+        dataObj['comparingWeeks'].push({
             "type": "Avg last eight weeks",
             "sum": avgLastEightWeeks
         });
     }
 
-    if (data['byWeek'].length > 13) {
+    if (dataObj['byWeek'].length > 13) {
         var avgLastTwelveWeeks = 0;
         for(var i=indexOfThisWeek-1; i>indexOfThisWeek-13; i--) {
-            avgLastTwelveWeeks += data['byWeek'][i].sum; 
+            avgLastTwelveWeeks += dataObj['byWeek'][i].sum; 
         }
         avgLastTwelveWeeks = avgLastTwelveWeeks/12;
-        data['comparingWeeks'].push({
+        dataObj['comparingWeeks'].push({
             "type": "Avg last twelve weeks",
             "sum": avgLastTwelveWeeks
         });
     }
 
-    data['comparingWeeks'].push({
+    dataObj['comparingWeeks'].push({
         "type": "Average week",
-        "sum": data['averageWeek'].toFixed(2)
+        "sum": dataObj['averageWeek'].toFixed(2)
     });
     
-    data["trivia"] = [];
-    data["trivia"].push({
+    dataObj["trivia"] = [];
+    dataObj["trivia"].push({
         "key": "First observation",
-        "value": data["firstObservation"].getUTCDate() 
-            + " " + month[data["firstObservation"].getUTCMonth()] 
-            + " " + data["firstObservation"].getUTCFullYear()
-            + " " + (data["firstObservation"].getUTCHours() < 10 ? "0" : "") + data["firstObservation"].getUTCHours() 
-            +":"+ (data["firstObservation"].getUTCMinutes() < 10 ? "0" : "") + data["firstObservation"].getUTCMinutes() 
-            +":"+ (data["firstObservation"].getUTCSeconds() < 10 ? "0" : "") + data["firstObservation"].getUTCSeconds()
+        "value": dataObj["firstObservation"].getUTCDate() 
+            + " " + month[dataObj["firstObservation"].getUTCMonth()] 
+            + " " + dataObj["firstObservation"].getUTCFullYear()
+            + " " + (dataObj["firstObservation"].getUTCHours() < 10 ? "0" : "") + dataObj["firstObservation"].getUTCHours() 
+            +":"+ (dataObj["firstObservation"].getUTCMinutes() < 10 ? "0" : "") + dataObj["firstObservation"].getUTCMinutes() 
+            +":"+ (dataObj["firstObservation"].getUTCSeconds() < 10 ? "0" : "") + dataObj["firstObservation"].getUTCSeconds()
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Last observation",
-        "value": data["lastObservation"].getUTCDate() 
-        + " " + month[data["lastObservation"].getUTCMonth()] 
-        + " " + data["lastObservation"].getUTCFullYear()
-        + " " + (data["lastObservation"].getUTCHours() < 10 ? "0" : "") + data["lastObservation"].getUTCHours() 
-            +":"+ (data["lastObservation"].getUTCMinutes() < 10 ? "0" : "") + data["lastObservation"].getUTCMinutes() 
-            +":"+ (data["lastObservation"].getUTCSeconds() < 10 ? "0" : "") + data["lastObservation"].getUTCSeconds()
+        "value": dataObj["lastObservation"].getUTCDate() 
+        + " " + month[dataObj["lastObservation"].getUTCMonth()] 
+        + " " + dataObj["lastObservation"].getUTCFullYear()
+        + " " + (dataObj["lastObservation"].getUTCHours() < 10 ? "0" : "") + dataObj["lastObservation"].getUTCHours() 
+            +":"+ (dataObj["lastObservation"].getUTCMinutes() < 10 ? "0" : "") + dataObj["lastObservation"].getUTCMinutes() 
+            +":"+ (dataObj["lastObservation"].getUTCSeconds() < 10 ? "0" : "") + dataObj["lastObservation"].getUTCSeconds()
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Total days",
-        "value": data["totalDays"]
+        "value": dataObj["totalDays"]
     });    
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Total weeks",
-        "value": data["byWeek"].length
+        "value": dataObj["byWeek"].length
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Total months",
-        "value": data["sumOfEachYearMonth"].length
+        "value": dataObj["sumOfEachYearMonth"].length
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Total observations",
         "value": rawData.length
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Days with observations",
-        "value": data["totalDaysWithObservations"] 
-            + " (" + ((data["totalDaysWithObservations"]/data["totalDays"])*100).toFixed(2) + "% of total days)"
+        "value": dataObj["totalDaysWithObservations"] 
+            + " (" + ((dataObj["totalDaysWithObservations"]/dataObj["totalDays"])*100).toFixed(2) + "% of total days)"
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Days without observations",
-        "value": data["totalDays"] - data["totalDaysWithObservations"] 
-            + " (" + (((data["totalDays"] - data["totalDaysWithObservations"])/data["totalDays"])*100).toFixed(2) + "% of total days)"
+        "value": dataObj["totalDays"] - dataObj["totalDaysWithObservations"] 
+            + " (" + (((dataObj["totalDays"] - dataObj["totalDaysWithObservations"])/dataObj["totalDays"])*100).toFixed(2) + "% of total days)"
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Average observations per day",
-        "value": data["averageDay"].toFixed(2)
+        "value": dataObj["averageDay"].toFixed(2)
     });
-    data["trivia"].push({
+    dataObj["trivia"].push({
         "key": "Average observations per week",
-        "value": data["averageWeek"].toFixed(2)
+        "value": dataObj["averageWeek"].toFixed(2)
     });
+    
+    return dataObj;
 }
 
 function getDaysInEachWeek(firstDay, lastDay) {
@@ -697,7 +707,7 @@ function checkForChosenDataset() {
             annotations = [];
             invalidObservations = [];
             var tz = document.getElementById("timezone");
-			processData(tz.value);            
+			data = processData(tz.value);            
             createVisualizations();
             window.localStorage.setItem('custom-date', timeNow.getTime());
         } else {

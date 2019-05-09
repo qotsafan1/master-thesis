@@ -1,3 +1,4 @@
+var data = [];
 var month = new Array(12);
     month[0] = "January";
     month[1] = "February";
