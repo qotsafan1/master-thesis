@@ -13,10 +13,15 @@
     font-weight: bold;
 }
 
-#informationPanel table td.table-key {
+#informationPanel table td.table-key, #dataComparison table td.table-key {
     font-weight: bold;
 }
 
-#informationPanel table td.table-value {
+#informationPanel table td.table-value, #dataComparison table td.table-value {
     text-align: right;
+}
+
+#comparableWeeks .brush rect.selection {
+    stroke-width: 1;
+    stroke: black;
 }

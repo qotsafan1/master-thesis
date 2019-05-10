@@ -34,9 +34,42 @@
 	</div>
 	<div class="row">		
 		<div class="col">
+			<div class='graph' id='weekComparison'></div>
+		</div>
+	</div>
+	<div class="row" id="comparableWeeks">		
+		<div class="col">
 			<div class='graph' id='weekBarChart'></div>
 		</div>
 	</div>
+	<br>
+	<div class="row" id="dataComparison">
+		<div class="col">
+			<h3 id="leftTriviaLabel"></h3>
+			<table id="triviaLeft"></table>	
+		</div>
+		<div class="col">
+			<h3 id="rightTriviaLabel"></h3>
+			<table id="triviaRight"></table>	
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<div id="weekdayChartLeft"></div>
+		</div>
+		<div class="col">
+			<div id="weekdayChartRight"></div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<div id="hourChartLeft"></div>
+		</div>
+		<div class="col">
+			<div id="hourChartRight"></div>
+		</div>
+	</div>
+	<br>
 	<footer>
 		<% include ../partials/footer %>
 	</footer>
@@ -98,6 +131,8 @@
 		while (trivia.firstChild) {
 			trivia.removeChild(trivia.firstChild);
 		}
+
+		removeComparisonData();
 		
 		document.getElementById("averageHourPerWeekday").innerText = "";
 	}	
@@ -208,9 +243,9 @@
 		new ColorScaleLegend(calendarObject.colorScale, "Color scale for days");
 		new ColorScaleLegend(timetableObject.colorScale, "Color scale for hours");
 
-		var weekChart = new NormalBarChart(
+		var weekComparison = new NormalBarChart(
 			data['comparingWeeks'], 
-			'weekBarChart', 
+			'weekComparison', 
 			1000,
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
@@ -223,8 +258,36 @@
 				"titleFontSize": "15px"
 			}
 		);
+		weekComparison.create("", "Observations", -1);
+
+		var weekChart = new NormalBarChart(
+			data['byWeek'], 
+			'weekBarChart', 
+			1000,
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per week", 
+			data['byWeek'], 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
 		weekChart.create("", "Observations", -1);
-		//weekChart.rotateTickLabels();
+		weekChart.rotateTickLabels();
+		
+		var brushObjects = weekChart.createCustomBrush();
+		weekChart.rightBrushG = brushObjects[0];
+		weekChart.rightBrush = brushObjects[1];
+		weekChart.setBrushPosition(weekChart.rightBrushG, weekChart.rightBrush, 1);
+
+		var brushObjects = weekChart.createCustomBrush();
+		weekChart.leftBrushG = brushObjects[0];
+		weekChart.leftBrush = brushObjects[1];
+		weekChart.setBrushPosition(weekChart.leftBrushG, weekChart.leftBrush, 3);
+
 	}
 
 	function updateAverages(date) {
@@ -273,5 +336,178 @@
 			("Average day overall"),
 			("Average day in " + month[monthNumber])
 		);
+	}
+
+	function createWeekComparison(leftWeeks, rightWeeks) {
+		if (!leftWeeks.length || !rightWeeks.length) {
+			return;
+		}		
+		removeComparisonData();
+
+		allLeftWeeks = [];
+		for (var i in leftWeeks) {
+			if (leftWeeks[i] in data["recordsEachWeek"]) {
+				allLeftWeeks = allLeftWeeks.concat(data["recordsEachWeek"][leftWeeks[i]]);
+			}
+		}
+		
+		allRightWeeks = [];
+		for (var i in rightWeeks) {
+			if (rightWeeks[i] in data["recordsEachWeek"]) {
+				allRightWeeks = allRightWeeks.concat(data["recordsEachWeek"][rightWeeks[i]]);
+			}
+		}
+
+		var leftData = processData(timezone, allLeftWeeks);
+		var rightData = processData(timezone, allRightWeeks);
+
+		var triviaTableLeft = d3.select("#triviaLeft");
+		for (var i in leftData['trivia']) {
+			var triviaRow = triviaTableLeft.append("tr");
+			triviaRow.append("td").attr("class", "table-key").text(leftData['trivia'][i].key);
+			triviaRow.append("td").attr("class", "table-value").text(leftData['trivia'][i].value);
+		}
+
+		var triviaTableRight = d3.select("#triviaRight");
+		for (var i in rightData['trivia']) {
+			var triviaRow = triviaTableRight.append("tr");
+			triviaRow.append("td").attr("class", "table-key").text(rightData['trivia'][i].key);
+			triviaRow.append("td").attr("class", "table-value").text(rightData['trivia'][i].value);
+		}
+
+		if (leftWeeks.length === 1) {
+			document.getElementById("leftTriviaLabel").innerText = "Week " + leftWeeks[0];
+		} else {
+			document.getElementById("leftTriviaLabel").innerText = "Week " + leftWeeks[0] + " - " + leftWeeks[leftWeeks.length-1];
+		}
+
+		if (rightWeeks.length === 1) {
+			document.getElementById("rightTriviaLabel").innerText = "Week " + rightWeeks[0];
+		} else {
+			document.getElementById("rightTriviaLabel").innerText = "Week " + rightWeeks[0] + " - " + rightWeeks[rightWeeks.length-1];
+		}
+
+		var weekdayChartLeft = new NormalBarChart(
+			leftData['byDay'], 
+			'weekdayChartLeft', 
+			500, 
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per weekday",
+			leftData['byDay'], 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		weekdayChartLeft.create(
+			"Weekday", 
+			"Observations", 
+			leftData['mostInADay'] < 10 ? 
+				leftData['mostInADay'] : -1
+		);
+
+		var weekdayChartRight = new NormalBarChart(
+			rightData['byDay'], 
+			'weekdayChartRight', 
+			500, 
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per weekday",
+			rightData['byDay'], 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		weekdayChartRight.create(
+			"Weekday", 
+			"Observations", 
+			rightData['mostInADay'] < 10 ? 
+				rightData['mostInADay'] : -1
+		);
+
+		var hourChartLeft = new TimeBarChart(
+			leftData['byHour'],
+			'hourChartLeft',
+			500,
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per hour",
+			[0,24],
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+			
+		hourChartLeft.create(
+			"Hour",
+			"Observations",
+			leftData['maxHourOverAllWeeks'] < 10 ? 
+				leftData['maxHourOverAllWeeks'] : -1	
+		);
+
+		var hourChartRight = new TimeBarChart(
+			rightData['byHour'],
+			'hourChartRight',
+			500,
+			250,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Observations per hour",
+			[0,24],
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+			
+		hourChartRight.create(
+			"Hour",
+			"Observations",
+			rightData['maxHourOverAllWeeks'] < 10 ? 
+				rightData['maxHourOverAllWeeks'] : -1
+		);
+	}
+
+	function removeComparisonData() {
+		var trivia = document.getElementById("triviaRight");		
+		while (trivia.firstChild) {
+			trivia.removeChild(trivia.firstChild);
+		}
+
+		var trivia = document.getElementById("triviaLeft");		
+		while (trivia.firstChild) {
+			trivia.removeChild(trivia.firstChild);
+		}
+		
+		var rightWeekChart = document.getElementById("weekdayChartRight");		
+		while (rightWeekChart.firstChild) {
+			rightWeekChart.removeChild(rightWeekChart.firstChild);
+		}
+
+		var leftWeekChart = document.getElementById("weekdayChartLeft");		
+		while (leftWeekChart.firstChild) {
+			leftWeekChart.removeChild(leftWeekChart.firstChild);
+		}
+
+		var hourChartRight = document.getElementById("hourChartRight");		
+		while (hourChartRight.firstChild) {
+			hourChartRight.removeChild(hourChartRight.firstChild);
+		}
+
+		var hourChartRight = document.getElementById("hourChartLeft");		
+		while (hourChartRight.firstChild) {
+			hourChartRight.removeChild(hourChartRight.firstChild);
+		}
+
+		document.getElementById("leftTriviaLabel").innerText = "";
+		document.getElementById("rightTriviaLabel").innerText = "";
 	}
 </script>
