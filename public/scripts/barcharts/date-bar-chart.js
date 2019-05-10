@@ -36,7 +36,6 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     this.createXAxis(xLabel);
     this.createYAxis(yLabel);
     //this.createBars();
-    //this.createColorBarChart();
     this.createTitle();
     this.createMeanLine();
     this.createDayTicks();    
@@ -107,50 +106,28 @@ DateBarChart.prototype.removeWeekdayBrushes = function() {
     this.g.selectAll('.weekday-brush').remove();
 }
 
-DateBarChart.prototype.createColorBarChart = function() {    
-    var thisObj = this;
-    var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
-    colors = ["#d53e4f","#fc8d59","#fee08b","#e6f598","#99d594","#3288bd"];
-
-    // Define the div for the tooltip
-    var div = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-    
-    this.bars = this.g.selectAll(".bar")
-        .data(this.data)
-        .enter().append("rect")
-        .attr("class", "bar")
-        .attr("x", function(d) { return thisObj.xBarPosition(thisObj.x,d,thisObj.xScaleType); })
-        .attr("y", function(d) { return thisObj.y(d.sum); })
-        .attr("width", this.getBarWidth(this.xScaleType))
-        .attr("height", function(d) { return (thisObj.height - thisObj.y(d.sum)); })
-        .style("fill", function(d,i) {
-            var dayString = (d.date.getUTCFullYear() +"-"+ (d.date.getUTCMonth()+1) +"-"+ d.date.getUTCDate());
-            if (dayString in data["sumStackedHoursEachDay"][1]) {
-                return colors[indexOfMax(data["sumStackedHoursEachDay"][2][dayString])];
-            }
-        });
-}
-
 DateBarChart.prototype.createStackedBars = function(hourChunks) {
     var keys = ["00-06", "06-12", "12-18", "18-00"];
-    var barData = data["stackedHoursEachDay"][1]
+    var barData = data["stackedHoursEachDay"][2]
     //var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
     var colors = ["#d7191c","#fdae61","#abdda4","#2b83ba"];
 
-    if (hourChunks === 2) {
+    if (hourChunks === 3) {
         keys = ["00-04", "04-08", "08-12", "12-16", "16-20", "20-00"];
         colors = ["#d53e4f","#fc8d59","#fee08b","#e6f598","#99d594","#3288bd"];
-        barData = data["stackedHoursEachDay"][2];
+        barData = data["stackedHoursEachDay"][3];
+    } else if (hourChunks === 1) {
+        keys = ["00-09", "09-18", "18-00"];
+        colors = ["#d7191c","#abdda4","#2b83ba"];
+        barData = data["stackedHoursEachDay"][1];
     } else if (hourChunks === 0) {
         keys = ["00-12", "12-00"];
         colors = ["#d7191c","#abdda4"];
         barData = data["stackedHoursEachDay"][0];
-    } else if (hourChunks === 3) {
+    } else if (hourChunks === 4) {
         keys = ["00-03", "03-06", "06-09", "09-12", "12-15","15-18", "18-21","21-24"];
         colors = ["#d53e4f","#f46d43","#fdae61","#fee08b","#e6f598","#abdda4","#66c2a5","#3288bd"];
-        barData = data["stackedHoursEachDay"][3];
+        barData = data["stackedHoursEachDay"][4];
     }
     stack = d3.stack().keys(keys);
     series = stack(barData);
@@ -256,9 +233,9 @@ DateBarChart.prototype.addStackSwitch = function(turnOn) {
             }
             return "none";
         })
-        .text("Hour chunks: ");
+        .text("Division of day: ");
     
-    var chunck = ["2", "4", "6", "8"];
+    var chunck = ["2", "3", "4", "6", "8"];
 
     var select = form.append('select')
         .attr('class','stacked-chunks')
@@ -281,7 +258,7 @@ DateBarChart.prototype.addStackSwitch = function(turnOn) {
             })
             .text(function (d) { return d; })
             .property("selected", function(d,i) {
-                if (i===1) {
+                if (i===2) {
                     return true;
                 }
                 return false;

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+</head>
+<body class="container">
+
+	<header>
+		<% include ../partials/header %>
+	</header>
+	<br>
+	<div class="row">
+		<input type="date" name="last-view" id="lastSession" onchange="setSessionDate(this)">
+	</div>	
+	<br>
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+
+</body>
+<% include ../partials/annotations %>
+</html>
+
+<script src="scripts/data-processing.js"></script>
+
+<script type='text/javascript'>
+	var lastSession = window.localStorage.getItem('lastSession');
+
+	if (lastSession) {
+		document.getElementById("lastSession").value = lastSession;
+	}
+
+	function setSessionDate(element) {
+		window.localStorage.setItem('lastSession', element.value);
+	}
+</script>

@@ -43,6 +43,7 @@ function processData(timezone, unFilteredData) {
     var countEachHourOfEachDay = [];
     var countEachHourOfEachWeekday = [];
     var countStackedTwoHoursOfEachDay = [];
+    var countStackedThreeHoursOfEachDay = [];
     var countStackedFourHoursOfEachDay = [];
     var countStackedSixHoursOfEachDay = [];
     var countStackedEightHoursOfEachDay = [];
@@ -197,6 +198,20 @@ console.log(unFilteredData)
             countStackedTwoHoursOfEachDay[dayOfMonth][0]++;
         } else {
             countStackedTwoHoursOfEachDay[dayOfMonth][1]++;
+        }
+
+        if (!(dayOfMonth in countStackedThreeHoursOfEachDay)) {
+            countStackedThreeHoursOfEachDay[dayOfMonth] = [];
+            for (var i=0; i<3; i++) {
+                countStackedThreeHoursOfEachDay[dayOfMonth][i] = 0;
+            }
+        }
+        if (isoDate.getUTCHours() < 9) {
+            countStackedThreeHoursOfEachDay[dayOfMonth][0]++;
+        } else if (isoDate.getUTCHours() >= 9 && isoDate.getUTCHours() < 18) {
+            countStackedThreeHoursOfEachDay[dayOfMonth][1]++;
+        } else {
+            countStackedThreeHoursOfEachDay[dayOfMonth][2]++;
         }
 
         if (!(dayOfMonth in countStackedFourHoursOfEachDay)) {
@@ -363,6 +378,7 @@ console.log(unFilteredData)
     dataObj["stackedHoursEachDay"][1] = [];
     dataObj["stackedHoursEachDay"][2] = [];
     dataObj["stackedHoursEachDay"][3] = [];
+    dataObj["stackedHoursEachDay"][4] = [];
     for (var i in countStackedTwoHoursOfEachDay) {
         dataObj["stackedHoursEachDay"][0].push({
             "date": getCorrectUTCDate(i),
@@ -370,8 +386,16 @@ console.log(unFilteredData)
             "12-00": countStackedTwoHoursOfEachDay[i][1]
         });
     }
-    for (var i in countStackedFourHoursOfEachDay) {
+    for (var i in countStackedThreeHoursOfEachDay) {
         dataObj["stackedHoursEachDay"][1].push({
+            "date": getCorrectUTCDate(i),
+            "00-09": countStackedThreeHoursOfEachDay[i][0],
+            "09-18": countStackedThreeHoursOfEachDay[i][1],
+            "18-00": countStackedThreeHoursOfEachDay[i][2]
+        });
+    }
+    for (var i in countStackedFourHoursOfEachDay) {
+        dataObj["stackedHoursEachDay"][2].push({
             "date": getCorrectUTCDate(i),
             "00-06": countStackedFourHoursOfEachDay[i][0],
             "06-12": countStackedFourHoursOfEachDay[i][1],
@@ -380,7 +404,7 @@ console.log(unFilteredData)
         });
     }
     for (var i in countStackedSixHoursOfEachDay) {
-        dataObj["stackedHoursEachDay"][2].push({
+        dataObj["stackedHoursEachDay"][3].push({
             "date": getCorrectUTCDate(i),
             "00-04": countStackedSixHoursOfEachDay[i][0],
             "04-08": countStackedSixHoursOfEachDay[i][1],
@@ -391,7 +415,7 @@ console.log(unFilteredData)
         });
     }
     for (var i in countStackedEightHoursOfEachDay) {
-        dataObj["stackedHoursEachDay"][3].push({
+        dataObj["stackedHoursEachDay"][4].push({
             "date": getCorrectUTCDate(i),
             "00-03": countStackedEightHoursOfEachDay[i][0],
             "03-06": countStackedEightHoursOfEachDay[i][1],
@@ -424,8 +448,14 @@ console.log(unFilteredData)
     dataObj['averageWeekend'] = (dataObj['byDay'][5].sum + dataObj['byDay'][6].sum) / (dataObj['amountOfEachWeekday'][5]+dataObj['amountOfEachWeekday'][6]);
 
     dataObj['averagePerWeekday'] = [];
+    dataObj['byAverageWeekday'] = [];
     for (var i=0;i<7;i++) {
-        dataObj['averagePerWeekday'][i] = dataObj['byDay'][i].sum/dataObj['amountOfEachWeekday'][i];
+        var averageWeekday = dataObj['byDay'][i].sum/dataObj['amountOfEachWeekday'][i];
+        dataObj['averagePerWeekday'][i] = averageWeekday;
+        dataObj['byAverageWeekday'].push({
+            sum: averageWeekday.toFixed(2),
+            type: weekday[i]
+        })
     }
 
     dataObj["averagePerHourPerWeekday"] = [];

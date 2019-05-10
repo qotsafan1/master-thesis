@@ -34,6 +34,14 @@ app.get('/monthly-breakdown', function(req, res) {
 	res.render('pages/monthly-breakdown');
 });
 
+app.get('/settings', function(req, res) {
+	res.render('pages/settings');
+});
+
+app.get('/test', function(req, res) {
+	res.render('pages/test');
+});
+
 app.get('/datasets/:name', function(req, res) {	
 	var rawData = data.getRawData(req.params.name);
 	//console.log(rawData)

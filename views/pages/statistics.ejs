@@ -132,13 +132,13 @@
 		weekChart.rotateTickLabels();
 
 		var weekdayChart = new NormalBarChart(
-			data['byDay'], 
+			data['byAverageWeekday'], 
 			'dayBarChart', 
-			500, 
+			500,
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
-			"Observations per weekday",
-			data['byDay'], 
+			"Average observations per weekday",
+			data['byAverageWeekday'], 
 			'default',
 			true,
 			{
@@ -146,7 +146,8 @@
 				"titleFontSize": "15px"
 			}
 		);
-		weekdayChart.create("Weekday", "Observations", -1);
+		var maxAverageWeekday = parseInt(d3.max(data['averagePerWeekday']));
+		weekdayChart.create("Weekday", "Observations", maxAverageWeekday < 10 ? maxAverageWeekday : -1);
 		childGraphs.push(weekdayChart);
 		weekdayChart.addClickEventToUpdateDateChart(dateChart, 'weekday');
 		

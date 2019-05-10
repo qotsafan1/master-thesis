@@ -22,7 +22,7 @@ TimeBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
 
     this.xAxis = this.xAxisBottom(this.x, this.xScaleData[1]);
     this.yAxis = this.yAxisLeft(this.y, yTicks);
-    this.barWidth  = (this.width-this.margin.right)/this.xScaleData[1];
+    this.barWidth = (this.width-this.margin.right)/this.xScaleData[1];
 
     this.createXAxis(xLabel);
     this.createYAxis(yLabel);
