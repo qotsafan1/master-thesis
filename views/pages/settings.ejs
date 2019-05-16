@@ -10,8 +10,27 @@
 	</header>
 	<br>
 	<div class="row">
-		<input type="date" name="last-view" id="lastSession" onchange="setSessionDate(this)">
+		<h5>Timezone: </h5>
+		<select name="timezone" id="timezone" onchange="changeTimezone()">
+			<option value="0">TZ: UTC</option>
+			<option value="1">TZ: Current</option>
+			<option value="2">TZ: From dataset</option>
+		</select>
+	</div>
+	<br>
+	<div class="row">
+		<h5>Sessions:</h5>
+	</div>
+	<div id="sessions">
 	</div>	
+	<br>
+	<div class="row">
+		<h5>Create session: </h5>
+	</div>
+	<div class="row">
+		<input type="date" id="newSessionDate">
+		<button class="btn btn-primary" onclick="createSession()">Add</button>
+	</div>
 	<br>
 	<footer>
 		<% include ../partials/footer %>
@@ -24,13 +43,118 @@
 <script src="scripts/data-processing.js"></script>
 
 <script type='text/javascript'>
-	var lastSession = window.localStorage.getItem('lastSession');
+	checkForChosenDataset();
+	var dataset = document.getElementById("datasets");
+	var event = new Event('change');
+	dataset.dispatchEvent(event);
 
-	if (lastSession) {
-		document.getElementById("lastSession").value = lastSession;
+	function removeAllVisualizations() {
+		var sessionsId = document.getElementById("sessions");			
+		while (sessionsId.firstChild) {
+			sessionsId.removeChild(sessionsId.firstChild);
+		}
+	};
+	function createVisualizations() {
+		var sessionsElement = d3.select("#sessions");
+		if (sessions.length) {
+			for (var i in sessions) {
+				var sessionDate = new Date(sessions[i].sessionDate);
+				var sessionDateString = (sessionDate.getUTCFullYear() +"-"+ 
+					((sessionDate.getUTCMonth()+1) < 10 ? "0" : "") +
+					(sessionDate.getUTCMonth()+1) +"-"+ 
+					(sessionDate.getUTCDate() < 10 ? "0" : "") +
+					sessionDate.getUTCDate()
+				);
+				var newSessionRow = sessionsElement.append("div")
+					.attr("class", "row")
+				newSessionRow
+					.append("div").attr("class", "col-sm-2")
+					.style("padding-top", "5px")
+					.append("span")
+					.text("Session " + (parseInt(i)+1) + ": ")
+
+				var sessionOptions = newSessionRow.append("div").attr("class", "col");
+				sessionOptions
+					.append("input")
+						.attr("type", "date")
+						.attr("id", ("sessionId-" + sessions[i].id))
+						.property("value", sessionDateString);
+				
+				sessionOptions
+					.append("button")
+						.attr("class", "btn btn-outline-primary")
+						.attr("data-session-id", sessions[i].id)
+						.on("click", function() {
+							var sessionId = this.getAttribute("data-session-id");
+							updateSession(sessionId);
+						})
+						.text("Update")
+
+				sessionOptions
+					.append("button")
+						.attr("class", "btn btn-outline-danger")
+						.attr("data-session-id", sessions[i].id)
+						.on("click", function() {
+							var sessionId = this.getAttribute("data-session-id");
+							deleteSession(sessionId);
+						})
+						.text("Remove")
+			}
+
+			var sessionDateString = (data['lastRecordedDay'].getUTCFullYear() +"-"+ 
+				((data['lastRecordedDay'].getUTCMonth()+1) < 10 ? "0" : "") +
+				(data['lastRecordedDay'].getUTCMonth()+1) +"-"+ 
+				(data['lastRecordedDay'].getUTCDate() < 10 ? "0" : "") +
+				data['lastRecordedDay'].getUTCDate()
+			);
+			document.getElementById("newSessionDate").value = sessionDateString;
+		}
+	};
+
+	var timezone  = getTimezone();
+	document.getElementById("timezone").value = timezone;
+
+
+	function changeTimezone() {
+		var tz = document.getElementById("timezone");
+		window.localStorage.setItem('timezone', tz.value);
 	}
 
-	function setSessionDate(element) {
-		window.localStorage.setItem('lastSession', element.value);
+	function deleteSession(id) {
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 204) {
+				location.reload();
+			}
+		};
+		xmlhttp.open("DELETE", ("/sessions/"+id), true);
+		xmlhttp.send();
+	}
+
+	function createSession() {
+		var dataset = document.getElementById("datasets").value;
+		var date = document.getElementById("newSessionDate").value;
+		var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 201) {
+					location.reload();
+				}
+			};
+			xmlhttp.open("POST", "/sessions", true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			xmlhttp.send(JSON.stringify({dataset, date}));
+	}
+
+	function updateSession(id) {
+		var date = document.getElementById("sessionId-"+id).value;
+		var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					location.reload();
+				}
+			};
+			xmlhttp.open("PATCH", ("/sessions/"+id), true);
+			xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+			xmlhttp.send(JSON.stringify({date}));
 	}
 </script>

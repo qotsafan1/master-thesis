@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<% include ../partials/head %>
+</head>
+<body class="container">
+
+	<header>
+		<% include ../partials/header %>
+	</header>
+	<div class="row text-center" id="colorScales">
+	</div>
+	<div style="overflow-x: hidden">
+		<table id="fullCalendar"></table>
+	</div>
+	<br>
+	<div class="row" id="informationPanel">
+		<div class="col"></div>
+		<div class="col-lg-10">
+			<table id="trivia"></table>
+		</div>
+		<div class="col"></div>
+	</div>
+	<div class="row">
+		<div class="col"></div>
+		<div class="col">
+	<br>
+	<div class='graph' id='dayBarChart'></div>
+		</div>
+		<div class="col"></div>
+	</div>
+	<br>
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+
+</body>
+<% include ../partials/annotations %>
+</html>
+
+<script src="scripts/data-processing.js"></script>
+
+<script type='text/javascript'>
+	checkForChosenDataset();
+	var fullCalendar;
+	var dataset = document.getElementById("datasets");
+	var event = new Event('change');
+	dataset.dispatchEvent(event);
+
+	function removeAllVisualizations() {
+		var graphs = document.getElementsByClassName("graph");
+		for (var i in graphs) {				
+			while (graphs[i].firstChild) {
+				graphs[i].removeChild(graphs[i].firstChild);
+			}
+		}
+
+		var fullCalendar = document.getElementById("fullCalendar");			
+		while (fullCalendar.firstChild) {
+			fullCalendar.removeChild(fullCalendar.firstChild);
+		}
+		
+		var colorScales = document.getElementById("colorScales");
+		while (colorScales.firstChild) {
+			colorScales.removeChild(colorScales.firstChild);
+		}
+
+		var trivia = document.getElementById("trivia");		
+		while (trivia.firstChild) {
+			trivia.removeChild(trivia.firstChild);
+		}
+	}
+
+	function createVisualizations() {
+		var newestData = [];
+		
+		if (sessions.length > 0) {
+			newestData = processData(timezone, data["sessions"][data["sessions"].length-1]);
+		} else {
+			var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-1].records;
+			newestData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-2].records));
+		}		
+
+		fullCalendar = new FullCalendar(newestData['hourByDay'], newestData['sumOfEachDay'], newestData['firstRecordedDay'], newestData['lastRecordedDay'], newestData['maxHourOfDay'], newestData["mostInADay"], "");
+		fullCalendar.create();
+
+		new ColorScaleLegend(fullCalendar.dayColorScale, "Color scale for days");
+		new ColorScaleLegend(fullCalendar.colorScale, "Color scale for hours");
+
+		var compareOneData, compareTwoData, compareThreeData, headerOne, headerTwo, headerThree;
+
+		if (sessions.length > 1) {
+			headerOne = "Last session";
+			compareOneData = processData(timezone, data["sessions"][data["sessions"].length-2]);
+		} else if (data["recordsEachWeekAsObject"].length > 4) {
+			headerOne = "Last two weeks";
+			var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
+			compareOneData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-4].records));
+		}
+
+		if (sessions.length > 2) {
+			headerTwo = "Last two sessions";
+			var temp = data["sessions"][data["sessions"].length-2];
+			temp = temp.concat(data["sessions"][data["sessions"].length-3]);
+			compareTwoData = processData(timezone, temp);
+		} else if (data["recordsEachWeekAsObject"].length > 6) {
+			headerTwo = "Last four weeks";
+			var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
+			temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-4].records);
+			temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-5].records);
+			compareTwoData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-6].records));
+		}
+
+		if (sessions.length > 3) {
+			headerThree = "Last three sessions";
+			var temp = data["sessions"][data["sessions"].length-2];
+			temp = temp.concat(data["sessions"][data["sessions"].length-3]);
+			temp = temp.concat(data["sessions"][data["sessions"].length-4]);
+			temp = temp.concat(data["sessions"][data["sessions"].length-5]);
+			compareThreeData = processData(timezone, temp);
+		} else if (data["recordsEachWeekAsObject"].length > 12) {
+			headerThree = "Last eight weeks";
+			var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
+			for (var i=3; i<=12; i++) {
+				temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-i].records);
+			}
+			compareThreeData = processData(timezone, temp);
+		}
+
+		var newestLabel = "Current " + (sessions.length > 0 ? "session" : "progress");
+		var trivia = d3.select("#trivia");
+		var triviaHeaderRow = trivia.append("tr");
+		triviaHeaderRow.append("th");
+		triviaHeaderRow.append("th").text(newestLabel);
+		var keys = [newestLabel];
+		if (headerOne) {
+			keys.push(headerOne);
+			triviaHeaderRow.append("th").text(headerOne);
+		};
+		if (headerTwo) {
+			keys.push(headerTwo);
+			triviaHeaderRow.append("th").text(headerTwo);
+		};
+		if (headerThree) {
+			keys.push(headerThree);
+			triviaHeaderRow.append("th").text(headerThree);
+		};
+
+
+		
+		for (var i in newestData['trivia']) {
+			var triviaRow = trivia.append("tr");
+			triviaRow.append("td").attr("class", "table-key").text(newestData['trivia'][i].key);
+			triviaRow.append("td").attr("class", "table-value").text(newestData['trivia'][i].value);
+			if (compareOneData) {
+				triviaRow.append("td").attr("class", "table-value").text(compareOneData['trivia'][i].value);
+			}
+			if (compareTwoData) {
+				triviaRow.append("td").attr("class", "table-value").text(compareTwoData['trivia'][i].value);
+			}
+			if (compareThreeData) {
+				triviaRow.append("td").attr("class", "table-value").text(compareThreeData['trivia'][i].value);
+			}
+		}
+
+		var groupWeekdayData = [];
+		
+		for (var i in newestData["byAverageWeekday"]) {
+			var groupData = {
+				type: newestData["byAverageWeekday"][i].type,
+			}
+			groupData[newestLabel] = newestData["byAverageWeekday"][i].sum			
+			if (compareOneData) {
+				groupData[headerOne] = compareOneData["byAverageWeekday"][i].sum;
+			}
+			if (compareTwoData) {
+				groupData[headerTwo] = compareTwoData["byAverageWeekday"][i].sum;
+			}
+			if (compareThreeData) {
+				groupData[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
+			}
+
+			groupWeekdayData.push(groupData);
+		}
+
+		var weekdayChart = new GroupedBarChart(
+			groupWeekdayData, 
+			'dayBarChart', 
+			850,
+			350,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Average observations per weekday",
+			groupWeekdayData, 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		var maxAverageWeekday = parseInt(d3.max(newestData['averagePerWeekday']));
+		weekdayChart.create("Weekday", "Observations", maxAverageWeekday, keys);		
+	}
+</script>

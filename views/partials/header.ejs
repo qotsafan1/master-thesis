@@ -29,22 +29,15 @@
       <li class="nav-item">
           <a class="nav-link" href="/monthly-breakdown">Calendar Year</a>
       </li>
-      <li>
-        <select name="timezone" id="timezone" onchange="changeTimezone()">
-          <option value="0">TZ: UTC</option>
-          <option value="1">TZ: Current</option>
-          <option value="2">TZ: From dataset</option>
-        </select>
+      <li class="nav-item">
+          <a class="nav-link" href="/settings"><img src="images/gear.svg" alt="settings" style="max-width:15px;"></a>
       </li>
     </ul>
   
 </nav>
 
 <script type="text/javascript">
-  var tz = window.localStorage.getItem('timezone');
-  if (tz === "1" || tz === "2") {
-    document.getElementById("timezone").value = tz;
-  }
+  var timezone = getTimezone();
 
   var openFile = function(event) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -72,7 +65,7 @@
           window.localStorage.setItem('custom-date', (new Date()).getTime());
           
           removeAllVisualizations();
-          var tz = document.getElementById("timezone");
+          var tz = getTimezone();
 				  data = processData(tz.value, rawData);
           createVisualizations();
         }
@@ -101,10 +94,12 @@
   function getDataset(dataset) {
     annotations = [];
     invalidObservations = [];
+    sessions = [];
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200) {
         var result = JSON.parse(this.responseText);
+        console.log(result)
 				rawData = result.data;
 				for (annotation in result.annotations)
 				{
@@ -132,21 +127,26 @@
 						"type": result.observations[observation].type,
 						"id": result.observations[observation].id
 					});
-				}
-        console.log(invalidObservations)
-        var tz = document.getElementById("timezone");
-				data = processData(tz.value, rawData);
+        }
+        
+        for (session in result.sessions) {
+          sessions.push(result.sessions[session]);
+        }
+
+        var tz = getTimezone();
+				data = processData(tz, rawData);
 				createVisualizations();
 			}
 		};
 		xmlhttp.open("GET", ("/datasets/"+dataset), true);
 		xmlhttp.send();
   }
-  
-  function changeTimezone() {
-    var tz = document.getElementById("timezone");
-    window.localStorage.setItem('timezone', tz.value);
-    location.reload();
-  }
 
+  function getTimezone() {
+    var tz = window.localStorage.getItem('timezone');
+    if (tz === null) {
+      tz = "1";
+    }
+    return tz;
+  }
 </script>

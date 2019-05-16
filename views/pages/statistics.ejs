@@ -113,13 +113,13 @@
 		monthChart.addClickEventToUpdateDateChart(dateChart, 'month');
 		
 		var weekChart = new NormalBarChart(
-			data['byWeek'], 
+			data['byAverageDayPerWeek'], 
 			'weekBarChart', 
 			data['byMonth'].length > 6 ? 1000 : 500,
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
-			"Observations per week", 
-			data['byWeek'], 
+			"Average observations per week", 
+			data['byAverageDayPerWeek'], 
 			'default',
 			true,
 			{
@@ -127,7 +127,8 @@
 				"titleFontSize": "15px"
 			}
 		);
-		weekChart.create("", "Observations", -1);
+		var maxAverageWeek = parseInt(d3.max(data['byAverageDayPerWeek'], function(d) {return d.sum;}));
+		weekChart.create("", "Observations", maxAverageWeek < 10 ? maxAverageWeek : -1);
 		weekChart.addClickEventToUpdateDateChart(dateChart, 'week');
 		weekChart.rotateTickLabels();
 
@@ -175,7 +176,6 @@
 		lastDate.setUTCHours(23,59,59);
 		document.getElementById("firstDate").innerHTML = weekday[firstDate.getUTCDay() === 0 ? 6 : (firstDate.getUTCDay()-1)] + " " + month[firstDate.getUTCMonth()] + " " + firstDate.getUTCDate() + " " + firstDate.getUTCFullYear();
 		document.getElementById("lastDate").innerHTML = weekday[lastDate.getUTCDay() === 0 ? 6 : (lastDate.getUTCDay()-1)] + " " + month[lastDate.getUTCMonth()] + " " + lastDate.getUTCDate() + " " + lastDate.getUTCFullYear();
-		var timezone = document.getElementById("timezone").value;
 		if (childGraphs.length > 0) {
 			var countWeekday = [];
 			var countHour = [];

@@ -38,6 +38,12 @@
     min-width: 6px;
 }
 
+#fullCalendar tbody td.hour, #fullCalendar thead th.hour {
+    max-width: 24px;
+    min-width: 24px;
+    width: 24px;
+}
+
 #fullCalendar tbody td.hour .hour-text, #fullCalendar thead th.hour .hour-text {
     position: relative;
     top: 6.5px;

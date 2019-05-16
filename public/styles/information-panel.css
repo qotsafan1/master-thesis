@@ -15,10 +15,12 @@
 
 #informationPanel table td.table-key, #dataComparison table td.table-key {
     font-weight: bold;
+    border: solid 1px black;
 }
 
 #informationPanel table td.table-value, #dataComparison table td.table-value {
     text-align: right;
+    border: solid 1px black;
 }
 
 #comparableWeeks .brush rect.selection {
