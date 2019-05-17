@@ -58,12 +58,15 @@
           var savedObject = {
             "annotations": [],
             "observations": [],
+            "sessions": [],
             "data": allData
           };
 
           window.localStorage.setItem('custom-data', JSON.stringify(savedObject));
           window.localStorage.setItem('custom-date', (new Date()).getTime());
-          
+          sessions = [];
+          annotations = [];
+          observations = [];
           removeAllVisualizations();
           var tz = getTimezone();
 				  data = processData(tz.value, rawData);

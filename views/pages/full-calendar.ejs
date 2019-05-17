@@ -96,6 +96,9 @@
 		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
 		dateChart.createBars();
 		dateChart.addStackSwitch(false);
+		if (sessions.length > 0) {
+			dateChart.showSessionsSwitch(false);
+		}
 		//dateChart.createStackedBars();
 		//dateChart.createLegend();
 

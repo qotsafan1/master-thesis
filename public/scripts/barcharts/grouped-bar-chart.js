@@ -47,6 +47,11 @@ GroupedBarChart.prototype.yScale = function(xScaleData) {
 }
 
 GroupedBarChart.prototype.createBars = function(keys, colors) {
+    // Define the div for the tooltip
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+    
     var thisObj = this;
     color = d3.scaleOrdinal().range(colors);
     this.g.append("g")
@@ -75,7 +80,20 @@ GroupedBarChart.prototype.createBars = function(keys, colors) {
       })
       .attr("fill", function(d) {
         return color(d.key);
-      });
+      })
+      .on("mouseover", function(d) {
+        div.transition()
+            .duration(200)
+            .style("opacity", .9);
+        div.html(d.value)
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0)
+        });
   }
 
 GroupedBarChart.prototype.createLegend = function(colors, keys) {
@@ -101,6 +119,23 @@ GroupedBarChart.prototype.createLegend = function(colors, keys) {
             .attr("dy", ".35em")
             .style("font-size", "12px")
             .text(function (d) { return d; });
+}
+
+GroupedBarChart.prototype.changeXaxis = function() {
+    this.g.select(".x-axis").remove();
+    x = d3.scaleLinear().range([0, this.width]);
+    x.domain([0,24]);
+    var xAxis = d3.axisBottom(x).ticks(23);
+    this.g.append("g")
+        .attr("transform", "translate(0 ," + this.height + ")")
+        .attr("class", "x-axis")
+        .style("font-size", this.styles.xBarFontSize)
+        .call(xAxis)
+        .append("text")
+            .attr("y", 30)
+            .attr("x", this.width/2)
+            .attr("fill", "#000")
+            .text("Hour");
 }
 
 GroupedBarChart.prototype.create = function(xLabel,yLabel, yTicks, keys) {

@@ -21,12 +21,16 @@
 		</div>
 		<div class="col"></div>
 	</div>
+	<br>
 	<div class="row">
 		<div class="col"></div>
-		<div class="col">
+		<div class='graph' id='dayBarChart'></div>
+		<div class="col"></div>
+	</div>
 	<br>
-	<div class='graph' id='dayBarChart'></div>
-		</div>
+	<div class="row">
+		<div class="col"></div>
+		<div class='graph' id='hourBarChart'></div>
 		<div class="col"></div>
 	</div>
 	<br>
@@ -164,23 +168,40 @@
 		}
 
 		var groupWeekdayData = [];
+		var groupHourData = [];
 		
 		for (var i in newestData["byAverageWeekday"]) {
-			var groupData = {
-				type: newestData["byAverageWeekday"][i].type,
+			var groupWeekday = {
+				type: newestData["byAverageWeekday"][i].type
 			}
-			groupData[newestLabel] = newestData["byAverageWeekday"][i].sum			
+			groupWeekday[newestLabel] = newestData["byAverageWeekday"][i].sum
 			if (compareOneData) {
-				groupData[headerOne] = compareOneData["byAverageWeekday"][i].sum;
+				groupWeekday[headerOne] = compareOneData["byAverageWeekday"][i].sum;
 			}
 			if (compareTwoData) {
-				groupData[headerTwo] = compareTwoData["byAverageWeekday"][i].sum;
+				groupWeekday[headerTwo] = compareTwoData["byAverageWeekday"][i].sum;
 			}
 			if (compareThreeData) {
-				groupData[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
+				groupWeekday[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
 			}
+			groupWeekdayData.push(groupWeekday);
+		}
 
-			groupWeekdayData.push(groupData);
+		for (var i in newestData["byAverageHour"]) {
+			var groupHour = {
+				type: newestData["byAverageHour"][i].type
+			}
+			groupHour[newestLabel] = newestData["byAverageHour"][i].sum
+			if (compareOneData) {
+				groupHour[headerOne] = compareOneData["byAverageHour"][i].sum;
+			}
+			if (compareTwoData) {
+				groupHour[headerTwo] = compareTwoData["byAverageHour"][i].sum;
+			}
+			if (compareThreeData) {
+				groupHour[headerThree] = compareThreeData["byAverageHour"][i].sum;
+			}
+			groupHourData.push(groupHour);
 		}
 
 		var weekdayChart = new GroupedBarChart(
@@ -199,6 +220,32 @@
 			}
 		);
 		var maxAverageWeekday = parseInt(d3.max(newestData['averagePerWeekday']));
-		weekdayChart.create("Weekday", "Observations", maxAverageWeekday, keys);		
+		weekdayChart.create("Weekday", "Observations", maxAverageWeekday, keys);
+
+		var hourChart = new GroupedBarChart(
+			groupHourData, 
+			'hourBarChart', 
+			850,
+			350,
+			{top: 40, right: 60, bottom: 40, left: 40},
+			"Average observations per hour",
+			groupHourData, 
+			'default',
+			true,
+			{
+				"xBarFontSize": "12px",
+				"titleFontSize": "15px"
+			}
+		);
+		var maxAverageHour = parseInt(d3.max(
+			[
+				d3.max(newestData['averagePerHour']),
+				(typeof compareOneData === "undefined" ? 0 : d3.max(compareOneData['averagePerHour'])),
+				(typeof compareTwoData === "undefined" ? 0 : d3.max(compareTwoData['averagePerHour'])),
+				(typeof compareThreeData === "undefined" ? 0 : d3.max(compareThreeData['averagePerHour'])),
+			]
+		));
+		hourChart.create("Hour", "Observations", maxAverageHour, keys);
+		hourChart.changeXaxis();
 	}
 </script>

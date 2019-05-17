@@ -81,7 +81,7 @@
 			250,
 			{top: 40, right: 60, bottom: 40, left: 40},
 			"Observations per day", 
-			[firstDate, lastDate],
+			[data["firstRecordedDay"], data["lastRecordedDay"]],
 			'default',
 			true,
 			{
@@ -92,6 +92,9 @@
 		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
 		dateChart.createStackedBars();
 		dateChart.addStackSwitch(true);
+		if (sessions.length > 0) {
+			dateChart.showSessionsSwitch(false);
+		}
 		dateChart.createBrush();
 
 		var monthChart = new NormalBarChart(

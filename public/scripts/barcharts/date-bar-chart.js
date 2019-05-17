@@ -38,7 +38,8 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
     //this.createBars();
     this.createTitle();
     this.createMeanLine();
-    this.createDayTicks();    
+    this.createDayTicks();
+    this.addFirstAndLastTicks();
 }
 
 DateBarChart.prototype.updateToSpecificTime = function(type, time) {
@@ -286,3 +287,74 @@ DateBarChart.prototype.changeChunkSelect = function(turnOn) {
     stackedSelect[1].style.display = display;
 }
 
+DateBarChart.prototype.markSessions = function() {
+    if (sessions.length > 0) {
+        for (var i in sessions) {
+            if (parseInt(i)===0) {
+                continue;
+            }
+            var sessionDate = new Date(sessions[i].sessionDate);
+            sessionDate.setUTCHours(0,0,0,0);
+            this.g.append("line")
+                .style("stroke", "black")
+                .attr("x1", this.x(sessionDate))
+                .attr("y1", 0)
+                .attr("x2", this.x(sessionDate))
+                .attr("y2", this.height)
+                .attr("class", "session");
+        }
+    }
+}
+
+DateBarChart.prototype.addFirstAndLastTicks = function() {
+    if (data["firstRecordedDay"].getUTCDate() < 21) {
+        var dayString = data["firstRecordedDay"].getUTCDate() + " " + month[data["firstRecordedDay"].getUTCMonth()].substr(0, 3) + " " + data["firstRecordedDay"].getUTCFullYear();
+        this.g
+            .append("text")
+            .attr("y", (this.height+(this.margin.top/2)-6))
+            .attr("x", -20)
+            .attr("fill", "black")
+            .style("font-size", "10px")
+            .text(dayString);
+    }
+    var newestDay = new Date(data["lastRecordedDay"].getTime()+86400000)
+    newestDay.setUTCHours(0,0,0,0);
+    if (newestDay.getUTCDate() > 10) {
+        var dayString = newestDay.getUTCDate() + " " + month[newestDay.getUTCMonth()].substr(0, 3) + " " + newestDay.getUTCFullYear();
+        this.g
+            .append("text")
+            .attr("y", (this.height+(this.margin.top/2)-6))
+            .attr("x", this.width-(this.margin.left/2))
+            .attr("fill", "black")
+            .style("font-size", "10px")
+            .text(dayString);
+    }
+}
+
+DateBarChart.prototype.showSessionsSwitch = function(turnOn) {
+    var thisObj = this;
+    
+    var form = this.svg.append("foreignObject")
+        .attr("width", 120)
+        .attr("height", 40)
+        .attr("x", thisObj.width-thisObj.margin.left-thisObj.margin.right)
+        .append("xhtml:body")
+        .html("<span class='stacked-label'>Show sessions</span>");
+
+    form.append("input")
+        .attr("type", "checkbox")
+        .attr("id", "showSessions")
+        .attr("class", "stacked-checkbox")
+        .property("checked", turnOn)
+        .on("click", function(d, i){
+            if (thisObj.svg.select("#showSessions").node().checked) {                
+                thisObj.markSessions();
+            } else {
+                thisObj.deleteSessionMarks();
+            }
+        });
+}
+
+DateBarChart.prototype.deleteSessionMarks = function() {
+    this.g.selectAll(".session").remove();
+}

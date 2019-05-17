@@ -98,7 +98,7 @@ console.log(unFilteredData)
         var millisecondString = hourOfDay + "-" +isoDate.getUTCMilliseconds();
 
         if (sessions.length > 0) {
-            if (currentSession < (sessions.length)) {
+            if (currentSession < sessions.length) {
                 var sessionDate = new Date(sessions[currentSession].sessionDate)
                 if (sessionDate.getTime() <= getCorrectUTCDate(dayOfMonth).getTime()) {
                     currentSession++;
@@ -451,12 +451,15 @@ console.log(unFilteredData)
 
     console.log(dataObj)
     dataObj['mostInADay'] = d3.max(dataObj['eachDay'],function(d) { return d.sum});
+    dataObj['leastInADay'] = d3.min(dataObj['eachDay'],function(d) { return d.sum});
     
     dataObj['totalDays'] = getNumberOfDayBetweenTwoDates(dataObj['firstRecordedDay'], dataObj['lastRecordedDay']);
     dataObj['averagePerHour'] = [];
     for (var hour in countHour) {
         dataObj['averagePerHour'][hour] = (countHour[hour]/dataObj['totalDays']);
     }
+
+    dataObj['byAverageHour'] = createBarData(dataObj['averagePerHour']);
     
     dataObj['averageDay'] = (d3.sum(dataObj['eachDay'],function(d) { return d.sum})/dataObj['totalDays']);
 
@@ -674,6 +677,22 @@ console.log(unFilteredData)
         "key": "Average observations per week",
         "value": dataObj["averageWeek"].toFixed(2)
     });
+    dataObj["trivia"].push({
+        "key": "Most in a day",
+        "value": dataObj["mostInADay"]
+    });
+    dataObj["trivia"].push({
+        "key": "Most in an hour",
+        "value": dataObj["maxHourOfDay"]
+    });
+    dataObj["trivia"].push({
+        "key": "Least in a day",
+        "value": (dataObj["totalDays"] - dataObj["totalDaysWithObservations"] === 0 ? dataObj["leastInADay"] : 0)
+    });
+    dataObj["trivia"].push({
+        "key": "Least in an hour",
+        "value": 0
+    });
     
     return dataObj;
 }
@@ -736,6 +755,7 @@ function checkForChosenDataset() {
             rawData = JSON.parse(window.localStorage.getItem('custom-data')).data
             annotations = [];
             invalidObservations = [];
+            sessions = [];
             var tz = getTimezone();
 			data = processData(tz.value, rawData);            
             createVisualizations();
