@@ -60,10 +60,14 @@ FullCalendar.prototype.create = function() {
             })
             .text(currentDate.getUTCDay() === 0 ? weekday[6].substr(0,3) : weekday[(currentDate.getUTCDay()-1)].substr(0,3))
             .append('div')
-                .text(currentDate.getUTCDate());                
+                .text(currentDate.getUTCDate());
 
         if (currentDate.getUTCDate() === 1) {
             headDay.style("border-left-width", "1.7px")
+        }
+
+        if (sessions.length > 0 && data['sessionDates'].includes(dayString)) {
+            headDay.style("background-color", "#90EE90");
         }
 
         days.push(new Date(currentDate.getTime()));

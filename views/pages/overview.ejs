@@ -116,7 +116,7 @@
 		}
 
 		if (sessions.length > 3) {
-			headerThree = "Last three sessions";
+			headerThree = "Last four sessions";
 			var temp = data["sessions"][data["sessions"].length-2];
 			temp = temp.concat(data["sessions"][data["sessions"].length-3]);
 			temp = temp.concat(data["sessions"][data["sessions"].length-4]);
@@ -149,7 +149,8 @@
 			keys.push(headerThree);
 			triviaHeaderRow.append("th").text(headerThree);
 		};
-
+		keys.push("Overall");
+		triviaHeaderRow.append("th").text("Overall");
 
 		
 		for (var i in newestData['trivia']) {
@@ -165,6 +166,8 @@
 			if (compareThreeData) {
 				triviaRow.append("td").attr("class", "table-value").text(compareThreeData['trivia'][i].value);
 			}
+			
+			triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
 		}
 
 		var groupWeekdayData = [];
@@ -184,6 +187,7 @@
 			if (compareThreeData) {
 				groupWeekday[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
 			}
+			groupWeekday["Overall"] = data["byAverageWeekday"][i].sum;
 			groupWeekdayData.push(groupWeekday);
 		}
 
@@ -201,6 +205,7 @@
 			if (compareThreeData) {
 				groupHour[headerThree] = compareThreeData["byAverageHour"][i].sum;
 			}
+			groupHour["Overall"] = data["byAverageHour"][i].sum;
 			groupHourData.push(groupHour);
 		}
 

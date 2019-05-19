@@ -26,6 +26,7 @@ function processData(timezone, unFilteredData) {
     dataObj['singleInvalidatedObservations'] = [];
     dataObj['hourToMarkAsChanged'] = [];
     dataObj['totalDaysWithObservations'] = 0;
+    dataObj['sessionDates'] = [];
 
     var lastLoopedDay;
     var lastRecordDate = new Date("1971-1-1");
@@ -96,11 +97,12 @@ console.log(unFilteredData)
         var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
         var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
         var millisecondString = hourOfDay + "-" +isoDate.getUTCMilliseconds();
+        
 
         if (sessions.length > 0) {
             if (currentSession < sessions.length) {
                 var sessionDate = new Date(sessions[currentSession].sessionDate)
-                if (sessionDate.getTime() <= getCorrectUTCDate(dayOfMonth).getTime()) {
+                if (sessionDate.getTime() <= getCorrectUTCDate(dayOfMonth).getTime()) {                    
                     currentSession++;
                     dataObj["sessions"].push(session);
                     session = [];
@@ -617,6 +619,13 @@ console.log(unFilteredData)
             "type": "Avg last twelve weeks",
             "sum": avgLastTwelveWeeks
         });
+    }
+
+    if (sessions.length > 0) {
+        for (var i in sessions) {
+            var sessionDate = new Date(sessions[i].sessionDate);
+            dataObj['sessionDates'].push((sessionDate.getUTCFullYear() +"-"+ (sessionDate.getUTCMonth()+1) +"-"+ sessionDate.getUTCDate()));
+        }
     }
 
     dataObj['comparingWeeks'].push({
