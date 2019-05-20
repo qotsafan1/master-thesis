@@ -111,23 +111,23 @@ DateBarChart.prototype.createStackedBars = function(hourChunks) {
     var keys = ["00-06", "06-12", "12-18", "18-00"];
     var barData = data["stackedHoursEachDay"][2]
     //var colors = ["#0000ff","#FF0000","#FFA500","#008000"];
-    var colors = ["#d7191c","#fdae61","#abdda4","#2b83ba"];
+    var colors = ["black","#abdda4","#fdae61","#2b83ba"];
 
     if (hourChunks === 3) {
         keys = ["00-04", "04-08", "08-12", "12-16", "16-20", "20-00"];
-        colors = ["#d53e4f","#fc8d59","#fee08b","#e6f598","#99d594","#3288bd"];
+        colors = ["black","#99d594","#e6f598","#fee08b","#fc8d59","#3288bd"];
         barData = data["stackedHoursEachDay"][3];
     } else if (hourChunks === 1) {
         keys = ["00-09", "09-18", "18-00"];
-        colors = ["#d7191c","#abdda4","#2b83ba"];
+        colors = ["black","#fdae61","#2b83ba"];
         barData = data["stackedHoursEachDay"][1];
     } else if (hourChunks === 0) {
         keys = ["00-12", "12-00"];
-        colors = ["#d7191c","#abdda4"];
+        colors = ["#2b83ba","#fdae61"];
         barData = data["stackedHoursEachDay"][0];
     } else if (hourChunks === 4) {
         keys = ["00-03", "03-06", "06-09", "09-12", "12-15","15-18", "18-21","21-24"];
-        colors = ["#d53e4f","#f46d43","#fdae61","#fee08b","#e6f598","#abdda4","#66c2a5","#3288bd"];
+        colors = ["black","#878787","#fddbc7","#abdda4","#e6f598","#fee08b","#92c5de","#2166ac"];
         barData = data["stackedHoursEachDay"][4];
     }
     stack = d3.stack().keys(keys);

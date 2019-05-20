@@ -23,15 +23,11 @@
 	</div>
 	<br>
 	<div class="row">
-		<div class="col"></div>
 		<div class='graph' id='dayBarChart'></div>
-		<div class="col"></div>
 	</div>
 	<br>
 	<div class="row">
-		<div class="col"></div>
 		<div class='graph' id='hourBarChart'></div>
-		<div class="col"></div>
 	</div>
 	<br>
 	<footer>
@@ -212,7 +208,7 @@
 		var weekdayChart = new GroupedBarChart(
 			groupWeekdayData, 
 			'dayBarChart', 
-			850,
+			950,
 			350,
 			{top: 40, right: 60, bottom: 40, left: 40},
 			"Average observations per weekday",
@@ -230,7 +226,7 @@
 		var hourChart = new GroupedBarChart(
 			groupHourData, 
 			'hourBarChart', 
-			850,
+			950,
 			350,
 			{top: 40, right: 60, bottom: 40, left: 40},
 			"Average observations per hour",
