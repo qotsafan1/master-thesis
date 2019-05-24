@@ -19,6 +19,14 @@
 	</div>
 	<br>
 	<div class="row">
+		<h5>Comparison view: </h5>
+		<select name="comparison" id="comparison" onchange="changeComparisonView(this)">
+			<option value="0">Week to week</option>
+			<option value="1">Grouped weeks</option>			
+		</select>
+	</div>
+	<br>
+	<div class="row">
 		<h5>Sessions:</h5>
 	</div>
 	<div id="sessions">
@@ -115,6 +123,9 @@
 	document.getElementById("timezone").value = timezone;
 
 
+	document.getElementById("comparison").value = getComparisonView();
+
+
 	function changeTimezone() {
 		var tz = document.getElementById("timezone");
 		window.localStorage.setItem('timezone', tz.value);
@@ -157,4 +168,8 @@
 			xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 			xmlhttp.send(JSON.stringify({date}));
 	}
+
+	function changeComparisonView(element) {
+		window.localStorage.setItem('comparison', element.value);
+	}	
 </script>

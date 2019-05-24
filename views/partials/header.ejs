@@ -152,4 +152,12 @@
     }
     return tz;
   }
+
+  function getComparisonView() {
+		var comparison = window.localStorage.getItem('comparison');
+		if (comparison === null) {
+			comparison = "0";
+		}
+		return comparison;
+	}
 </script>

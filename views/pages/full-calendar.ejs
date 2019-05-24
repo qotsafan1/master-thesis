@@ -109,9 +109,10 @@
 
 		dateChart.createBrush();
 
-		if ((lastDate.getTime() - firstDate.getTime()) < 3456000) {
+		if ((lastDate.getTime() - firstDate.getTime()) < 3456000000) {
 			dateChart.brushSpecific(firstDate, lastDate);
 		} else {
+			console.log("INN")
 			var newDate = new Date(lastDate.getTime());
 			newDate.setUTCDate(lastDate.getUTCDate()-40);
 			dateChart.brushSpecific(newDate, lastDate);

@@ -93,77 +93,100 @@
 			headerOne = "Last session";
 			compareOneData = processData(timezone, data["sessions"][data["sessions"].length-2]);
 		} else if (data["recordsEachWeekAsObject"].length > 4) {
-			headerOne = "Last two weeks";
+			headerOne = "Last weeks";
 			var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
-			compareOneData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-4].records));
+			compareOneData = processData(timezone, data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-4].records);
 		}
 
-		if (sessions.length > 2) {
-			headerTwo = "Last two sessions";
-			var temp = data["sessions"][data["sessions"].length-2];
-			temp = temp.concat(data["sessions"][data["sessions"].length-3]);
-			compareTwoData = processData(timezone, temp);
-		} else if (data["recordsEachWeekAsObject"].length > 6) {
-			headerTwo = "Last four weeks";
-			var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
-			temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-4].records);
-			temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-5].records);
-			compareTwoData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-6].records));
-		}
-
-		if (sessions.length > 3) {
-			headerThree = "Last four sessions";
-			var temp = data["sessions"][data["sessions"].length-2];
-			temp = temp.concat(data["sessions"][data["sessions"].length-3]);
-			temp = temp.concat(data["sessions"][data["sessions"].length-4]);
-			temp = temp.concat(data["sessions"][data["sessions"].length-5]);
-			compareThreeData = processData(timezone, temp);
-		} else if (data["recordsEachWeekAsObject"].length > 12) {
-			headerThree = "Last eight weeks";
-			var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
-			for (var i=3; i<=12; i++) {
-				temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-i].records);
+		if (getComparisonView() === "0") {
+			if (sessions.length > 2) {
+				headerTwo = "Session before last";
+				compareTwoData = processData(timezone, data["sessions"][data["sessions"].length-3]);
+			} else if (data["recordsEachWeekAsObject"].length > 6) {
+				headerTwo = "Last four weeks";
+				var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
+				temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-4].records);
+				temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-5].records);
+				compareTwoData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-6].records));
 			}
-			compareThreeData = processData(timezone, temp);
+			if (sessions.length > 3) {
+				headerThree = "Two sessions before for last";
+				compareThreeData = processData(timezone, data["sessions"][data["sessions"].length-4]);
+			} else if (data["recordsEachWeekAsObject"].length > 12) {
+				headerThree = "Last eight weeks";
+				var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
+				for (var i=3; i<=12; i++) {
+					temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-i].records);
+				}
+				compareThreeData = processData(timezone, temp);
+			}
+		} else {
+			if (sessions.length > 2) {
+				headerTwo = "Last two sessions";
+				var temp = data["sessions"][data["sessions"].length-2];
+				temp = temp.concat(data["sessions"][data["sessions"].length-3]);
+				compareTwoData = processData(timezone, temp);
+			} else if (data["recordsEachWeekAsObject"].length > 6) {
+				headerTwo = "Last four weeks";
+				var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
+				temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-4].records);
+				temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-5].records);
+				compareTwoData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-6].records));
+			}
+	
+			if (sessions.length > 3) {
+				headerThree = "Last four sessions";
+				var temp = data["sessions"][data["sessions"].length-2];
+				temp = temp.concat(data["sessions"][data["sessions"].length-3]);
+				temp = temp.concat(data["sessions"][data["sessions"].length-4]);
+				temp = temp.concat(data["sessions"][data["sessions"].length-5]);
+				compareThreeData = processData(timezone, temp);
+			} else if (data["recordsEachWeekAsObject"].length > 12) {
+				headerThree = "Last eight weeks";
+				var temp = data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-3].records;
+				for (var i=3; i<=12; i++) {
+					temp = temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-i].records);
+				}
+				compareThreeData = processData(timezone, temp);
+			}
 		}
-
 		var newestLabel = "Current " + (sessions.length > 0 ? "session" : "progress");
 		var trivia = d3.select("#trivia");
 		var triviaHeaderRow = trivia.append("tr");
 		triviaHeaderRow.append("th");
-		triviaHeaderRow.append("th").text(newestLabel);
-		var keys = [newestLabel];
-		if (headerOne) {
-			keys.push(headerOne);
-			triviaHeaderRow.append("th").text(headerOne);
+		var keys = ["Overall"];
+		triviaHeaderRow.append("th").text("Overall");
+		if (headerThree) {
+			keys.push(headerThree);
+			triviaHeaderRow.append("th").text(headerThree);
 		};
 		if (headerTwo) {
 			keys.push(headerTwo);
 			triviaHeaderRow.append("th").text(headerTwo);
 		};
-		if (headerThree) {
-			keys.push(headerThree);
-			triviaHeaderRow.append("th").text(headerThree);
+		if (headerOne) {
+			keys.push(headerOne);
+			triviaHeaderRow.append("th").text(headerOne);
 		};
-		keys.push("Overall");
-		triviaHeaderRow.append("th").text("Overall");
+		keys.push(newestLabel);
+		triviaHeaderRow.append("th").text(newestLabel);
 
 		
 		for (var i in newestData['trivia']) {
 			var triviaRow = trivia.append("tr");
 			triviaRow.append("td").attr("class", "table-key").text(newestData['trivia'][i].key);
-			triviaRow.append("td").attr("class", "table-value").text(newestData['trivia'][i].value);
-			if (compareOneData) {
-				triviaRow.append("td").attr("class", "table-value").text(compareOneData['trivia'][i].value);
+			triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
+			if (compareThreeData) {
+				triviaRow.append("td").attr("class", "table-value").text(compareThreeData['trivia'][i].value);
 			}
 			if (compareTwoData) {
 				triviaRow.append("td").attr("class", "table-value").text(compareTwoData['trivia'][i].value);
 			}
-			if (compareThreeData) {
-				triviaRow.append("td").attr("class", "table-value").text(compareThreeData['trivia'][i].value);
+			if (compareOneData) {
+				triviaRow.append("td").attr("class", "table-value").text(compareOneData['trivia'][i].value);
 			}
 			
-			triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
+			triviaRow.append("td").attr("class", "table-value").text(newestData['trivia'][i].value);
 		}
 
 		var groupWeekdayData = [];
@@ -173,17 +196,17 @@
 			var groupWeekday = {
 				type: newestData["byAverageWeekday"][i].type
 			}
-			groupWeekday[newestLabel] = newestData["byAverageWeekday"][i].sum
-			if (compareOneData) {
-				groupWeekday[headerOne] = compareOneData["byAverageWeekday"][i].sum;
+			groupWeekday["Overall"] = data["byAverageWeekday"][i].sum;
+			if (compareThreeData) {
+				groupWeekday[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
 			}
 			if (compareTwoData) {
 				groupWeekday[headerTwo] = compareTwoData["byAverageWeekday"][i].sum;
 			}
-			if (compareThreeData) {
-				groupWeekday[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
+			if (compareOneData) {
+				groupWeekday[headerOne] = compareOneData["byAverageWeekday"][i].sum;
 			}
-			groupWeekday["Overall"] = data["byAverageWeekday"][i].sum;
+			groupWeekday[newestLabel] = newestData["byAverageWeekday"][i].sum
 			groupWeekdayData.push(groupWeekday);
 		}
 
@@ -191,17 +214,17 @@
 			var groupHour = {
 				type: newestData["byAverageHour"][i].type
 			}
-			groupHour[newestLabel] = newestData["byAverageHour"][i].sum
-			if (compareOneData) {
-				groupHour[headerOne] = compareOneData["byAverageHour"][i].sum;
+			groupHour["Overall"] = data["byAverageHour"][i].sum;
+			if (compareThreeData) {
+				groupHour[headerThree] = compareThreeData["byAverageHour"][i].sum;
 			}
 			if (compareTwoData) {
 				groupHour[headerTwo] = compareTwoData["byAverageHour"][i].sum;
 			}
-			if (compareThreeData) {
-				groupHour[headerThree] = compareThreeData["byAverageHour"][i].sum;
+			if (compareOneData) {
+				groupHour[headerOne] = compareOneData["byAverageHour"][i].sum;
 			}
-			groupHour["Overall"] = data["byAverageHour"][i].sum;
+			groupHour[newestLabel] = newestData["byAverageHour"][i].sum
 			groupHourData.push(groupHour);
 		}
 
