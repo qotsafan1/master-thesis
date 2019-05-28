@@ -195,6 +195,10 @@
 
 				var isoDate = strictIsoParse(rawData[instance][date]);
 
+				if (!isoDate || isoDate === null || isoDate === "") {
+					continue;
+				}
+
 				if (timezone === "2" && "timezone" in rawData[instance]) {
 					var tzString = rawData[instance]["timezone"];
 					if (tzString.includes("+")) {
@@ -253,6 +257,10 @@
 			
 			var isoDate = strictIsoParse(rawData[instance][date]);
 
+			if (!isoDate || isoDate === null || isoDate === "") {
+				continue;
+			}
+
 			var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
 			var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
 			if (dayOfMonth in invalidObservations
@@ -286,6 +294,10 @@
 				}
 
 				var isoDate = strictIsoParse(rawData[instance][date]);
+
+				if (!isoDate || isoDate === null || isoDate === "") {
+					continue;
+				}
 
 				var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
         		var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();

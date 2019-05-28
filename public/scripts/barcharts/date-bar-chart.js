@@ -46,19 +46,20 @@ DateBarChart.prototype.updateToSpecificTime = function(type, time) {
     this.removeWeekdayBrushes();
     
     if (type === 'month') {
-        var monthIndex = month.indexOf(time); 
+        var monthIndex = month.indexOf(time);
         var year = this.xScaleData[0].getUTCFullYear();
         var firstInMonth = new Date(Date.UTC(year, monthIndex, 1));
         var lastInMonth = new Date(Date.UTC(year, monthIndex+1, 0));
-        
-        if (this.xScaleData[0].getTime() > firstInMonth.getTime()
-            || this.xScaleData[1].getTime() < firstInMonth.getTime())
+
+        if (this.xScaleData[0].getTime() > firstInMonth.getTime())
         {
-            firstInMonth = new Date(Date.UTC(year+1, monthIndex, 1));
-            lastInMonth = new Date(Date.UTC(year+1, monthIndex+1, 0));
+            firstInMonth = new Date(Date.UTC(year, monthIndex, this.xScaleData[0].getUTCDate()));
+        }
+
+        if (this.xScaleData[1].getTime() < lastInMonth.getTime()) {
+            lastInMonth = new Date(Date.UTC(year, monthIndex, this.xScaleData[1].getUTCDate()));
         }
         lastInMonth.setUTCHours(23,59,59);
-
         this.g.call(this.brush.move, [this.x(firstInMonth), this.x(lastInMonth)]);
     } else if (type === 'weekday') {
         this.g.call(this.brush.move, [this.width-1,this.width]);
