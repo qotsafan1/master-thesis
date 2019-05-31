@@ -22,8 +22,8 @@ app.get('/old', function(req, res) {
 	res.render('pages/index');
 });
 
-app.get('/statistics', function(req, res) {
-	res.render('pages/statistics');
+app.get('/details', function(req, res) {
+	res.render('pages/overview');
 });
 
 app.get('/full-calendar', function(req, res) {
@@ -39,7 +39,7 @@ app.get('/settings', function(req, res) {
 });
 
 app.get('/', function(req, res) {
-	res.render('pages/overview');
+	res.render('pages/statistics');
 });
 
 app.get('/datasets/:name', function(req, res) {	
