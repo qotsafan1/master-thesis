@@ -84,13 +84,14 @@
 		fullCalendar = new FullCalendar(newestData['hourByDay'], newestData['sumOfEachDay'], newestData['firstRecordedDay'], newestData['lastRecordedDay'], newestData['maxHourOfDay'], newestData["mostInADay"], "");
 		fullCalendar.create();
 
-		new ColorScaleLegend(fullCalendar.dayColorScale, "Color scale for days");
-		new ColorScaleLegend(fullCalendar.colorScale, "Color scale for hours");
+		new ColorScaleLegend(fullCalendar.dayColorScale, "Colors indicating amount of observations from lowest to highest per DAY");
+		new ColorScaleLegend(fullCalendar.colorScale, "Colors indicating amount of observations from lowest to highest per HOUR");
 
 		var compareOneData, compareTwoData, compareThreeData, headerOne, headerTwo, headerThree;
 
 		if (sessions.length > 1) {
-			headerOne = "Last session";
+			headerOne = ("Session " + (sessions.length));
+			console.log(headerOne)
 			compareOneData = processData(timezone, data["sessions"][data["sessions"].length-2]);
 		} else if (data["recordsEachWeekAsObject"].length > 4) {
 			headerOne = "Last weeks";
@@ -100,7 +101,7 @@
 
 		if (getComparisonView() === "0") {
 			if (sessions.length > 2) {
-				headerTwo = "Session before last";
+				headerTwo = ("Session " + (sessions.length-1));
 				compareTwoData = processData(timezone, data["sessions"][data["sessions"].length-3]);
 			} else if (data["recordsEachWeekAsObject"].length > 6) {
 				headerTwo = "Last four weeks";
@@ -110,7 +111,7 @@
 				compareTwoData = processData(timezone, temp.concat(data["recordsEachWeekAsObject"][data["recordsEachWeekAsObject"].length-6].records));
 			}
 			if (sessions.length > 3) {
-				headerThree = "Two sessions before for last";
+				headerThree = ("Session " + (sessions.length-2));
 				compareThreeData = processData(timezone, data["sessions"][data["sessions"].length-4]);
 			} else if (data["recordsEachWeekAsObject"].length > 12) {
 				headerThree = "Last eight weeks";
@@ -156,34 +157,34 @@
 		triviaHeaderRow.append("th");
 		var keys = ["Overall"];
 		triviaHeaderRow.append("th").text("Overall");
-		if (headerThree) {
-			keys.push(headerThree);
-			triviaHeaderRow.append("th").text(headerThree);
+		keys.push(newestLabel);
+		triviaHeaderRow.append("th").text(newestLabel);
+		if (headerOne) {
+			keys.push(headerOne);
+			triviaHeaderRow.append("th").text(headerOne);
 		};
 		if (headerTwo) {
 			keys.push(headerTwo);
 			triviaHeaderRow.append("th").text(headerTwo);
 		};
-		if (headerOne) {
-			keys.push(headerOne);
-			triviaHeaderRow.append("th").text(headerOne);
+		if (headerThree) {
+			keys.push(headerThree);
+			triviaHeaderRow.append("th").text(headerThree);
 		};
-		keys.push(newestLabel);
-		triviaHeaderRow.append("th").text(newestLabel);
 
 		
 		for (var i in newestData['trivia']) {
 			var triviaRow = trivia.append("tr");
 			triviaRow.append("td").attr("class", "table-key").text(newestData['trivia'][i].key);
 			triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
-			if (compareThreeData) {
-				triviaRow.append("td").attr("class", "table-value").text(compareThreeData['trivia'][i].value);
+			if (compareOneData) {
+				triviaRow.append("td").attr("class", "table-value").text(compareOneData['trivia'][i].value);
 			}
 			if (compareTwoData) {
 				triviaRow.append("td").attr("class", "table-value").text(compareTwoData['trivia'][i].value);
 			}
-			if (compareOneData) {
-				triviaRow.append("td").attr("class", "table-value").text(compareOneData['trivia'][i].value);
+			if (compareThreeData) {
+				triviaRow.append("td").attr("class", "table-value").text(compareThreeData['trivia'][i].value);
 			}
 			
 			triviaRow.append("td").attr("class", "table-value").text(newestData['trivia'][i].value);
@@ -197,16 +198,16 @@
 				type: newestData["byAverageWeekday"][i].type
 			}
 			groupWeekday["Overall"] = data["byAverageWeekday"][i].sum;
-			if (compareThreeData) {
-				groupWeekday[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
+			groupWeekday[newestLabel] = newestData["byAverageWeekday"][i].sum
+			if (compareOneData) {
+				groupWeekday[headerOne] = compareOneData["byAverageWeekday"][i].sum;
 			}
 			if (compareTwoData) {
 				groupWeekday[headerTwo] = compareTwoData["byAverageWeekday"][i].sum;
 			}
-			if (compareOneData) {
-				groupWeekday[headerOne] = compareOneData["byAverageWeekday"][i].sum;
+			if (compareThreeData) {
+				groupWeekday[headerThree] = compareThreeData["byAverageWeekday"][i].sum;
 			}
-			groupWeekday[newestLabel] = newestData["byAverageWeekday"][i].sum
 			groupWeekdayData.push(groupWeekday);
 		}
 
@@ -215,16 +216,16 @@
 				type: newestData["byAverageHour"][i].type
 			}
 			groupHour["Overall"] = data["byAverageHour"][i].sum;
-			if (compareThreeData) {
-				groupHour[headerThree] = compareThreeData["byAverageHour"][i].sum;
+			groupHour[newestLabel] = newestData["byAverageHour"][i].sum
+			if (compareOneData) {
+				groupHour[headerOne] = compareOneData["byAverageHour"][i].sum;
 			}
 			if (compareTwoData) {
 				groupHour[headerTwo] = compareTwoData["byAverageHour"][i].sum;
 			}
-			if (compareOneData) {
-				groupHour[headerOne] = compareOneData["byAverageHour"][i].sum;
+			if (compareThreeData) {
+				groupHour[headerThree] = compareThreeData["byAverageHour"][i].sum;
 			}
-			groupHour[newestLabel] = newestData["byAverageHour"][i].sum
 			groupHourData.push(groupHour);
 		}
 

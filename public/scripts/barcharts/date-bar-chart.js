@@ -43,7 +43,8 @@ DateBarChart.prototype.create = function(xLabel,yLabel, yTicks) {
 }
 
 DateBarChart.prototype.updateToSpecificTime = function(type, time) {
-    this.removeWeekdayBrushes();
+    //this.removeWeekdayBrushes();
+    this.removeWeekdayOutlines();
     
     if (type === 'month') {
         var monthIndex = month.indexOf(time);
@@ -68,7 +69,9 @@ DateBarChart.prototype.updateToSpecificTime = function(type, time) {
         for (var i in days) {
             var beginOfDay = this.getBeginningOfDay(days[i]);
             var endOfDay = this.getEndOfDay(days[i]);            
-            this.newWeekdayBrush(beginOfDay, endOfDay);
+            //this.newWeekdayBrush(beginOfDay, endOfDay);
+            this.addWeekdayOutlines(beginOfDay, endOfDay);
+            
         }
         updateChildGraphsWithWeekdayData(weekdayIndex);
     } else if ('week') {
@@ -358,4 +361,35 @@ DateBarChart.prototype.showSessionsSwitch = function(turnOn) {
 
 DateBarChart.prototype.deleteSessionMarks = function() {
     this.g.selectAll(".session").remove();
+}
+
+DateBarChart.prototype.removeWeekdayOutlines = function() {
+    this.g.selectAll(".weekday-outline").remove();
+}
+
+DateBarChart.prototype.addWeekdayOutlines = function(beginOfDay, endOfDay) {
+    this.g.append("line")
+        .style("stroke", "grey")
+        .attr("x1", this.x(beginOfDay))
+        .attr("y1", 0)
+        .attr("x2", this.x(beginOfDay))
+        .attr("y2", (this.height+10))
+        .attr("stroke-width", "0.5px")
+        .attr("class", "weekday-outline");
+    this.g.append("line")
+        .style("stroke", "grey")
+        .attr("x1", this.x(endOfDay))
+        .attr("y1", 0)
+        .attr("x2", this.x(endOfDay))
+        .attr("y2", (this.height+10))
+        .attr("stroke-width", "0.5px")
+        .attr("class", "weekday-outline");
+    this.g.append("line")
+        .style("stroke", "grey")
+        .attr("x1", this.x(beginOfDay))
+        .attr("y1", 0)
+        .attr("x2", this.x(endOfDay))
+        .attr("y2", 0)
+        .attr("stroke-width", "0.5px")
+        .attr("class", "weekday-outline");
 }

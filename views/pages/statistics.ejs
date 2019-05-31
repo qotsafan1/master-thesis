@@ -59,6 +59,7 @@
 	var childGraphs;
 	var dataset = document.getElementById("datasets");
 	var event = new Event('change');
+	var dateChart;
 	dataset.dispatchEvent(event);
 
 	function removeAllVisualizations() {
@@ -71,10 +72,12 @@
 	}
 
 	function createVisualizations() {
-		var firstDate = new Date(Date.UTC(data['firstYear'], data['firstMonth'], 1));
-		var lastDate = new Date(Date.UTC(data['lastRecordedDay'].getUTCMonth() === 11 ? data['lastYear']+1 : data['lastYear'], data['lastRecordedDay'].getUTCMonth() === 11 ? 0 : (data['lastRecordedDay'].getUTCMonth()+1), 1));
+		var firstDate = data["firstRecordedDay"];
+		var lastDate = data["lastRecordedDay"];
+		document.getElementById("firstDate").innerHTML = weekday[firstDate.getUTCDay() === 0 ? 6 : (firstDate.getUTCDay()-1)] + " " + month[firstDate.getUTCMonth()] + " " + firstDate.getUTCDate() + " " + firstDate.getUTCFullYear();
+		document.getElementById("lastDate").innerHTML = weekday[lastDate.getUTCDay() === 0 ? 6 : (lastDate.getUTCDay()-1)] + " " + month[lastDate.getUTCMonth()] + " " + lastDate.getUTCDate() + " " + lastDate.getUTCFullYear();
 
-		var dateChart = new DateBarChart(
+		dateChart = new DateBarChart(
 			data['eachDay'],
 			'dateChart', 
 			1000,
@@ -89,7 +92,7 @@
 				"titleFontSize": "15px"
 			}
 		);
-		dateChart.create("Day", "Observations", monthDiff(firstDate, lastDate));
+		dateChart.create("Day", "Observations", monthDiff(data["firstRecordedDay"], data["lastRecordedDay"]));
 		dateChart.createStackedBars();
 		dateChart.addStackSwitch(true);
 		if (sessions.length > 0) {
@@ -175,6 +178,7 @@
 	}
 
 	function updateChildGraphs(firstDate, lastDate) {
+		dateChart.removeWeekdayOutlines();
 		firstDate.setUTCHours(0,0,0,0);
 		lastDate.setUTCHours(23,59,59);
 		document.getElementById("firstDate").innerHTML = weekday[firstDate.getUTCDay() === 0 ? 6 : (firstDate.getUTCDay()-1)] + " " + month[firstDate.getUTCMonth()] + " " + firstDate.getUTCDate() + " " + firstDate.getUTCFullYear();
@@ -249,6 +253,8 @@
 
 	function getSpecificWeekdayData(day) {
 		var days = [];
+		var lastLoopedDay;
+		var countEachDay = [];
 		for (var instance in rawData) {
 			var date = Object.keys(rawData[instance])[0]
 			if (date !== "date") {
@@ -268,11 +274,33 @@
 				continue;
 			}
 
-			var isoDay = isoDate.getUTCDay() === 0 ? 6 : isoDate.getUTCDay()-1;
-			if (isoDay === day) {
-				days.push(isoDate);
+			// count days that don't appear in dataset
+			if (lastLoopedDay) {
+				var tempDate = new Date(isoDate.getTime());
+				tempDate.setUTCHours(0,0,0,0);
+				if ((tempDate.getTime() - lastLoopedDay.getTime()) > 86400000) {
+					while(lastLoopedDay.getTime() < tempDate.getTime()) {
+						var loopedDay = lastLoopedDay.getUTCDay() === 0 ? 6 : lastLoopedDay.getUTCDay()-1;
+						var tempDay = lastLoopedDay.getUTCFullYear() + "-" + (lastLoopedDay.getUTCMonth()+1) + "-" + lastLoopedDay.getUTCDate();
+						if (!(tempDay in countEachDay) && loopedDay === day) {
+							days.push(new Date(lastLoopedDay.getTime()));
+							countEachDay[tempDay] = 0;
+						}
+						lastLoopedDay.setUTCDate(lastLoopedDay.getUTCDate() + 1);
+					}
+				}
 			}
+
+			var isoDay = isoDate.getUTCDay() === 0 ? 6 : isoDate.getUTCDay()-1;
+			if (!(dayOfMonth in countEachDay) && isoDay === day) {
+				days.push(isoDate);
+				countEachDay[dayOfMonth] = 0;				
+			}
+
+			lastLoopedDay = new Date(isoDate.getTime());
+        	lastLoopedDay.setUTCHours(0,0,0,0);
 		}
+
 		return days;
 	}
 

@@ -79,7 +79,7 @@ FullCalendar.prototype.create = function() {
         for (var j=0; j<=days.length; j++) {
             if (j===0) {
                 if (i===24) {
-                    bodyTr.append("td").attr("class", "empty").text("sum").style("font-weight", "bold"); 
+                    bodyTr.append("td").attr("class", "empty").text("day").style("font-weight", "bold"); 
                     bodyTr.append("td").attr("class", "hour-border")   
                 } else {
                     bodyTr.append("td").attr("class", "hour")
@@ -184,7 +184,7 @@ FullCalendar.prototype.create = function() {
                         theObject.addAnnotation(this, "hour");
                 })
 
-                if (i===12) {
+                if (i === 6 || i===12 || i === 18 || i === 0) {
                     currentTd.style("border-top-width", "1.7px")
                 }
 

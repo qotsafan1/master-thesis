@@ -112,14 +112,13 @@
 		if ((lastDate.getTime() - firstDate.getTime()) < 3456000000) {
 			dateChart.brushSpecific(firstDate, lastDate);
 		} else {
-			console.log("INN")
 			var newDate = new Date(lastDate.getTime());
 			newDate.setUTCDate(lastDate.getUTCDate()-40);
 			dateChart.brushSpecific(newDate, lastDate);
 		}
 
-		new ColorScaleLegend(fullCalendar.dayColorScale, "Color scale for days");
-		new ColorScaleLegend(fullCalendar.colorScale, "Color scale for hours");
+		new ColorScaleLegend(fullCalendar.dayColorScale, "Colors indicating amount of observations from lowest to highest per DAY");
+		new ColorScaleLegend(fullCalendar.colorScale, "Colors indicating amount of observations from lowest to highest per HOUR");
 	}
 
 

@@ -639,23 +639,18 @@ console.log(unFilteredData)
         "value": dataObj["firstObservation"].getUTCDate() 
             + " " + month[dataObj["firstObservation"].getUTCMonth()] 
             + " " + dataObj["firstObservation"].getUTCFullYear()
-            + " " + (dataObj["firstObservation"].getUTCHours() < 10 ? "0" : "") + dataObj["firstObservation"].getUTCHours() 
-            +":"+ (dataObj["firstObservation"].getUTCMinutes() < 10 ? "0" : "") + dataObj["firstObservation"].getUTCMinutes() 
-            +":"+ (dataObj["firstObservation"].getUTCSeconds() < 10 ? "0" : "") + dataObj["firstObservation"].getUTCSeconds()
     });
     dataObj["trivia"].push({
         "key": "Last observation",
         "value": dataObj["lastObservation"].getUTCDate() 
         + " " + month[dataObj["lastObservation"].getUTCMonth()] 
         + " " + dataObj["lastObservation"].getUTCFullYear()
-        + " " + (dataObj["lastObservation"].getUTCHours() < 10 ? "0" : "") + dataObj["lastObservation"].getUTCHours() 
-            +":"+ (dataObj["lastObservation"].getUTCMinutes() < 10 ? "0" : "") + dataObj["lastObservation"].getUTCMinutes() 
-            +":"+ (dataObj["lastObservation"].getUTCSeconds() < 10 ? "0" : "") + dataObj["lastObservation"].getUTCSeconds()
     });
     dataObj["trivia"].push({
         "key": "Total days",
         "value": dataObj["totalDays"]
-    });    
+    });
+    /*
     dataObj["trivia"].push({
         "key": "Total weeks",
         "value": dataObj["byWeek"].length
@@ -664,10 +659,7 @@ console.log(unFilteredData)
         "key": "Total months",
         "value": dataObj["sumOfEachYearMonth"].length
     });
-    dataObj["trivia"].push({
-        "key": "Total observations",
-        "value": unFilteredData.length
-    });
+    */    
     dataObj["trivia"].push({
         "key": "Days with observations",
         "value": dataObj["totalDaysWithObservations"] 
@@ -679,13 +671,19 @@ console.log(unFilteredData)
             + " (" + (((dataObj["totalDays"] - dataObj["totalDaysWithObservations"])/dataObj["totalDays"])*100).toFixed(2) + "% of total days)"
     });
     dataObj["trivia"].push({
+        "key": "Total observations",
+        "value": unFilteredData.length
+    });
+    dataObj["trivia"].push({
         "key": "Average observations per day",
         "value": dataObj["averageDay"].toFixed(2)
     });
+    /*
     dataObj["trivia"].push({
         "key": "Average observations per week",
         "value": dataObj["averageWeek"].toFixed(2)
     });
+    */
     dataObj["trivia"].push({
         "key": "Most in a day",
         "value": dataObj["mostInADay"]
@@ -698,11 +696,12 @@ console.log(unFilteredData)
         "key": "Least in a day",
         "value": (dataObj["totalDays"] - dataObj["totalDaysWithObservations"] === 0 ? dataObj["leastInADay"] : 0)
     });
+    /*
     dataObj["trivia"].push({
         "key": "Least in an hour",
         "value": 0
     });
-    
+    */
     return dataObj;
 }
 

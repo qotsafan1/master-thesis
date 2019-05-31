@@ -12,12 +12,17 @@ const db = mysql.createConnection ({
 // connect to database
 db.connect((err) => {
     if (err) {
-		throw err;
+        console.log("CANT CONNECT TO THE DATABASE");
+    } else {
+        console.log('Connected to database');
     }
-    console.log('Connected to database');
 });
 
 exports.getAnnotations = async function(dataset) {
+    if (db.state === 'disconnected') {
+        return;
+    }
+
     let promise = new Promise((resolve, reject) => {
         var query = "SELECT * FROM annotations ";
         var extra = [];
@@ -44,6 +49,10 @@ exports.getAnnotations = async function(dataset) {
 }
 
 exports.getAnnotation = async function(id) {
+    if (db.state === 'disconnected') {
+        return;
+    }
+
     let promise = new Promise((resolve, reject) => {
         db.query(
             "SELECT * FROM annotations WHERE id = ?",
@@ -67,6 +76,10 @@ exports.getAnnotation = async function(id) {
 }
 
 exports.addAnnotation = async function(body) {
+    if (db.state === 'disconnected') {
+        return;
+    }
+
     let promise = new Promise((resolve, reject) => {
         db.query(
 			"INSERT INTO annotations (dataset, type, comment, creationDate, systemName) VALUES (?,?,?,?,?)",
@@ -86,6 +99,10 @@ exports.addAnnotation = async function(body) {
 }
 
 exports.deleteAnnotation = async function(id) {
+    if (db.state === 'disconnected') {
+        return;
+    }
+
     let promise = new Promise((resolve, reject) => {
         db.query(
             "DELETE FROM annotations WHERE id = ?",
@@ -105,6 +122,10 @@ exports.deleteAnnotation = async function(id) {
 }
 
 exports.invalidateObservation = async function(body) {
+    if (db.state === 'disconnected') {
+        return;
+    }
+
     let promise = new Promise((resolve, reject) => {
         db.query(
 			"INSERT INTO observations (dataset, type, comment, creationDate, systemName) VALUES (?,?,?,?,?)",
@@ -124,6 +145,9 @@ exports.invalidateObservation = async function(body) {
 }
 
 exports.getObservation = async function(id) {
+    if (db.state === 'disconnected') {
+        return;
+    }
     let promise = new Promise((resolve, reject) => {
         db.query(
             "SELECT * FROM observations WHERE id = ?",
@@ -147,6 +171,9 @@ exports.getObservation = async function(id) {
 }
 
 exports.deleteObservation = async function(systemName) {
+    if (db.state === 'disconnected') {
+        return;
+    }
     let promise = new Promise((resolve, reject) => {
         db.query(
             "DELETE FROM observations WHERE systemName = ?",
@@ -166,6 +193,9 @@ exports.deleteObservation = async function(systemName) {
 }
 
 exports.getObservations = async function(dataset) {
+    if (db.state === 'disconnected') {
+        return;
+    }
     let promise = new Promise((resolve, reject) => {
         var query = "SELECT * FROM observations ";
         var extra = [];
@@ -192,6 +222,9 @@ exports.getObservations = async function(dataset) {
 }
 
 exports.getSessions = async function(dataset) {
+    if (db.state === 'disconnected') {
+        return;
+    }
     let promise = new Promise((resolve, reject) => {
         var query = "SELECT * FROM sessions ";
         var extra = [];
@@ -219,6 +252,9 @@ exports.getSessions = async function(dataset) {
 }
 
 exports.deleteSession = async function(id) {
+    if (db.state === 'disconnected') {
+        return;
+    }
     let promise = new Promise((resolve, reject) => {
         db.query(
             "DELETE FROM sessions WHERE id = ?",
@@ -238,6 +274,9 @@ exports.deleteSession = async function(id) {
 }
 
 exports.createSession = async function(body) {
+    if (db.state === 'disconnected') {
+        return;
+    }
     console.log(body)
     let promise = new Promise((resolve, reject) => {
         db.query(
@@ -258,6 +297,9 @@ exports.createSession = async function(body) {
 }
 
 exports.updateSession = async function(id, date) {
+    if (db.state === 'disconnected') {
+        return;
+    }
     let promise = new Promise((resolve, reject) => {
         db.query(
             "UPDATE sessions SET sessionDate = ? WHERE id = ?",

@@ -23,7 +23,7 @@
 }
 
 #fullCalendar tbody td:nth-child(1), #fullCalendar thead th:nth-child(1){
-    font-size: 9px;
+    
     font-weight: normal;
     vertical-align: bottom;
     text-align: right;
@@ -46,7 +46,8 @@
 
 #fullCalendar tbody td.hour .hour-text, #fullCalendar thead th.hour .hour-text {
     position: relative;
-    top: 6.5px;
+    top: 7.5px;
+    font-size: 10px;
 }
 
 #fullCalendar tbody td {
