@@ -167,10 +167,9 @@
 		var triviaHeaderRow = trivia.append("tr");
 		triviaHeaderRow.append("th");
 		var keys = [];
-		if (getComparisonView() === "0") {
-			keys.push("Overall");
-			triviaHeaderRow.append("th").text("Overall");
-		}
+		keys.push("Overall");
+		triviaHeaderRow.append("th").text("Overall");
+		
 		keys.push(newestLabel);
 		triviaHeaderRow.append("th").text(newestLabel);
 		if (headerOne) {
@@ -186,17 +185,12 @@
 			triviaHeaderRow.append("th").text(headerThree);
 		};
 		
-		if (getComparisonView() === "1") {
-			keys.push("Overall");
-			triviaHeaderRow.append("th").text("Overall");
-		}
-
 		for (var i in newestData['trivia']) {
 			var triviaRow = trivia.append("tr");
 			triviaRow.append("td").attr("class", "table-key").text(newestData['trivia'][i].key);
-			if (getComparisonView() === "0") {
-				triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
-			}
+
+			triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
+
 			triviaRow.append("td").attr("class", "table-value").text(newestData['trivia'][i].value);
 			if (compareOneData) {
 				triviaRow.append("td").attr("class", "table-value").text(compareOneData['trivia'][i].value);
@@ -206,11 +200,7 @@
 			}
 			if (compareThreeData) {
 				triviaRow.append("td").attr("class", "table-value").text(compareThreeData['trivia'][i].value);
-			}
-			
-			if (getComparisonView() === "1") {
-				triviaRow.append("td").attr("class", "table-value").text(data['trivia'][i].value);
-			}
+			}			
 		}
 
 		var groupWeekdayData = [];
@@ -220,9 +210,7 @@
 			var groupWeekday = {
 				type: newestData["byAverageWeekday"][i].type
 			}
-			if (getComparisonView() === "0") {				
-				groupWeekday["Overall"] = data["byAverageWeekday"][i].sum;
-			}
+			groupWeekday["Overall"] = data["byAverageWeekday"][i].sum;
 			groupWeekday[newestLabel] = newestData["byAverageWeekday"][i].sum
 			if (compareOneData) {
 				groupWeekday[headerOne] = compareOneData["byAverageWeekday"][i].sum;
@@ -244,9 +232,7 @@
 			var groupHour = {
 				type: newestData["byAverageHour"][i].type
 			}
-			if (getComparisonView() === "0") {
-				groupHour["Overall"] = data["byAverageHour"][i].sum;
-			}
+			groupHour["Overall"] = data["byAverageHour"][i].sum;			
 			groupHour[newestLabel] = newestData["byAverageHour"][i].sum
 			if (compareOneData) {
 				groupHour[headerOne] = compareOneData["byAverageHour"][i].sum;
@@ -257,12 +243,9 @@
 			if (compareThreeData) {
 				groupHour[headerThree] = compareThreeData["byAverageHour"][i].sum;
 			}
-			if (getComparisonView() === "1") {
-				groupHour["Overall"] = data["byAverageHour"][i].sum;
-			}
 			groupHourData.push(groupHour);
 		}
-
+console.log(keys)
 		var weekdayChart = new GroupedBarChart(
 			groupWeekdayData, 
 			'dayBarChart', 

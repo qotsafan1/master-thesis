@@ -150,7 +150,7 @@ GroupedBarChart.prototype.create = function(xLabel,yLabel, yTicks, keys) {
     this.yAxis = this.yAxisLeft(this.y, yTicks);
     this.barWidth  = this.x;
 
-    this.colors = ["#d7191c","#fdae61","#abdda4","#2b83ba", "black"];
+    this.colors = ["#d7191c","#fdae61","#abdda4","#2b83ba", "#DDA0DD"];
 
     this.createXAxis(xLabel);
     this.createYAxis(yLabel);
