@@ -162,7 +162,7 @@
 				compareThreeData = processData(timezone, temp);
 			}
 		}
-		var newestLabel = (sessions.length > 0 ? ("Session " + (sessions.length)) : "Last two weeks");
+		var newestLabel = (sessions.length > 0 ? ("Session " + (sessions.length) + " (current)") : "Last two weeks");
 		var trivia = d3.select("#trivia");
 		var triviaHeaderRow = trivia.append("tr");
 		triviaHeaderRow.append("th");
