@@ -752,7 +752,6 @@ function createBarData(countArray) {
 
 function checkForChosenDataset() {
     var possibleDataset = window.localStorage.getItem('dataset');
-    console.log(possibleDataset)
     if (possibleDataset && possibleDataset !== "" && possibleDataset !== "custom") {
         document.getElementById("datasets").value = possibleDataset;
     } else if (possibleDataset === 'custom') {
@@ -765,7 +764,7 @@ function checkForChosenDataset() {
             invalidObservations = [];
             sessions = [];
             var tz = getTimezone();
-			data = processData(tz.value, rawData);            
+			data = processData(tz, rawData);            
             createVisualizations();
             window.localStorage.setItem('custom-date', timeNow.getTime());
         } else {
