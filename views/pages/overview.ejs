@@ -226,7 +226,6 @@
 			}
 			groupWeekdayData.push(groupWeekday);
 		}
-		console.log(groupWeekdayData)
 
 		for (var i in newestData["byAverageHour"]) {
 			var groupHour = {
@@ -245,7 +244,7 @@
 			}
 			groupHourData.push(groupHour);
 		}
-console.log(keys)
+
 		var weekdayChart = new GroupedBarChart(
 			groupWeekdayData, 
 			'dayBarChart', 
