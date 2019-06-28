@@ -14,7 +14,7 @@ app.set('view engine', 'ejs');
 
 app.use(express.static('public'))
 
-const database = require('./data/annotations');
+const database = require('./data/database');
 const data = require('./data/processing');
 
 // index page
