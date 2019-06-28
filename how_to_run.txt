@@ -1,0 +1,8 @@
+Node.js server is needed.
+MySQL is optional, depending on if you want to be able to comment, invalidate and create sessions.
+
+SQL dump can be found in the folder. The connection parameters in the project are set in data/database.js
+
+To start the app:
+    node server.js
+
