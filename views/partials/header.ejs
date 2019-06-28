@@ -62,8 +62,7 @@
             "data": allData
           };
 
-          window.localStorage.setItem('custom-data', JSON.stringify(savedObject));
-          window.localStorage.setItem('custom-date', (new Date()).getTime());
+          window.sessionStorage.setItem('custom-data', JSON.stringify(savedObject));
           sessions = [];
           annotations = [];
           observations = [];
@@ -86,6 +85,7 @@
     if (dataset === "custom") {
       d3.select("#customDataUpload").style("display", "inline");
     } else {
+      window.sessionStorage.clear();
       d3.select("#customDataUpload").style("display", "none");
       document.getElementById("customDataset").value = "";
       removeAllVisualizations();		

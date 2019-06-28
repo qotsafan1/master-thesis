@@ -751,28 +751,21 @@ function createBarData(countArray) {
 }
 
 function checkForChosenDataset() {
-    var possibleDataset = window.localStorage.getItem('dataset');
-    if (possibleDataset && possibleDataset !== "" && possibleDataset !== "custom") {
-        document.getElementById("datasets").value = possibleDataset;
-    } else if (possibleDataset === 'custom') {
-        var customDateString = parseInt(window.localStorage.getItem('custom-date'));        
-        var timeNow = new Date();
-        if ((timeNow.getTime() - customDateString) < 1800000) {
+    if (window.sessionStorage.getItem('custom-data') !== null) {
+        document.getElementById("datasets").value = 'custom';
+        rawData = JSON.parse(window.sessionStorage.getItem('custom-data')).data
+        annotations = [];
+        invalidObservations = [];
+        sessions = [];
+        var tz = getTimezone();
+        data = processData(tz, rawData);            
+        createVisualizations();
+    } else {
+        var possibleDataset = window.localStorage.getItem('dataset');
+        if (possibleDataset && possibleDataset !== "" && possibleDataset !== "custom") {
             document.getElementById("datasets").value = possibleDataset;
-            rawData = JSON.parse(window.localStorage.getItem('custom-data')).data
-            annotations = [];
-            invalidObservations = [];
-            sessions = [];
-            var tz = getTimezone();
-			data = processData(tz, rawData);            
-            createVisualizations();
-            window.localStorage.setItem('custom-date', timeNow.getTime());
-        } else {
-            window.localStorage.setItem('custom-data', "");
-            window.localStorage.setItem('custom-date', "");
-            window.localStorage.setItem('dataset', "");				  
         }
-    }
+    }    
 }
 
 function getTimezone() {
