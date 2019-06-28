@@ -122,7 +122,7 @@ DateBarChart.prototype.createStackedBars = function(hourChunks) {
         colors = ["black","#99d594","#e6f598","#fee08b","#fc8d59","#3288bd"];
         barData = data["stackedHoursEachDay"][3];
     } else if (hourChunks === 1) {
-        keys = ["00-09", "09-18", "18-00"];
+        keys = ["00-08", "08-16", "16-00"];
         colors = ["black","#fdae61","#2b83ba"];
         barData = data["stackedHoursEachDay"][1];
     } else if (hourChunks === 0) {

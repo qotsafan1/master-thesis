@@ -222,9 +222,9 @@ console.log(unFilteredData)
                 countStackedThreeHoursOfEachDay[dayOfMonth][i] = 0;
             }
         }
-        if (isoDate.getUTCHours() < 9) {
+        if (isoDate.getUTCHours() < 8) {
             countStackedThreeHoursOfEachDay[dayOfMonth][0]++;
-        } else if (isoDate.getUTCHours() >= 9 && isoDate.getUTCHours() < 18) {
+        } else if (isoDate.getUTCHours() >= 8 && isoDate.getUTCHours() < 16) {
             countStackedThreeHoursOfEachDay[dayOfMonth][1]++;
         } else {
             countStackedThreeHoursOfEachDay[dayOfMonth][2]++;
@@ -407,9 +407,9 @@ console.log(unFilteredData)
     for (var i in countStackedThreeHoursOfEachDay) {
         dataObj["stackedHoursEachDay"][1].push({
             "date": getCorrectUTCDate(i),
-            "00-09": countStackedThreeHoursOfEachDay[i][0],
-            "09-18": countStackedThreeHoursOfEachDay[i][1],
-            "18-00": countStackedThreeHoursOfEachDay[i][2]
+            "00-08": countStackedThreeHoursOfEachDay[i][0],
+            "08-16": countStackedThreeHoursOfEachDay[i][1],
+            "16-00": countStackedThreeHoursOfEachDay[i][2]
         });
     }
     for (var i in countStackedFourHoursOfEachDay) {
