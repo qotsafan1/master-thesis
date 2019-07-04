@@ -267,6 +267,21 @@
 				continue;
 			}
 
+			if (timezone === "2" && "timezone" in rawData[instance]) {
+				var tzString = rawData[instance]["timezone"];
+				if (tzString.includes("+")) {
+					isoDate.setUTCHours(isoDate.getUTCHours() + parseInt(tzString.slice(1,3)));
+				} else if (tzString.includes("-")) {
+					isoDate.setUTCHours(isoDate.getUTCHours() - parseInt(tzString.slice(1,3)));
+				}
+			}
+
+			if (timezone === "1") {
+				thisTZDate = new Date(isoDate.getTime())
+				isoDate.setUTCMinutes(isoDate.getUTCMinutes() + (-1*thisTZDate.getTimezoneOffset()));
+			}
+
+
 			var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
 			var hourOfDay = dayOfMonth + "-" +isoDate.getUTCHours();
 			if (dayOfMonth in invalidObservations
@@ -325,6 +340,20 @@
 
 				if (!isoDate || isoDate === null || isoDate === "") {
 					continue;
+				}
+
+				if (timezone === "2" && "timezone" in rawData[instance]) {
+					var tzString = rawData[instance]["timezone"];
+					if (tzString.includes("+")) {
+						isoDate.setUTCHours(isoDate.getUTCHours() + parseInt(tzString.slice(1,3)));
+					} else if (tzString.includes("-")) {
+						isoDate.setUTCHours(isoDate.getUTCHours() - parseInt(tzString.slice(1,3)));
+					}
+				}
+
+				if (timezone === "1") {
+					thisTZDate = new Date(isoDate.getTime())
+					isoDate.setUTCMinutes(isoDate.getUTCMinutes() + (-1*thisTZDate.getTimezoneOffset()));
 				}
 
 				var dayOfMonth = isoDate.getUTCFullYear() + "-" + (isoDate.getUTCMonth()+1) + "-" + isoDate.getUTCDate();
